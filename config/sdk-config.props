@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Restart VC after editing -->
+  <PropertyGroup Label="SearchPath">
+    <SDL2Root>../devsdk/SDL2-2.0.8</SDL2Root>
+    <GLEWRoot>../devsdk/glew-2.0.0</GLEWRoot>
+    <GLUTRoot>../devsdk/glut-3.7.6-bin</GLUTRoot>
+  </PropertyGroup>
+</Project>
