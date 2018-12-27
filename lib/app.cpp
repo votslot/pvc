@@ -99,9 +99,8 @@ void CloudImpl::OnDone()
 	float cx = (maxX + minX) *0.5f;
 	float cy = (maxY + minY) *0.5f;
 	float cz = (maxZ + minZ) *0.5f;
-	float *ptr = (float*)(pMem);
-	
 
+	float *ptr = (float*)(pMem);
 	for (int i = 0; i < numP; i++) {
 		ptr[3] = 128.0f + 128.0f * (ptr[2] - minZ) / ddz; // color
 		ptr[0] = ((ptr[0] - cx) / maxD) *prd;
@@ -109,16 +108,6 @@ void CloudImpl::OnDone()
 		ptr[2] = ((ptr[2] - cz) / maxD) *prd;
 		ptr += 4;
 	}
-	/*
-	for (int i = 0; i < numP; i++) {
-		ptr[3] = 128.0f + 128.0f * (ptr[2] - minZ) / ddz; // color
-		ptr[0] = (-0.5f + (ptr[0] - minX) / maxD) *prd;
-		ptr[1] = (-0.5f + (ptr[1] - minY) / maxD) *prd;
-		ptr[2] = (-0.5f + (ptr[2] - minZ) / maxD) *prd;
-		ptr += 4;
-	}
-	*/
-
 	
 	SetPointData(pMem, numP);
 }

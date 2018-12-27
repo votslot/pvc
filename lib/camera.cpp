@@ -13,9 +13,8 @@ Camera *Camera::GetCamera()
 
 Camera::Camera() 
 {
-	static float pos[3] = { 0.0f,0.0f,-600.0f }, dir[3] = { 0.0f,0.0f,1.0f };;
 	m_pivot[0] = m_pivot[1] = m_pivot[2] = 0.0f;
-	Build(pos, dir);	
+	SetPivotCamera(60.0f * 3.1415f / 180.0f, 0.0f, 600.0f);
 }
 
 float* Camera:: GetData()
@@ -29,7 +28,14 @@ float *Camera::GetUp()    { return  m_data + 6; }
 float *Camera::GetDir()   { return  m_data + 9; }
 float *Camera::GetPivot() { return  m_pivot; }
 
+void Camera::SetScreenPixSize(int sx, int sy)
+{
+	m_screenX = (float)sx;
+	m_screenY = (float)sy;
+	printf("ScreenX = %f ScreenY = %f\n", m_screenX, m_screenY);
+}
 
+#if 0
 void Camera::Build(float pos[3], float dir[3], float up[3]) 
 {
 	m_data[0] = pos[0];
@@ -47,6 +53,7 @@ void Camera::Build(float pos[3], float dir[3], float up[3])
 		pD[i] = dir[i];
 	}
 }
+#endif
 
 void Camera::RotateRight(float ang)
 {
@@ -82,6 +89,24 @@ void Camera::RotateUp(float ang)
 	}
 }
 
+void Camera::RotateDir(float ang)
+{
+	float sinF = sin(ang);
+	float cosF = cos(ang);
+	float uu[3], rr[3];
+	float *pR = GetRight();
+	float *pU = GetUp();
+	for (int i = 0; i < 3; i++) {
+		uu[i] =  pU[i] * cosF + pR[i] * sinF;
+		rr[i] = -pU[i] * sinF + pR[i] * cosF;
+	}
+	for (int i = 0; i < 3; i++) {
+		pU[i] = uu[i];
+		pR[i] = rr[i];
+	}
+}
+
+#if 0
 void Camera::Build(float pos[3], float dir[3])
 {
 	float right[3], up[3];
@@ -115,12 +140,93 @@ void Camera::Build(float pos[3], float dir[3])
 	m_data[10] = dir[1];
 	m_data[11] = dir[2];
 }
+#endif
 
-void Camera::SetScreenPixSize(int sx, int sy)
+static void RotateAroundZ(float *pV, float ang) 
 {
-	m_screenX = (float)sx;
-	m_screenY = (float)sy;
-	printf("ScreenX = %f ScreenY = %f\n", m_screenX, m_screenY);
+	float xx = pV[0];
+	float yy = pV[1];
+	float sinF = sin(ang);
+	float cosF = cos(ang);
+	pV[0] =  xx * cosF + yy * sinF;
+	pV[1] = -xx * sinF + yy * cosF;
+}
+
+void Camera::RotateAroundPivot(float dx, float dy)
+{
+	float pivotInCam[3], pivotInWorld[3];
+	FromWorld(m_pivot, pivotInCam);
+	RotateRight(dy);
+	ToWorld(pivotInCam, pivotInWorld);
+	float *pPos = GetPos();
+	pPos[0] -= pivotInWorld[0];
+	pPos[1] -= pivotInWorld[1];
+	pPos[2] -= pivotInWorld[2];
+	RotateAroundZ(pPos, dx);
+	RotateAroundZ(GetUp(), dx);
+	RotateAroundZ(GetRight(), dx);
+	RotateAroundZ(GetDir(), dx);
+	pPos[0] += m_pivot[0];
+	pPos[1] += m_pivot[1];
+	pPos[2] += m_pivot[2];
+}
+
+void Camera::MoveInPivotDir(float dd) 
+{
+	float *pPos = GetPos();
+	pPos[0] = (m_pivot[0] - pPos[0])*dd + pPos[0];
+	pPos[1] = (m_pivot[1] - pPos[1])*dd + pPos[1];
+	pPos[2] = (m_pivot[2] - pPos[2])*dd + pPos[2];
+}
+
+void Camera::ShiftPivot(float dx, float dy) 
+{
+	float sh[3],dd[3],len,prd,near = 2.0f;
+	float scm = (m_screenX < m_screenY) ? m_screenX : m_screenY;
+	float *pR = GetRight();
+	float *pU = GetUp();
+	float *pC = GetPos();
+	float *pP = GetPivot();
+	dd[0] = pP[0] - pC[0];
+	dd[1] = pP[1] - pC[1];
+	dd[2] = pP[2] - pC[2];
+	len = sqrtf(dd[0] * dd[0] + dd[1] * dd[1] * dd[2] * dd[2]);
+	prd = 1.0f;// 0.5f *(scm * near) / (len + near);
+
+	sh[0] = (pR[0] * dx + pU[0] * dy) * prd;
+	sh[1] = (pR[1] * dx + pU[1] * dy) * prd;
+	sh[2] = (pR[2] * dx + pU[2] * dy) * prd;
+	pC[0] += sh[0];
+	pC[1] += sh[1];
+	pC[2] += sh[2];
+	pP[0] += sh[0];
+	pP[1] += sh[1];
+	pP[2] += sh[2];
+}
+
+void Camera::SetPivotCamera(float teta, float fi, float dist) 
+{
+	float rr[3];
+	rr[0] = sin(teta) * cos(fi);
+	rr[1] = sin(teta) * sin(fi);
+	rr[2] = cos(teta);
+	float *pPos = GetPos();
+	pPos[0] = m_pivot[0] + rr[0] * dist;
+	pPos[1] = m_pivot[1] + rr[1] * dist;
+	pPos[2] = m_pivot[2] + rr[2] * dist;
+	float *pDir = GetDir();
+	pDir[0] = -rr[0];
+	pDir[1] = -rr[1];
+	pDir[2] = -rr[2];
+	float *pR = GetRight();
+	float lenR = sqrt(pDir[0] * pDir[0] + pDir[1] * pDir[1]);
+	pR[0] = -pDir[1] / lenR;
+	pR[1] =  pDir[0] / lenR;
+	pR[2] = 0.0f;
+	float *pU = GetUp();
+	pU[0] =  pDir[1] * pR[2] - pDir[2] * pR[1];
+	pU[1] = -pDir[0] * pR[2] + pDir[2] * pR[0];
+	pU[2] =  pDir[0] * pR[1] - pDir[1] * pR[0];
 }
 
 void Camera::FromWorld(float *pWorldIn, float *pInCamOut) 

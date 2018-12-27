@@ -50,7 +50,7 @@ void OnEndLoop()
 	sDiff += df;
 	sNtimes--;
 	if (sNtimes <= 0) {
-		std::cout << ((float)sDiff/256000.0f) << "ms\n";
+	//	std::cout << ((float)sDiff/256000.0f) << "ms\n";
 		sNtimes = 256;
 		sDiff = 0;
 	}
@@ -137,45 +137,18 @@ void OnMouseMoveEvent(SDL_MouseMotionEvent *pMotion)
 {
 	Camera *pCam = Camera::GetCamera();
 	float *pivot = pCam->GetPivot();
-	int dx = pMotion->x - sMouseXDown;
+	int dx = pMotion->x - sMouseXDown; 
 	int dy = pMotion->y - sMouseYDown;
 	if (sLeftMouseDown)
 	{
-		float pivotInCam[3], pivotInWorld[3];
-		pCam->FromWorld(pivot, pivotInCam);
-		pCam->RotateRight(0.01f*dy);
-		pCam->RotateUp(0.01f*dx);
-		sMouseXDown = pMotion->x;
-		sMouseYDown = pMotion->y;
-		pCam->ToWorld(pivotInCam, pivotInWorld);
-		float *pPos = pCam->GetPos();
-		pPos[0] -= pivotInWorld[0] - pivot[0];
-		pPos[1] -= pivotInWorld[1] - pivot[1];
-		pPos[2] -= pivotInWorld[2] - pivot[2];
+		pCam->RotateAroundPivot((float)dx*0.01f, (float)dy*0.01f);
 	}
 	else if (sRightMouseDown) 
 	{
-		float wrdShift[3], CamShift[3];
-		CamShift[0] = dx * 0.01f;
-		CamShift[1] = dy * 0.01f;
-		CamShift[2] = 0.0f;
-		float *pPos = pCam->GetPos();
-		pCam->ToWorld(CamShift, wrdShift);
-		wrdShift[0] -= pPos[0];
-		wrdShift[1] -= pPos[1];
-		wrdShift[2] -= pPos[2];
-		printf("CamShit %f %f %f \n", CamShift[0], CamShift[1], CamShift[2]);
-		printf("wrdShit %f %f %f \n", wrdShift[0], wrdShift[1], wrdShift[2]);
-		
-		/*
-		pPos[0] += wrdShift[0];
-		pPos[1] += wrdShift[1];
-		pPos[2] += wrdShift[2];
-		pivot[0] += wrdShift[0];
-		pivot[1] += wrdShift[1];
-		pivot[2] += wrdShift[2];
-		*/
+		pCam->ShiftPivot((float)dx,(float)dy);
 	}
+	sMouseXDown = pMotion->x;
+	sMouseYDown = pMotion->y;
 }
 
 void OnMouseWhellEvevt(SDL_MouseWheelEvent *pWheel)
@@ -185,22 +158,9 @@ void OnMouseWhellEvevt(SDL_MouseWheelEvent *pWheel)
 		return;
 	}
 	Camera *pCam = Camera::GetCamera();
-	float *pPivot = pCam->GetPivot();
-	float *pPos = pCam->GetPos();
-	float sig = (pWheel->y > 0) ? 1.0f : -1.0f;
-    float d[3], prd = 0.1f;
-	d[0] = pPivot[0] - pPos[0];
-	d[1] = pPivot[1] - pPos[1];
-	d[2] = pPivot[2] - pPos[2];
-
-	float dd = sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
-	if (dd > 0.00001f) 
-	{
-		dd = 1.0f / dd;
-		pPos[0] += d[0] * sig * prd;
-		pPos[1] += d[1] * sig * prd;
-		pPos[2] += d[2] * sig * prd;
-	}
+	float prd = 0.1f;
+	float shift = (pWheel->y > 0) ? prd : -prd;
+	pCam->MoveInPivotDir(shift);
 }
 /*---------------------------------------------------------------------*/
 
