@@ -96,5 +96,8 @@
     <None Include="..\shaders\wave-test.cs.glsl">
       <Filter>pcloud\shaders</Filter>
     </None>
+    <None Include="..\shaders\post-proc.cs.glsl">
+      <Filter>pcloud\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -4,6 +4,28 @@
 #include <stdio.h>
 #include "camera.h"
 
+
+static void RotateAroundZ(float *pV, float ang)
+{
+	float xx = pV[0];
+	float yy = pV[1];
+	float sinF = sin(ang);
+	float cosF = cos(ang);
+	pV[0] = xx * cosF + yy * sinF;
+	pV[1] = -xx * sinF + yy * cosF;
+}
+
+struct vector3 {
+	float v[3];
+	vector3(float x, float y, float z) { v[0] = x; v[1] = y; v[2] = z; }
+};
+
+vector3 operator + (const vector3 &a, const vector3 &b)
+{
+	vector3 ret(a.v[0] + b.v[0], a.v[1] + b.v[1], a.v[2] + b.v[2]);
+	return ret;
+}
+
 static Camera theCamera;
 
 Camera *Camera::GetCamera() 
@@ -17,16 +39,13 @@ Camera::Camera()
 	SetPivotCamera(60.0f * 3.1415f / 180.0f, 0.0f, 600.0f);
 }
 
-float* Camera:: GetData()
-{
-	return m_data;
-}
-
 float *Camera::GetPos()   { return  m_data + 0; }
 float *Camera::GetRight() { return  m_data + 3; }
 float *Camera::GetUp()    { return  m_data + 6; }
 float *Camera::GetDir()   { return  m_data + 9; }
 float *Camera::GetPivot() { return  m_pivot; }
+int Camera::GetScreenX() { return m_screenX; }
+int Camera::GetScreenY() { return m_screenY; }
 
 void Camera::SetScreenPixSize(int sx, int sy)
 {
@@ -34,26 +53,6 @@ void Camera::SetScreenPixSize(int sx, int sy)
 	m_screenY = (float)sy;
 	printf("ScreenX = %f ScreenY = %f\n", m_screenX, m_screenY);
 }
-
-#if 0
-void Camera::Build(float pos[3], float dir[3], float up[3]) 
-{
-	m_data[0] = pos[0];
-	m_data[1] = pos[1];
-	m_data[2] = pos[2];
-	//right
-	m_data[3] = up[2] * dir[1] - dir[2] * up[1];
-	m_data[4] = -up[0] * dir[2] + dir[0] * up[2];
-	m_data[5] = up[0] * dir[1] - dir[0] * up[1];
-
-	float *pU = GetUp();
-	float *pD = GetDir();
-	for (int i = 0; i < 3; i++) {
-		pU[i] = up[i];
-		pD[i] = dir[i];
-	}
-}
-#endif
 
 void Camera::RotateRight(float ang)
 {
@@ -106,51 +105,7 @@ void Camera::RotateDir(float ang)
 	}
 }
 
-#if 0
-void Camera::Build(float pos[3], float dir[3])
-{
-	float right[3], up[3];
-	right[0] = -dir[1];
-	right[1] = dir[0];
-	float len = sqrtf(right[0]*right[0] + right[1] * right[1]);
-	if (len > 0.0000001f) {
-		right[0] = right[0] / len;
-		right[1] = right[1] / len;
-		right[2] = 0.0f;
-	}
-	else {
-		right[0] = 1.0f;
-		right[1] = 0.0f;
-		right[2] = 0.0f;
-	}
-	float *pPos = GetPos();
-	pPos[0] = pos[0];
-	pPos[1] = pos[1];
-	pPos[2] = pos[2];
-	//right
-	m_data[3] = right[0];
-	m_data[4] = right[1];
-	m_data[5] = right[2];
-	//up
-	m_data[6] = right[1] * dir[2] - right[2] * dir[1];
-	m_data[7] = right[2] * dir[0] - right[0] * dir[2];
-	m_data[8] = right[0] * dir[1] - right[1] * dir[0];
-	// z(dir)
-	m_data[9]  = dir[0];
-	m_data[10] = dir[1];
-	m_data[11] = dir[2];
-}
-#endif
 
-static void RotateAroundZ(float *pV, float ang) 
-{
-	float xx = pV[0];
-	float yy = pV[1];
-	float sinF = sin(ang);
-	float cosF = cos(ang);
-	pV[0] =  xx * cosF + yy * sinF;
-	pV[1] = -xx * sinF + yy * cosF;
-}
 
 void Camera::RotateAroundPivot(float dx, float dy)
 {
@@ -174,9 +129,10 @@ void Camera::RotateAroundPivot(float dx, float dy)
 void Camera::MoveInPivotDir(float dd) 
 {
 	float *pPos = GetPos();
-	pPos[0] = (m_pivot[0] - pPos[0])*dd + pPos[0];
-	pPos[1] = (m_pivot[1] - pPos[1])*dd + pPos[1];
-	pPos[2] = (m_pivot[2] - pPos[2])*dd + pPos[2];
+	float *pDir = GetDir();
+	pPos[0] += pDir[0] * dd;
+	pPos[1] += pDir[1] * dd;
+	pPos[2] += pDir[2] * dd;
 }
 
 void Camera::ShiftPivot(float dx, float dy) 
@@ -255,16 +211,6 @@ void Camera::ToWorld(float *pCamIn, float *pWorldOut)
 	pWorldOut[2] = pCamIn[0] * pR[2] + pCamIn[1] * pU[2] + pCamIn[2] * pD[2] + pC[2];
 }
 
-void Camera::Print4x4(float *pDat)
-{
-	printf("matrix\n");
-	float *pT = pDat;
-	for (int i = 0; i < 4; i++, pT += 4)
-	{
-		printf(" %f %f %f %f \n", pT[0], pT[1], pT[2], pT[3]);
-	}
-}
-
 /*
  W2V matrix memry layout
 
@@ -292,3 +238,15 @@ void Camera::ConvertTo4x4(float *pOut)
 	pOut[13] = -(pC[0] * pU[0] + pC[1] * pU[1] + pC[2] * pU[2]);
 	pOut[14] = -(pC[0] * pD[0] + pC[1] * pD[1] + pC[2] * pD[2]);
 }
+
+
+void Camera::Print4x4(float *pDat)
+{
+	printf("matrix\n");
+	float *pT = pDat;
+	for (int i = 0; i < 4; i++, pT += 4)
+	{
+		printf(" %f %f %f %f \n", pT[0], pT[1], pT[2], pT[3]);
+	}
+}
+

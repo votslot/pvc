@@ -173,6 +173,7 @@ GLuint InitQuad(int sw_, int sh_)
 
 extern GLuint GetSrcBuff();
 extern GLuint GetParamsBuff();
+extern GLuint GetClutData();
 
 void Draw(GLint win_width, GLint win_height, GLuint texDest)
 {
@@ -195,6 +196,7 @@ void Draw(GLint win_width, GLint win_height, GLuint texDest)
 	//glBindTexture(GL_TEXTURE_2D, texDest);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, GetSrcBuff());
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, GetParamsBuff());
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, GetClutData());
 	//draw
 	glDrawArrays(GL_TRIANGLES, 0, 3*2); 
 	glDisableVertexAttribArray(0);

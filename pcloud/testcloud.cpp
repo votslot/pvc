@@ -68,10 +68,11 @@ void* PCloudIn::InitTestCloud(int numPoints)
 	gpTestCloud->OnStart();
 	gpTestCloud->SetNumPoints(numPoints);
 
-	GetSphere(10.0f, -10.0f, -10.0f, 0.0f, numPoints / 4);
-	GetSphere(10.0f, -10.0f,  10.0f, 0.0f, numPoints / 4);
-	GetSphere(10.0f,  10.0f, -10.0f, 0.0f, numPoints / 4);
-	GetSphere(10.0f,  10.0f,  10.0f, 0.0f, numPoints / 4);
+	GetSphere(10.0f, 0.0f, 0.0f, 0.0f, numPoints/2);
+	GetSphere(5.0f, 0.0f, 0.0f, 7.5f, numPoints/2);
+	//GetSphere(10.0f, -10.0f,  10.0f, 0.0f, numPoints / 4);
+	//GetSphere(10.0f,  10.0f, -10.0f, 0.0f, numPoints / 4);
+	//GetSphere(10.0f,  10.0f,  10.0f, 0.0f, numPoints / 4);
 	/*
 	int numInSphere = numPoints / 16;
 	for (int y = 0; y < 4; y++) {

@@ -11,37 +11,39 @@ extern void WaveTest_Init();
 extern void WaveTest_Run();
 
 float *pTest    = NULL;
-//static float pCameraData[32];
 static int pParams[32];
-static int pParams2[32];
 static int sNumOfPoints = 0;
 static void *pPoints;
+static float clutData[256 * 4];
 static float matrView4x4[16];
 
 static const int sMaxW = 2048;
 static const int sMaxH = 2048;
 
-//static   SSBBuffer bufferCamera;
 static   SSBBuffer bufferParams;
 static   SSBBuffer bufferDebug;
 static   TBOBuffer bufferTbo;
 static   SSBBuffer bufferZMap;
+static   SSBBuffer bufferZMapPost;
 static   SSBBuffer bufferMatrView4x4;
+static   SSBBuffer bufferClut;
 
 static CSShader csPointRender;
-static CSShader csCleanRGB; 
+static CSShader csCleanRGB;
+static CSShader csPostProc;
 
 int gHasPoints = 0; 
 int gRunWaveTest = 0;
 
 #include "..\shaders\test.cs.glsl"
+#include "..\shaders\post-proc.cs.glsl"
 
 GLuint ComputeInit(int sw,int sh)
 {
     // clean shader
 	csCleanRGB.initFromSource(cs_clean.c_str());
-	csCleanRGB.setBufferBinding(&bufferZMap, 0);
-	csCleanRGB.setBufferBinding(&bufferParams, 1);
+	csCleanRGB.setBufferBinding(&bufferParams, 0);
+	csCleanRGB.setBufferBinding(&bufferZMap, 1);
 
 	// render points shader
 	csPointRender.initFromSource(cs_render_points.c_str());
@@ -51,12 +53,13 @@ GLuint ComputeInit(int sw,int sh)
 	csPointRender.setBufferBinding(&bufferZMap,    3);
 	csPointRender.setBufferBinding(&bufferMatrView4x4, 4);
 
-	pTest = new float[1024*1024*4];
-	for (int i = 0; i < 1024*1024*4; i++) pTest[i] = 0.0;
-
+	//post process shader
+	csPostProc.initFromSource(cs_postproc_w.c_str());
+	csPostProc.setBufferBinding(&bufferParams, 0);
+	csPostProc.setBufferBinding(&bufferZMap, 1);
+	csPostProc.setBufferBinding(&bufferZMapPost, 2);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
-	//bufferCamera.init();
 	bufferParams.init();
 	//
 	bufferDebug.init();
@@ -65,6 +68,8 @@ GLuint ComputeInit(int sw,int sh)
 	//
 	bufferZMap.init();
 	bufferZMap.allocate(sMaxW*sMaxH *sizeof(int));
+	bufferZMapPost.init();
+	bufferZMapPost.allocate(sMaxW*sMaxH * sizeof(int));
 	//
 	bufferMatrView4x4.init();
 	bufferMatrView4x4.allocate(16 * sizeof(float));
@@ -76,7 +81,24 @@ GLuint ComputeInit(int sw,int sh)
 	pParams[3] = sMaxH;
 	bufferParams.setData(pParams, 32 * sizeof(int));
 
+	//clut
+	for (int i = 0; i < 1024; i+=4) 
+	{
+		int nn = i ;
+		clutData[nn+0] = (float)nn / 1024.0f;
+		clutData[nn+1] = (float)nn / 1024.0f;
+		clutData[nn+2] = (float)nn / 1024.0f;
+		clutData[nn+3] = (float)nn / 1024.0f;
+	}
+	clutData[0] = 0.0f; clutData[1] = 0.5f; clutData[2] = 0.0f;
+	clutData[4] = 0.0f; clutData[5] = 1.0f; clutData[6] = 0.0f;
+	clutData[8] = 0.0f; clutData[9] = 0.0f; clutData[10] = 1.0f;
+	bufferClut.init();
+	bufferClut.setData(clutData, 4 * 256 * sizeof(float));
+
 	//Set debug data
+	pTest = new float[1024 * 1024 * 4];
+	for (int i = 0; i < 1024 * 1024 * 4; i++) pTest[i] = 0.0;
 	bufferDebug.setData(pTest, 1024 * 1024 * 4 * sizeof(float));
 	if (gRunWaveTest) {
 		WaveTest_Init();
@@ -86,24 +108,30 @@ GLuint ComputeInit(int sw,int sh)
 
 GLuint GetSrcBuff() 
 {
-	return  bufferZMap.gb;
+	//return  bufferZMap.gb;
+	return  bufferZMapPost.gb;
 }
 GLuint GetParamsBuff() 
 {
 	return bufferParams.gb;
 }
 
-void ComputeRun(int sw, int sh)
+GLuint GetClutData()
+{
+	return bufferClut.gb;
+}
+
+void ComputeRun(int sw__, int sh__)
 {
 	static int n_call = 0;
 	// params
-	pParams[0] = sw;
-	pParams[1] = sh;
+	Camera *pCam = Camera::GetCamera();
+	pParams[0] = pCam->GetScreenX();
+	pParams[1] = pCam->GetScreenY();
 	bufferParams.setData((unsigned char*)pParams, 32 * sizeof(int));
 	// camera
-	Camera::GetCamera()->ConvertTo4x4(matrView4x4);
+	pCam->ConvertTo4x4(matrView4x4);
 	bufferMatrView4x4.setData(matrView4x4, 16 * sizeof(float));
-	//Camera::GetCamera()->Print4x4(matrView4x4);
 
 	// clean dst zMap buffer
 	glUseProgram(csCleanRGB.m_program);
@@ -127,12 +155,45 @@ void ComputeRun(int sw, int sh)
 		glDispatchCompute(num_groups_x, num_groups_y, 1);
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);
 		SSBBuffer::checkError();
+
+	
+		SSBBuffer::checkError();
+
 		glUseProgram(0);
 		//GLsync sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 		//int ret = glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
 		SSBBuffer::checkError();
 		//std::cout << std::this_thread::get_id() << std::endl;
 	}
+
+	// post proc
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	glUseProgram(csPostProc.m_program);
+
+	for (int m = 0; m < 1; m++)
+	{
+		csPostProc.setBufferBinding(&bufferZMap, 1);
+		csPostProc.setBufferBinding(&bufferZMapPost, 2);
+		csPostProc.bindBuffer(&bufferParams);
+		csPostProc.bindBuffer(&bufferZMap);
+		csPostProc.bindBuffer(&bufferZMapPost);
+		glDispatchCompute(sMaxW / 32, sMaxH / 32, 1);
+		glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+		/*
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		csPostProc.setBufferBinding(&bufferZMap, 2);
+		csPostProc.setBufferBinding(&bufferZMapPost, 1);
+		csPostProc.bindBuffer(&bufferParams);
+		csPostProc.bindBuffer(&bufferZMapPost);
+		csPostProc.bindBuffer(&bufferZMap);
+		glDispatchCompute(sMaxW / 32, sMaxH / 32, 1);
+		*/
+		glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	}
+	glUseProgram(0);
+
 
 	if (gRunWaveTest) {
 		WaveTest_Run();
@@ -146,25 +207,6 @@ void ComputeRun(int sw, int sh)
 		for (int y = 0; y < 4; y++) {
 			printf("%f\n", pTest[y]);
 		}
-		/*1
-		CPoint *pp = (CPoint*)pTest;
-		for (int y = 0; y < 1024; y++)
-		{
-			for (int x = 0; x < 1024; x++,pp++)
-			{
-				int xx = (int)pp->z;
-				int yy = (int)pp->attr;
-				if( ((xx != x) || (yy != y) ) &&( xx == -1234))
-				{
-					printf("Err x = %d y = %d  ( %d %d)\n", x, y, xx, yy);
-
-				}
-
-				for (int i = 0; i < 100; i++)  pp->z += 1.0f;
-				
-			}
-		}
-		*/
 	}
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);

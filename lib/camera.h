@@ -8,10 +8,7 @@ class Camera {
 	float m_screenX, m_screenY, m_devSize, m_focus;
 public:
 	Camera();
-	static Camera *GetCamera();
-	float *GetData();
-	//void Build(float pos[3], float dir[3]);
-	//void Build(float pos[3], float dir[3], float up[3]);
+	static Camera *GetCamera();	
 	void RotateRight(float ang);
 	void RotateUp(float ang);
 	void RotateDir(float ang);
@@ -22,13 +19,15 @@ public:
 	void MoveInPivotDir(float dd);
 	void ShiftPivot(float dx, float dy);
 	void ConvertTo4x4(float *pOut);
-	void Print4x4(float *pDat);
+	void SetScreenPixSize(int sx, int sy);
 	float *GetUp();
 	float *GetRight();
 	float *GetDir();
 	float *GetPos();
 	float *GetPivot();
-	void SetScreenPixSize(int sx, int sy);
+	int GetScreenX();
+	int GetScreenY();
+	void Print4x4(float *pDat);
 };
 
 #endif

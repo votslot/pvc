@@ -40,7 +40,7 @@ static int sleepTime = 0;
 void OnStartLoop() 
 {
 	sStartTime = std::chrono::high_resolution_clock::now();
-    //Sleep(16);
+    Sleep(16);
 }
 
 void OnEndLoop() 
@@ -50,7 +50,7 @@ void OnEndLoop()
 	sDiff += df;
 	sNtimes--;
 	if (sNtimes <= 0) {
-	//	std::cout << ((float)sDiff/256000.0f) << "ms\n";
+		std::cout << ((float)sDiff/256000.0f) << "ms\n";
 		sNtimes = 256;
 		sDiff = 0;
 	}
@@ -105,8 +105,9 @@ void OnKeyEvent(int key)
 /*-----------------------------------------------------------------*/
 static int sMouseXDown = 0;
 static int sMouseYDown = 0;
-bool sLeftMouseDown = false;
-bool sRightMouseDown = false;
+static bool sLeftMouseDown = false;
+static bool sRightMouseDown = false;
+static bool sHasEvent = true;
 void OnMouseDownEvent(SDL_MouseButtonEvent *pMouseDown)
 {
 	sMouseXDown = pMouseDown->x;
@@ -119,6 +120,7 @@ void OnMouseDownEvent(SDL_MouseButtonEvent *pMouseDown)
 	{
 		sRightMouseDown = true;
 	}
+	sHasEvent = true;
 }
 
 void OnMouseUpEvent(SDL_MouseButtonEvent *pMouseUp)
@@ -131,6 +133,7 @@ void OnMouseUpEvent(SDL_MouseButtonEvent *pMouseUp)
 	{
 		sRightMouseDown = false;
 	}
+	sHasEvent = true;
 }
 
 void OnMouseMoveEvent(SDL_MouseMotionEvent *pMotion)
@@ -149,6 +152,7 @@ void OnMouseMoveEvent(SDL_MouseMotionEvent *pMotion)
 	}
 	sMouseXDown = pMotion->x;
 	sMouseYDown = pMotion->y;
+	sHasEvent = true;
 }
 
 void OnMouseWhellEvevt(SDL_MouseWheelEvent *pWheel)
@@ -158,9 +162,10 @@ void OnMouseWhellEvevt(SDL_MouseWheelEvent *pWheel)
 		return;
 	}
 	Camera *pCam = Camera::GetCamera();
-	float prd = 0.1f;
+	float prd = 10.0f;
 	float shift = (pWheel->y > 0) ? prd : -prd;
 	pCam->MoveInPivotDir(shift);
+	sHasEvent = true;
 }
 /*---------------------------------------------------------------------*/
 
@@ -248,6 +253,7 @@ int SdlEntryPoint()
 			{
 				case SDL_KEYDOWN:
 					OnKeyEvent(sdlEvent.key.keysym.sym);
+					sHasEvent = true;
 				break;
 				case SDL_MOUSEBUTTONDOWN:
 					OnMouseDownEvent(&sdlEvent.button);
@@ -273,15 +279,18 @@ int SdlEntryPoint()
 				break;
 			}
 		}
-		
-		OnStartLoop();
-		// render to buffer
-		ComputeRun(sw,sh);
-		// render to screen
-		Draw(sw, sh, texdest);
-		// swap 
-		SDL_GL_SwapWindow(gWindow);
-		OnEndLoop();
+	//	if (sHasEvent)
+		{
+			OnStartLoop();
+			// render to buffer
+			ComputeRun(sw, sh);
+			// render to screen
+			Draw(sw, sh, texdest);
+			// swap 
+			SDL_GL_SwapWindow(gWindow);
+			OnEndLoop();
+			sHasEvent = false;
+		}
 	}
 	int t = GL_SYNC_GPU_COMMANDS_COMPLETE;
 	// clear resource
