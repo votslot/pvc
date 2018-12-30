@@ -23,11 +23,11 @@ const std::string cs_render_points =
 R""(
  #version 430 core 
  layout(local_size_x = 32,local_size_y =1) in;   
- layout(binding = 0) buffer in1  {  int params[]; }; 
- layout(binding = 1) buffer dbg  {  float debugOut[]; }; 
+ layout(std430,binding = 0) buffer in1  {  int params[]; }; 
+ layout(std430,binding = 1) buffer dbg  {  float debugOut[]; }; 
  layout(rgba32f,binding = 2) uniform readonly imageBuffer inputPoints;
- layout(binding = 3) buffer zm  {  uint zMap[]; }; 
- layout(binding = 4) buffer vv  {  mat4 World2View; };
+ layout(std430,binding = 3) buffer zm  {  uint zMap[]; }; 
+ layout(std430,binding = 4) buffer vv  {  mat4 World2View; };
 
  void main()                           
  {  

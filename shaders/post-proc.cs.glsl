@@ -3,9 +3,9 @@ const std::string cs_postproc =
 R""(
  #version 430 core 
  layout(local_size_x = 32,local_size_y =32) in; 
- layout(binding = 0) buffer pm   {  int params[]; }; 
- layout(binding = 1) buffer zmi  {  uint zMapIn[]; }; 
- layout(binding = 2) buffer zmo  {  uint zMapOut[];}; 
+ layout(std430,binding = 0) buffer pm   {  int params[]; }; 
+ layout(std430,binding = 1) buffer zmi  {  uint zMapIn[]; }; 
+ layout(std430,binding = 2) buffer zmo  {  uint zMapOut[];}; 
 
  void main()                           
  {                                     
@@ -55,9 +55,9 @@ const std::string cs_postproc_w =
 R""(
  #version 430 core 
  layout(local_size_x = 32,local_size_y =32) in; 
- layout(binding = 0) buffer pm   {  int params[]; }; 
- layout(binding = 1) buffer zmi  {  uint zMapIn[]; }; 
- layout(binding = 2) buffer zmo  {  uint zMapOut[];}; 
+ layout(std430,binding = 0) buffer pm   {  int params[]; }; 
+ layout(std430,binding = 1) buffer zmi  {  uint zMapIn[]; }; 
+ layout(std430,binding = 2) buffer zmo  {  uint zMapOut[];}; 
 
  void main()                           
  {                                     

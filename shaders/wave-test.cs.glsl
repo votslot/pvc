@@ -4,9 +4,9 @@ const std::string cs_wave_test =
 R""(
  #version 450 core 
  layout(local_size_x = 32,local_size_y =1) in;         
- layout(binding = 0) buffer in0  {  float pdata[]; }; 
- layout(binding = 1) buffer aaa  {  float patom[]; }; 
- layout(binding = 2) buffer vv  {  mat4 View; };
+ layout(std430,binding = 0) buffer in0  {  float pdata[]; }; 
+ layout(std430,binding = 1) buffer aaa  {  float patom[]; }; 
+ layout(std430,binding = 2) buffer vv  {  mat4 View; };
  void main()                           
  {                                     
     const uint xx = gl_GlobalInvocationID.x;
