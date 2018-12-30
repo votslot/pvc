@@ -3,8 +3,8 @@ const std::string cs_clean =
 R""(
  #version 430 core 
  layout(local_size_x = 32,local_size_y =32) in;         
- layout(binding = 0) buffer pm  {  int params[]; }; 
- layout(binding = 1) buffer zm  {  uint zMap[]; }; 
+ layout(std430,binding = 0) buffer pm  {  int params[]; }; 
+ layout(std430,binding = 1) buffer zm  {  uint zMap[]; }; 
 
  void main()                           
  {                                     
