@@ -11,7 +11,7 @@ extern void WaveTest_Init();
 extern void WaveTest_Run();
 
 float *pTest    = NULL;
-static int pParams[32];
+static float pParams[32];
 static int sNumOfPoints = 0;
 static void *pPoints;
 static float clutData[256 * 4];
@@ -22,7 +22,8 @@ static const int sMaxH = 2048;
 
 static   SSBBuffer bufferParams;
 static   SSBBuffer bufferDebug;
-static   TBOBuffer bufferTbo;
+//static   TBOBuffer bufferTbo;
+static   SSBBuffer bufferTbo;
 static   SSBBuffer bufferZMap;
 static   SSBBuffer bufferZMapPost;
 static   SSBBuffer bufferMatrView4x4;
@@ -62,7 +63,7 @@ GLuint ComputeInit(int sw,int sh)
 
 	bufferParams.init();
 	//
-	bufferDebug.init();
+	
 	bufferTbo.init();
 
 	//
@@ -79,7 +80,7 @@ GLuint ComputeInit(int sw,int sh)
 	pParams[1] = 512;
 	pParams[2] = sMaxW;
 	pParams[3] = sMaxH;
-	bufferParams.setData(pParams, 32 * sizeof(int));
+	bufferParams.setData(pParams, 32 * sizeof(float));
 
 	//clut
 	for (int i = 0; i < 1024; i+=4) 
@@ -94,12 +95,19 @@ GLuint ComputeInit(int sw,int sh)
 	clutData[4] = 0.0f; clutData[5] = 1.0f; clutData[6] = 0.0f;
 	clutData[8] = 0.0f; clutData[9] = 0.0f; clutData[10] = 1.0f;
 	bufferClut.init();
-	bufferClut.setData(clutData, 4 * 256 * sizeof(float));
+	void *pd = bufferClut.allocateVram(4 * 256 * sizeof(float));
+	memcpy(pd, clutData, 4 * 256 * sizeof(float));
+	//bufferClut.setData(clutData, 4 * 256 * sizeof(float));
 
 	//Set debug data
-	pTest = new float[1024 * 1024 * 4];
+	/*
+	bufferDebug.init();
+	pTest = new float[1024 * 1024 *4];
 	for (int i = 0; i < 1024 * 1024 * 4; i++) pTest[i] = 0.0;
 	bufferDebug.setData(pTest, 1024 * 1024 * 4 * sizeof(float));
+	*/
+
+
 	if (gRunWaveTest) {
 		WaveTest_Init();
 	}
@@ -128,7 +136,9 @@ void ComputeRun(int sw__, int sh__)
 	Camera *pCam = Camera::GetCamera();
 	pParams[0] = pCam->GetScreenX();
 	pParams[1] = pCam->GetScreenY();
-	bufferParams.setData((unsigned char*)pParams, 32 * sizeof(int));
+	pParams[2] = pCam->m_zNear;
+	pParams[3] = pCam->m_zFar;
+	bufferParams.setData((unsigned char*)pParams, 32 * sizeof(float));
 	// camera
 	pCam->ConvertTo4x4(matrView4x4);
 	bufferMatrView4x4.setData(matrView4x4, 16 * sizeof(float));
@@ -155,8 +165,6 @@ void ComputeRun(int sw__, int sh__)
 		glDispatchCompute(num_groups_x, num_groups_y, 1);
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);
 		SSBBuffer::checkError();
-
-	
 		SSBBuffer::checkError();
 
 		glUseProgram(0);

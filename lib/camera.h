@@ -5,8 +5,9 @@
 class Camera {
 	float m_data[32];
 	float m_pivot[3];
-	float m_screenX, m_screenY, m_devSize, m_focus;
+	float m_screenX, m_screenY, m_devSize;
 public:
+	float m_zNear, m_zFar;
 	Camera();
 	static Camera *GetCamera();	
 	void RotateRight(float ang);

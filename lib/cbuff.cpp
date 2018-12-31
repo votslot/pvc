@@ -45,10 +45,22 @@ void SSBBuffer::setData(void *pD, unsigned int sizeInBytes)
 
 void SSBBuffer::allocate(unsigned int sizeInBytes) 
 {
+	GLint maxtb = 0;
+	glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &maxtb);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, gb);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeInBytes, NULL, GL_DYNAMIC_COPY);
 	sz = sizeInBytes;
 	checkError();
+}
+
+void* SSBBuffer::allocateVram(unsigned int sizeInBytes)
+{
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, gb);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeInBytes, NULL, GL_DYNAMIC_COPY); checkError();
+	GLvoid* p = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY);
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+	checkError();
+	return p;
 }
 
 void SSBBuffer::getData(unsigned int sizeInBytes, void *pOut)
@@ -97,6 +109,7 @@ void TexU32::bind(int bi) const
 //bind the texture to an image unit with glBindImageTexture(), 
 //and access the data in the compute shader using imageLoad().
 
+unsigned int tboType = GL_RGBA32F;
 void TBOBuffer::init() 
 {
 	glGenTextures(1, &tex);
@@ -106,8 +119,7 @@ void TBOBuffer::init()
 
 void TBOBuffer::bind(int bi) const
 {
-	glBindImageTexture(bi, tex, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-	//glBindImageTexture(bindIndex, tex, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32F);
+	glBindImageTexture(bi, tex, 0, GL_FALSE, 0, GL_READ_WRITE, tboType);
 	checkError();
 }
 
@@ -127,7 +139,7 @@ void TBOBuffer::setData(void *pD, unsigned int sizeInBytes)
 	memcpy(pMem, pD, sizeInBytes); checkError();
 	glUnmapBuffer(target); checkError();
 	glBindTexture(target, tex); checkError();
-	glTexBuffer(target, GL_RGBA32F, gb); checkError();
+	glTexBuffer(target, tboType, gb); checkError();
 } 
 
 // ---  CSShader ---------------

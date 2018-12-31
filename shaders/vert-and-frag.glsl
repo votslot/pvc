@@ -23,7 +23,7 @@ in vec3 fragmentColor;
 in vec2 fragmentUV;
 out vec3 color;
 layout(std430,binding = 0) buffer inz  {  uint zMap[]; };   
-layout(std430,binding = 1) buffer inp  {  int params[]; };   
+layout(std430,binding = 1) buffer inp  {  float params[]; };   
 layout(std430,binding = 2) buffer clt  {  float clut[]; };   
 precision mediump float;
 void main()                                  

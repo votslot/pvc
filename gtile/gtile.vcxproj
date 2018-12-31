@@ -190,7 +190,6 @@
     <ClInclude Include="..\lib\camera.h" />
     <ClInclude Include="..\lib\cbuff.h" />
     <ClInclude Include="..\lib\compute.h" />
-    <ClInclude Include="..\lib\cpoints.h" />
     <ClInclude Include="..\pcloud\pcloud.h" />
     <ClInclude Include="..\winui\ui.h" />
     <ClInclude Include="stdafx.h" />
@@ -201,7 +200,6 @@
     <ClCompile Include="..\lib\camera.cpp" />
     <ClCompile Include="..\lib\cbuff.cpp" />
     <ClCompile Include="..\lib\compute.cpp" />
-    <ClCompile Include="..\lib\cpoints.cpp" />
     <ClCompile Include="..\lib\sdl-main.cpp" />
     <ClCompile Include="..\lib\trisample.cpp" />
     <ClCompile Include="..\lib\wave-test.cpp" />

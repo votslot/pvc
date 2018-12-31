@@ -55,7 +55,7 @@ const std::string cs_postproc_w =
 R""(
  #version 430 core 
  layout(local_size_x = 32,local_size_y =32) in; 
- layout(std430,binding = 0) buffer pm   {  int params[]; }; 
+ layout(std430,binding = 0) buffer pm   {  float params[]; }; 
  layout(std430,binding = 1) buffer zmi  {  uint zMapIn[]; }; 
  layout(std430,binding = 2) buffer zmo  {  uint zMapOut[];}; 
 
@@ -64,14 +64,16 @@ R""(
     const uint xx = gl_GlobalInvocationID.x;
     const uint yy = gl_GlobalInvocationID.y;
 	uint border = 3;
-	if(( xx < params[0]-border) && (yy< params[1]-border) &&( xx > border) && ( yy> border)) 
+	uint ww = uint(params[0]);
+	uint hh = uint(params[1]);
+
+	if(( xx < ww-border) && (yy< hh-border) &&( xx > border) && ( yy> border)) 
 	{
-	    uint shift = xx +  params[0]* yy;
+	    uint shift = xx +  ww* yy;
 		uint val0 = zMapIn[shift];
 		uint val_ini = val0;
 		uint col = val0 & 0xFF;
 		
-		uint ww = uint(params[0]);
 		uint shiftStart = shift- ww*border - border ;
 		uint vv;
 		uint num = border*2 + 1;
@@ -96,6 +98,7 @@ R""(
 		}
 		zMapOut[shift] = (val0 & 0xFFFFFF00) | col;
 	}
+	
  }       
 )"";
 

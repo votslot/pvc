@@ -42,7 +42,7 @@ void UIOutImpl::OnFileOpen(const char *pPath)
 void UIOutImpl::OnTestRun()
 {
 	extern void SetPointData(void *pData, int num);
-	int num = 1024*1024;
+	int num = 1024*1024*2;
 	theCloudImpl.InitTestCloud(num);
 	//SetPointData(ret, num);
 }

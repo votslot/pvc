@@ -32,9 +32,6 @@
     <ClInclude Include="..\lib\compute.h">
       <Filter>lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\lib\cpoints.h">
-      <Filter>lib</Filter>
-    </ClInclude>
     <ClInclude Include="..\lib\cbuff.h">
       <Filter>lib</Filter>
     </ClInclude>
@@ -56,9 +53,6 @@
       <Filter>lib</Filter>
     </ClCompile>
     <ClCompile Include="..\lib\compute.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\lib\cpoints.cpp">
       <Filter>lib</Filter>
     </ClCompile>
     <ClCompile Include="..\lib\cbuff.cpp">

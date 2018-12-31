@@ -19,6 +19,7 @@ public:
 	void bind(int bi) const;
 	void setData(void *pD, unsigned int sizeInBytes);
 	void allocate(unsigned int sizeInBytes);
+	void* allocateVram(unsigned int sizeInBytes);
 	void getData(unsigned int sizeInBytes, void *pOut);
 };
 

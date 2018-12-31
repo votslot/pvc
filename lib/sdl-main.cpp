@@ -226,6 +226,8 @@ int SdlEntryPoint()
 	GLint maxtb = 0;
 	glGetIntegerv(GL_MAJOR_VERSION, &maxtb);
 	glGetIntegerv(GL_MINOR_VERSION, &maxtb);
+
+	
 	glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &maxtb);
 	printf("GL_MAX_TEXTURE_BUFFER_SIZE= %d MB \n", maxtb/(1024*1024));
 	glGetIntegerv(GL_MAX_RECTANGLE_TEXTURE_SIZE, &maxtb);

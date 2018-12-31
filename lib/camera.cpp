@@ -36,6 +36,8 @@ Camera *Camera::GetCamera()
 Camera::Camera() 
 {
 	m_pivot[0] = m_pivot[1] = m_pivot[2] = 0.0f;
+	m_zNear = 2.0f;
+	m_zFar = 10000.0f;
 	SetPivotCamera(60.0f * 3.1415f / 180.0f, 0.0f, 600.0f);
 }
 
