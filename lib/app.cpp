@@ -42,7 +42,7 @@ void UIOutImpl::OnFileOpen(const char *pPath)
 void UIOutImpl::OnTestRun()
 {
 	extern void SetPointData(void *pData, int num);
-	int num = 1024*1024*2;
+	int num = 1024*1024;
 	theCloudImpl.InitTestCloud(num);
 	//SetPointData(ret, num);
 }
@@ -91,7 +91,7 @@ void CloudImpl::OnDone()
 	extern void SetPointData(void *pData, int num);
 	float prd = 256.0f;
 	float ddx = (maxX - minX);
-	float ddy = (maxY - minY);
+	float ddy = (maxY - minY); 
 	float ddz = (maxZ - minZ);
 	float maxD = (ddx > ddy) ? ddx : ddy;
 	maxD = (maxD > ddz) ? maxD : ddz;

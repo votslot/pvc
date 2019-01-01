@@ -57,7 +57,7 @@ void OnEndLoop()
 	
 }
 
-//
+#if 0
 void OnKeyEvent(int key)
 {
 	static float  dist = 600.0f;
@@ -101,6 +101,7 @@ void OnKeyEvent(int key)
 	*/
 	
 }
+#endif
 
 /*-----------------------------------------------------------------*/
 static int sMouseXDown = 0;
@@ -254,7 +255,7 @@ int SdlEntryPoint()
 			switch (sdlEvent.type) 
 			{
 				case SDL_KEYDOWN:
-					OnKeyEvent(sdlEvent.key.keysym.sym);
+					//OnKeyEvent(sdlEvent.key.keysym.sym);
 					sHasEvent = true;
 				break;
 				case SDL_MOUSEBUTTONDOWN:

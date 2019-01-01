@@ -33,7 +33,9 @@ void SSBBuffer::init()
 	
 void SSBBuffer::setData(void *pD, unsigned int sizeInBytes)
 {
-	if (sizeInBytes > 1024 * 1024 * 32)
+	GLint maxtb = 0;
+	glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &maxtb);
+	if (sizeInBytes > maxtb)
 	{
 			printf("Error buff size \n");
 	}

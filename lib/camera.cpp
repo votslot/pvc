@@ -4,27 +4,71 @@
 #include <stdio.h>
 #include "camera.h"
 
-
+/*
 static void RotateAroundZ(float *pV, float ang)
 {
 	float xx = pV[0];
 	float yy = pV[1];
-	float sinF = sin(ang);
-	float cosF = cos(ang);
+	float sinF = sinf(ang);
+	float cosF = cosf(ang);
 	pV[0] = xx * cosF + yy * sinF;
 	pV[1] = -xx * sinF + yy * cosF;
 }
+*/
 
-struct vector3 {
-	float v[3];
-	vector3(float x, float y, float z) { v[0] = x; v[1] = y; v[2] = z; }
-};
 
-vector3 operator + (const vector3 &a, const vector3 &b)
+Camera::vector3 operator - (const Camera::vector3 &a, const Camera::vector3 &b)
 {
-	vector3 ret(a.v[0] + b.v[0], a.v[1] + b.v[1], a.v[2] + b.v[2]);
+	Camera::vector3 ret(a.v[0] - b.v[0], a.v[1] - b.v[1], a.v[2] - b.v[2]);
 	return ret;
 }
+
+Camera::vector3 operator + (const Camera::vector3 &a, const Camera::vector3 &b)
+{
+	Camera::vector3 ret(a.v[0] + b.v[0], a.v[1] + b.v[1], a.v[2] + b.v[2]);
+	return ret;
+}
+
+
+Camera::vector3 operator * (const Camera::vector3 &a, float prod)
+{
+	Camera::vector3 ret(a.v[0] * prod, a.v[1] * prod, a.v[2] * prod);
+	return ret;
+}
+
+Camera::vector3 operator * (float prod, const Camera::vector3 &a)
+{
+	Camera::vector3 ret = a * prod ;
+	return ret;
+}
+
+// dot product
+float operator * (const Camera::vector3 &a, const Camera::vector3 &b)
+{
+	return (a.v[0] * b.v[0] + a.v[1] * b.v[1] + a.v[2] * b.v[2]);
+}
+
+// Cross product
+Camera::vector3 operator ^ (const Camera::vector3 &a, const Camera::vector3 &b)
+{
+	Camera::vector3 ret(0.0f, 0.0f,0.0f);
+	ret.v[0] = a.v[1] * b.v[2] - a.v[2] * b.v[1];
+	ret.v[1] = a.v[2] * b.v[0] - a.v[0] * b.v[2];
+	ret.v[2] = a.v[0] * b.v[1] - a.v[1] * b.v[0];
+	return ret;
+}
+
+// Rotate P around A ( A is a unit vector)
+Camera::vector3 rotate(const Camera::vector3 &P, const Camera::vector3 &S, const Camera::vector3 &A, float angle)
+{
+	Camera::vector3 D = P - S;
+	Camera::vector3 N0 = (D * A) * A;
+	Camera::vector3 N1 = D - N0;
+	Camera::vector3 N2 = N1 ^ A;
+	Camera::vector3 R = S + N0 +  N1 * cosf(angle) + N2 * sinf(angle);
+	return R;
+}
+
 
 static Camera theCamera;
 
@@ -35,17 +79,18 @@ Camera *Camera::GetCamera()
 
 Camera::Camera() 
 {
-	m_pivot[0] = m_pivot[1] = m_pivot[2] = 0.0f;
+	m_L.v[0] = m_L.v[1] = m_L.v[2] = 0.0f;
 	m_zNear = 2.0f;
 	m_zFar = 10000.0f;
 	SetPivotCamera(60.0f * 3.1415f / 180.0f, 0.0f, 600.0f);
 }
 
-float *Camera::GetPos()   { return  m_data + 0; }
-float *Camera::GetRight() { return  m_data + 3; }
-float *Camera::GetUp()    { return  m_data + 6; }
-float *Camera::GetDir()   { return  m_data + 9; }
-float *Camera::GetPivot() { return  m_pivot; }
+float *Camera::GetPos()   { return  m_P.v; }
+float *Camera::GetRight() { return  m_R.v; }
+float *Camera::GetUp()    { return  m_U.v; }
+float *Camera::GetDir()   { return  m_D.v; }
+
+float *Camera::GetPivot() { return  m_L.v; }
 int Camera::GetScreenX() { return m_screenX; }
 int Camera::GetScreenY() { return m_screenY; }
 
@@ -56,85 +101,26 @@ void Camera::SetScreenPixSize(int sx, int sy)
 	printf("ScreenX = %f ScreenY = %f\n", m_screenX, m_screenY);
 }
 
-void Camera::RotateRight(float ang)
-{
-	float sinF = sin(ang);
-	float cosF = cos(ang);
-	float uu[3], dd[3];
-	float *pU = GetUp();
-	float *pD = GetDir();
-	for (int i = 0; i < 3; i++){
-		uu[i] =  pU[i] * cosF + pD[i] * sinF;
-		dd[i] = -pU[i] * sinF + pD[i] * cosF;
-	}
-	for (int i = 0; i < 3; i++) {
-		pU[i] = uu[i];
-		pD[i] = dd[i];
-	}
-}
-
-void Camera::RotateUp(float ang)
-{
-	float sinF = sin(ang);
-	float cosF = cos(ang);
-	float uu[3], dd[3];
-	float *pU = GetRight();
-	float *pD = GetDir();
-	for (int i = 0; i < 3; i++) {
-		uu[i] = pU[i] * cosF + pD[i] * sinF;
-		dd[i] = -pU[i] * sinF + pD[i] * cosF;
-	}
-	for (int i = 0; i < 3; i++) {
-		pU[i] = uu[i];
-		pD[i] = dd[i];
-	}
-}
-
-void Camera::RotateDir(float ang)
-{
-	float sinF = sin(ang);
-	float cosF = cos(ang);
-	float uu[3], rr[3];
-	float *pR = GetRight();
-	float *pU = GetUp();
-	for (int i = 0; i < 3; i++) {
-		uu[i] =  pU[i] * cosF + pR[i] * sinF;
-		rr[i] = -pU[i] * sinF + pR[i] * cosF;
-	}
-	for (int i = 0; i < 3; i++) {
-		pU[i] = uu[i];
-		pR[i] = rr[i];
-	}
-}
-
-
 
 void Camera::RotateAroundPivot(float dx, float dy)
 {
-	float pivotInCam[3], pivotInWorld[3];
-	FromWorld(m_pivot, pivotInCam);
-	RotateRight(dy);
-	ToWorld(pivotInCam, pivotInWorld);
-	float *pPos = GetPos();
-	pPos[0] -= pivotInWorld[0];
-	pPos[1] -= pivotInWorld[1];
-	pPos[2] -= pivotInWorld[2];
-	RotateAroundZ(pPos, dx);
-	RotateAroundZ(GetUp(), dx);
-	RotateAroundZ(GetRight(), dx);
-	RotateAroundZ(GetDir(), dx);
-	pPos[0] += m_pivot[0];
-	pPos[1] += m_pivot[1];
-	pPos[2] += m_pivot[2];
+	Camera::vector3 ZZ (0.0f, 0.0f, 0.0f);
+	Camera::vector3 A0 = m_R;
+	m_P = rotate(m_P, m_L, A0, dy);
+	m_D = rotate(m_D, ZZ,  A0, dy);
+	m_U = rotate(m_U, ZZ,  A0, dy);
+	m_R = rotate(m_R, ZZ,  A0, dy);
+
+	Camera::vector3 A1(0.0f, 0.0f, 1.0f);
+	m_P = rotate(m_P, m_L, A1, dx);
+	m_D = rotate(m_D, ZZ,  A1, dx);
+	m_U = rotate(m_U, ZZ,  A1, dx);
+	m_R = rotate(m_R, ZZ,  A1, dx);
 }
 
 void Camera::MoveInPivotDir(float dd) 
 {
-	float *pPos = GetPos();
-	float *pDir = GetDir();
-	pPos[0] += pDir[0] * dd;
-	pPos[1] += pDir[1] * dd;
-	pPos[2] += pDir[2] * dd;
+	m_P = m_P + m_D * dd;
 }
 
 void Camera::ShiftPivot(float dx, float dy) 
@@ -164,27 +150,14 @@ void Camera::ShiftPivot(float dx, float dy)
 
 void Camera::SetPivotCamera(float teta, float fi, float dist) 
 {
-	float rr[3];
-	rr[0] = sin(teta) * cos(fi);
-	rr[1] = sin(teta) * sin(fi);
-	rr[2] = cos(teta);
-	float *pPos = GetPos();
-	pPos[0] = m_pivot[0] + rr[0] * dist;
-	pPos[1] = m_pivot[1] + rr[1] * dist;
-	pPos[2] = m_pivot[2] + rr[2] * dist;
-	float *pDir = GetDir();
-	pDir[0] = -rr[0];
-	pDir[1] = -rr[1];
-	pDir[2] = -rr[2];
-	float *pR = GetRight();
-	float lenR = sqrt(pDir[0] * pDir[0] + pDir[1] * pDir[1]);
-	pR[0] = -pDir[1] / lenR;
-	pR[1] =  pDir[0] / lenR;
-	pR[2] = 0.0f;
-	float *pU = GetUp();
-	pU[0] =  pDir[1] * pR[2] - pDir[2] * pR[1];
-	pU[1] = -pDir[0] * pR[2] + pDir[2] * pR[0];
-	pU[2] =  pDir[0] * pR[1] - pDir[1] * pR[0];
+	vector3 S(sinf(teta) * cosf(fi), sinf(teta) * sinf(fi), cosf(teta));
+	m_P = m_L + S * dist;
+	m_D = -1.f * S;
+	float lenR = sqrt(m_D[0] * m_D[0] + m_D[1] * m_D[1]);
+	m_R[0] = -m_D[1] / lenR;
+	m_R[1] =  m_D[0] / lenR;
+	m_R[2] =  0.0f;
+	m_U = m_D ^ m_R;
 }
 
 void Camera::FromWorld(float *pWorldIn, float *pInCamOut) 
