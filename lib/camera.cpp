@@ -4,52 +4,39 @@
 #include <stdio.h>
 #include "camera.h"
 
-/*
-static void RotateAroundZ(float *pV, float ang)
-{
-	float xx = pV[0];
-	float yy = pV[1];
-	float sinF = sinf(ang);
-	float cosF = cosf(ang);
-	pV[0] = xx * cosF + yy * sinF;
-	pV[1] = -xx * sinF + yy * cosF;
-}
-*/
-
-
-Camera::vector3 operator - (const Camera::vector3 &a, const Camera::vector3 &b)
+static Camera::vector3 operator - (const Camera::vector3 &a, const Camera::vector3 &b)
 {
 	Camera::vector3 ret(a.v[0] - b.v[0], a.v[1] - b.v[1], a.v[2] - b.v[2]);
 	return ret;
 }
 
-Camera::vector3 operator + (const Camera::vector3 &a, const Camera::vector3 &b)
+static Camera::vector3 operator + (const Camera::vector3 &a, const Camera::vector3 &b)
 {
 	Camera::vector3 ret(a.v[0] + b.v[0], a.v[1] + b.v[1], a.v[2] + b.v[2]);
 	return ret;
 }
 
 
-Camera::vector3 operator * (const Camera::vector3 &a, float prod)
+static Camera::vector3 operator * (const Camera::vector3 &a, float prod)
 {
 	Camera::vector3 ret(a.v[0] * prod, a.v[1] * prod, a.v[2] * prod);
 	return ret;
 }
 
-Camera::vector3 operator * (float prod, const Camera::vector3 &a)
+static Camera::vector3 operator * (float prod, const Camera::vector3 &a)
 {
 	Camera::vector3 ret = a * prod ;
 	return ret;
 }
 
 // dot product
-float operator * (const Camera::vector3 &a, const Camera::vector3 &b)
+static float operator * (const Camera::vector3 &a, const Camera::vector3 &b)
 {
 	return (a.v[0] * b.v[0] + a.v[1] * b.v[1] + a.v[2] * b.v[2]);
 }
 
 // Cross product
-Camera::vector3 operator ^ (const Camera::vector3 &a, const Camera::vector3 &b)
+static Camera::vector3 operator ^ (const Camera::vector3 &a, const Camera::vector3 &b)
 {
 	Camera::vector3 ret(0.0f, 0.0f,0.0f);
 	ret.v[0] = a.v[1] * b.v[2] - a.v[2] * b.v[1];
@@ -58,8 +45,8 @@ Camera::vector3 operator ^ (const Camera::vector3 &a, const Camera::vector3 &b)
 	return ret;
 }
 
-// Rotate P around A ( A is a unit vector)
-Camera::vector3 rotate(const Camera::vector3 &P, const Camera::vector3 &S, const Camera::vector3 &A, float angle)
+// Rotate vector P around axis defined by starting point S and unit vector A ( direction).
+static Camera::vector3 rotate(const Camera::vector3 &P, const Camera::vector3 &S, const Camera::vector3 &A, float angle)
 {
 	Camera::vector3 D = P - S;
 	Camera::vector3 N0 = (D * A) * A;
@@ -68,7 +55,6 @@ Camera::vector3 rotate(const Camera::vector3 &P, const Camera::vector3 &S, const
 	Camera::vector3 R = S + N0 +  N1 * cosf(angle) + N2 * sinf(angle);
 	return R;
 }
-
 
 static Camera theCamera;
 
@@ -125,27 +111,13 @@ void Camera::MoveInPivotDir(float dd)
 
 void Camera::ShiftPivot(float dx, float dy) 
 {
-	float sh[3],dd[3],len,prd,near = 2.0f;
-	float scm = (m_screenX < m_screenY) ? m_screenX : m_screenY;
-	float *pR = GetRight();
-	float *pU = GetUp();
-	float *pC = GetPos();
-	float *pP = GetPivot();
-	dd[0] = pP[0] - pC[0];
-	dd[1] = pP[1] - pC[1];
-	dd[2] = pP[2] - pC[2];
-	len = sqrtf(dd[0] * dd[0] + dd[1] * dd[1] * dd[2] * dd[2]);
-	prd = 1.0f;// 0.5f *(scm * near) / (len + near);
-
-	sh[0] = (pR[0] * dx + pU[0] * dy) * prd;
-	sh[1] = (pR[1] * dx + pU[1] * dy) * prd;
-	sh[2] = (pR[2] * dx + pU[2] * dy) * prd;
-	pC[0] += sh[0];
-	pC[1] += sh[1];
-	pC[2] += sh[2];
-	pP[0] += sh[0];
-	pP[1] += sh[1];
-	pP[2] += sh[2];
+	float prd = 1.0f;
+	Camera::vector3 SH;
+	SH[0] = (m_R[0] * dx + m_U[0] * dy) * prd;
+	SH[1] = (m_R[1] * dx + m_U[1] * dy) * prd;
+	SH[2] = (m_R[2] * dx + m_U[2] * dy) * prd;
+	m_P = m_P + SH;
+	m_L = m_L + SH;
 }
 
 void Camera::SetPivotCamera(float teta, float fi, float dist) 
@@ -153,7 +125,7 @@ void Camera::SetPivotCamera(float teta, float fi, float dist)
 	vector3 S(sinf(teta) * cosf(fi), sinf(teta) * sinf(fi), cosf(teta));
 	m_P = m_L + S * dist;
 	m_D = -1.f * S;
-	float lenR = sqrt(m_D[0] * m_D[0] + m_D[1] * m_D[1]);
+	float lenR = sqrtf(m_D[0] * m_D[0] + m_D[1] * m_D[1]);
 	m_R[0] = -m_D[1] / lenR;
 	m_R[1] =  m_D[0] / lenR;
 	m_R[2] =  0.0f;
@@ -198,20 +170,16 @@ void Camera::ToWorld(float *pCamIn, float *pWorldOut)
 void Camera::ConvertTo4x4(float *pOut)
 {
 	memset(pOut, 0, 16 * sizeof(float));
-	float *pC = GetPos();
-	float *pR = GetRight();
-	float *pU = GetUp();
-	float *pD = GetDir();
 	for(int i = 0,k=0; i < 3; i++,k+=4) {
-		pOut[k + 0] = pR[i];
-		pOut[k + 1] = pU[i];
-		pOut[k + 2] = pD[i];
+		pOut[k + 0] = m_R[i];
+		pOut[k + 1] = m_U[i];
+		pOut[k + 2] = m_D[i];
 		pOut[k + 3] = 0.0f;
 	}
 	// Tx,Ty,Tz 
-	pOut[12] = -(pC[0] * pR[0] + pC[1] * pR[1] + pC[2] * pR[2]);
-	pOut[13] = -(pC[0] * pU[0] + pC[1] * pU[1] + pC[2] * pU[2]);
-	pOut[14] = -(pC[0] * pD[0] + pC[1] * pD[1] + pC[2] * pD[2]);
+	pOut[12] = -(m_P[0] * m_R[0] + m_P[1] * m_R[1] + m_P[2] * m_R[2]);
+	pOut[13] = -(m_P[0] * m_U[0] + m_P[1] * m_U[1] + m_P[2] * m_U[2]);
+	pOut[14] = -(m_P[0] * m_D[0] + m_P[1] * m_D[1] + m_P[2] * m_D[2]);
 }
 
 
