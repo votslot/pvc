@@ -35,7 +35,7 @@ void SSBBuffer::setData(void *pD, unsigned int sizeInBytes)
 {
 	GLint maxtb = 0;
 	glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &maxtb);
-	if (sizeInBytes > maxtb)
+	if (sizeInBytes > (unsigned int)maxtb)
 	{
 			printf("Error buff size \n");
 	}
@@ -129,7 +129,7 @@ void TBOBuffer::setData(void *pD, unsigned int sizeInBytes)
 {
 	GLint maxtb = 0;
 	glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &maxtb);
-	if (sizeInBytes > maxtb) 
+	if (sizeInBytes > (unsigned int)maxtb) 
 	{
 		checkError();
 	}

@@ -77,8 +77,8 @@ float *Camera::GetUp()    { return  m_U.v; }
 float *Camera::GetDir()   { return  m_D.v; }
 
 float *Camera::GetPivot() { return  m_L.v; }
-int Camera::GetScreenX() { return m_screenX; }
-int Camera::GetScreenY() { return m_screenY; }
+int Camera::GetScreenX() { return (int)m_screenX; }
+int Camera::GetScreenY() { return (int)m_screenY; }
 
 void Camera::SetScreenPixSize(int sx, int sy)
 {

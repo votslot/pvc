@@ -79,6 +79,9 @@
     <ClCompile Include="..\lib\sdl-main.cpp">
       <Filter>lib</Filter>
     </ClCompile>
+    <ClCompile Include="..\pcloud\partition.cpp">
+      <Filter>pcloud</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\test.cs.glsl">

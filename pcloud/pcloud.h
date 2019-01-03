@@ -16,4 +16,6 @@ class PCloudIn
 	  void* InitTestCloud(int numPonts);
 };
 
+void DoPartitionXYZW_Float(void *pData, unsigned int num);
+
 #endif

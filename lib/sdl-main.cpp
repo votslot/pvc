@@ -46,7 +46,7 @@ void OnStartLoop()
 void OnEndLoop() 
 {
 	std::chrono::high_resolution_clock::time_point finish = std::chrono::high_resolution_clock::now();
-	int df = std::chrono::duration_cast<std::chrono::microseconds>(finish - sStartTime).count();
+	int df = (int)std::chrono::duration_cast<std::chrono::microseconds>(finish - sStartTime).count();
 	sDiff += df;
 	sNtimes--;
 	if (sNtimes <= 0) {

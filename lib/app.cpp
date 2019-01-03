@@ -42,7 +42,7 @@ void UIOutImpl::OnFileOpen(const char *pPath)
 void UIOutImpl::OnTestRun()
 {
 	extern void SetPointData(void *pData, int num);
-	int num = 1024*1024;
+	int num = 1024 * 1024;
 	theCloudImpl.InitTestCloud(num);
 	//SetPointData(ret, num);
 }
@@ -101,13 +101,15 @@ void CloudImpl::OnDone()
 	float cz = (maxZ + minZ) *0.5f;
 
 	float *ptr = (float*)(pMem);
-	for (int i = 0; i < numP; i++) {
+	for (unsigned int i = 0; i < numP; i++) {
 		ptr[3] = 255.0f * (ptr[2] - minZ) / ddz; // color
 		ptr[0] = ((ptr[0] - cx) / maxD) *prd;
 		ptr[1] = ((ptr[1] - cy) / maxD) *prd;
 		ptr[2] = ((ptr[2] - cz) / maxD) *prd;
 		ptr += 4;
 	}
+	DoPartitionXYZW_Float(pMem, numP);
+
 	SetPointData(pMem, numP);
 }
 

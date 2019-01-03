@@ -204,6 +204,7 @@
     <ClCompile Include="..\lib\trisample.cpp" />
     <ClCompile Include="..\lib\wave-test.cpp" />
     <ClCompile Include="..\pcloud\las.cpp" />
+    <ClCompile Include="..\pcloud\partition.cpp" />
     <ClCompile Include="..\pcloud\testcloud.cpp" />
     <ClCompile Include="..\winui\winui.cpp" />
     <ClCompile Include="gtile.cpp" />

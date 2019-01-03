@@ -22,7 +22,6 @@ static const int sMaxH = 2048;
 
 static   SSBBuffer bufferParams;
 static   SSBBuffer bufferDebug;
-//static   TBOBuffer bufferTbo;
 static   SSBBuffer bufferTbo;
 static   SSBBuffer bufferZMap;
 static   SSBBuffer bufferZMapPost;
@@ -134,10 +133,10 @@ void ComputeRun(int sw__, int sh__)
 	static int n_call = 0;
 	// params
 	Camera *pCam = Camera::GetCamera();
-	pParams[0] = pCam->GetScreenX();
-	pParams[1] = pCam->GetScreenY();
-	pParams[2] = pCam->m_zNear;
-	pParams[3] = pCam->m_zFar;
+	pParams[0] = (float)pCam->GetScreenX();
+	pParams[1] = (float)pCam->GetScreenY();
+	pParams[2] = (float)pCam->m_zNear;
+	pParams[3] = (float)pCam->m_zFar;
 	bufferParams.setData((unsigned char*)pParams, 32 * sizeof(float));
 	// camera
 	pCam->ConvertTo4x4(matrView4x4);
@@ -158,15 +157,16 @@ void ComputeRun(int sw__, int sh__)
 		csPointRender.bindBuffer(&bufferZMap);
 		csPointRender.bindBuffer(&bufferMatrView4x4);
 
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		glMemoryBarrier(GL_ALL_BARRIER_BITS);
-		GLuint num_groups_x = sNumOfPoints / 32 / 32;  // max 65535
-		GLuint num_groups_y = 1;
-		glDispatchCompute(num_groups_x, num_groups_y, 1);
-		glMemoryBarrier(GL_ALL_BARRIER_BITS);
-		SSBBuffer::checkError();
-		SSBBuffer::checkError();
-
+		//for (int m = 0; m < 50; m++) {
+			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+			glMemoryBarrier(GL_ALL_BARRIER_BITS);
+			GLuint num_groups_x = sNumOfPoints / 32 / 32;  // max 65535
+			GLuint num_groups_y = 1;
+			glDispatchCompute(num_groups_x, num_groups_y, 1);
+			glMemoryBarrier(GL_ALL_BARRIER_BITS);
+			SSBBuffer::checkError();
+			SSBBuffer::checkError();
+		//}
 		glUseProgram(0);
 		//GLsync sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 		//int ret = glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
