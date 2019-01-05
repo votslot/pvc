@@ -55,7 +55,13 @@ const std::string cs_postproc_w =
 R""(
  #version 430 core 
  layout(local_size_x = 32,local_size_y =32) in; 
- layout(std430,binding = 0) buffer pm   {  float params[]; }; 
+ layout(std430,binding = 0) buffer in1 
+ {  
+	float screenX;
+	float screenY;
+	float zNear;
+	float zFar;
+ }; 
  layout(std430,binding = 1) buffer zmi  {  uint zMapIn[]; }; 
  layout(std430,binding = 2) buffer zmo  {  uint zMapOut[];}; 
 
@@ -63,9 +69,9 @@ R""(
  {                                     
     const uint xx = gl_GlobalInvocationID.x;
     const uint yy = gl_GlobalInvocationID.y;
-	uint border = 3;
-	uint ww = uint(params[0]);
-	uint hh = uint(params[1]);
+	uint border = 10;
+	uint ww = uint(screenX);
+	uint hh = uint(screenY);
 
 	if(( xx < ww-border) && (yy< hh-border) &&( xx > border) && ( yy> border)) 
 	{
@@ -73,7 +79,6 @@ R""(
 		uint val0 = zMapIn[shift];
 		uint val_ini = val0;
 		uint col = val0 & 0xFF;
-		
 		uint shiftStart = shift- ww*border - border ;
 		uint vv;
 		uint num = border*2 + 1;
@@ -82,8 +87,11 @@ R""(
 		{
 			for( uint xi = 0; xi<=num  ; xi++)
 			{
+			    uint dx = xi - border;
+			    uint dy = yi - border;
 				vv = zMapIn[shiftStart + xi + yi*ww];
-				if( vv < val0) {
+				uint dist = dx*dx + dy*dy;
+				if(( vv < val0) && ( dist< 49) ) {
 					val0 = vv;
 					col  = val0 & 0xFF;
 					xMin = xi;

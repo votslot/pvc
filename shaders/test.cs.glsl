@@ -3,16 +3,20 @@ const std::string cs_clean =
 R""(
  #version 430 core 
  layout(local_size_x = 32,local_size_y =32) in;         
- layout(std430,binding = 0) buffer pm  {  float params[]; }; 
+ layout(std430,binding = 0) buffer in1 
+ {  
+	float screenX;
+	float screenY;
+ }; 
  layout(std430,binding = 1) buffer zm  {  uint zMap[]; }; 
 
  void main()                           
  {                                     
     const uint xx = gl_GlobalInvocationID.x;
     const uint yy = gl_GlobalInvocationID.y;
-	if(( xx < uint(params[0])) && (yy< uint(params[1])) ) 
+	if(( xx < uint(screenX)) && (yy< uint(screenY)) ) 
 	{
-	    uint shift = xx +  uint(params[0])* yy;
+	    uint shift = xx +  uint(screenX)* yy;
 		zMap[shift] = 0xFFFFFFFF;
 	}
  }       
@@ -27,6 +31,8 @@ R""(
  {  
 	float screenX;
 	float screenY;
+	float zNear;
+	float zFar;
  }; 
  layout(std430,binding = 1) buffer dbg  {  float debugOut[]; }; 
  layout(std430,binding = 2) buffer pt   {  float inputPoints[]; }; 
@@ -36,8 +42,6 @@ R""(
  void main()                           
  {  
     const int grp_size = 32;
-	float zNear = 2.0f;
-	float zFar = 10000.0f;
 	float zScale = 16777215.0/(zFar -zNear);
 	float scm = min(screenX,screenY);
     int loc;
@@ -60,7 +64,7 @@ R""(
 			uint yy = uint(yf + 0.5);
 			uint wOut =  uint(screenX); 
 			uint hOut =  uint(screenY);
-			if(( xx < wOut) && (yy< hOut)  )   
+			if(( xx < wOut) && (yy< hOut) )   
 			{
 				uint shift = xx + yy * wOut;
 				uint zAsInt = uint((inCam.z-zNear) * zScale) <<8;

@@ -43,7 +43,6 @@ unsigned int Separate(T *pD, unsigned int shift, E mid, unsigned int first, unsi
 template<typename T, typename E>
 void DoPartition(T * pData, unsigned int first, unsigned int last)
 {
-
 	auto minX = pData[first].x;
 	auto maxY = pData[first].y;
 	auto minZ = pData[first].z;
@@ -64,9 +63,9 @@ void DoPartition(T * pData, unsigned int first, unsigned int last)
 	auto dy = maxY - minY;
 	auto dz = maxZ - minZ;
 
-
 	int numPoints = last - first + 1;
-	if (numPoints < 16) {
+	if (numPoints < 256) {
+		pData[first].w = 0.0f;
 		return;
 	}
 

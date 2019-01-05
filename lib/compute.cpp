@@ -77,20 +77,20 @@ GLuint ComputeInit(int sw,int sh)
 	//Set params
 	pParams[0] = 512;
 	pParams[1] = 512;
-	pParams[2] = sMaxW;
-	pParams[3] = sMaxH;
+	//pParams[2] = sMaxW;
+	//pParams[3] = sMaxH;
 	bufferParams.setData(pParams, 32 * sizeof(float));
 
 	//clut
 	for (int i = 0; i < 1024; i+=4) 
 	{
 		int nn = i ;
-		clutData[nn+0] = (float)nn / 1024.0f;
-		clutData[nn+1] = (float)nn / 1024.0f;
-		clutData[nn+2] = (float)nn / 1024.0f;
+		clutData[nn + 0] =  (float)nn / 1024.0f;
+		clutData[nn + 1] = (float)(nn) / 1024.0f;
+		clutData[nn + 2] = (float)nn / 1024.0f;
 		clutData[nn+3] = (float)nn / 1024.0f;
 	}
-	clutData[0] = 0.0f; clutData[1] = 0.5f; clutData[2] = 0.0f;
+	clutData[0] = 1.0f; clutData[1] = 0.0f; clutData[2] = 0.0f;
 	clutData[4] = 0.0f; clutData[5] = 1.0f; clutData[6] = 0.0f;
 	clutData[8] = 0.0f; clutData[9] = 0.0f; clutData[10] = 1.0f;
 	bufferClut.init();
@@ -149,6 +149,7 @@ void ComputeRun(int sw__, int sh__)
 	glDispatchCompute(sMaxW /32, sMaxH/32, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	if (gHasPoints) {
+	
 	  // Render points
 		glUseProgram(csPointRender.m_program);
 		csPointRender.bindBuffer(&bufferParams);
@@ -189,7 +190,7 @@ void ComputeRun(int sw__, int sh__)
 		glDispatchCompute(sMaxW / 32, sMaxH / 32, 1);
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
-		/*
+	    /*
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		csPostProc.setBufferBinding(&bufferZMap, 2);
 		csPostProc.setBufferBinding(&bufferZMapPost, 1);
@@ -198,6 +199,7 @@ void ComputeRun(int sw__, int sh__)
 		csPostProc.bindBuffer(&bufferZMap);
 		glDispatchCompute(sMaxW / 32, sMaxH / 32, 1);
 		*/
+
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	}
 	glUseProgram(0);
