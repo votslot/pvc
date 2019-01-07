@@ -63,12 +63,14 @@ Camera *Camera::GetCamera()
 	return &theCamera;
 }
 
-Camera::Camera() 
+Camera::Camera()
 {
 	m_L.v[0] = m_L.v[1] = m_L.v[2] = 0.0f;
 	m_zNear = 2.0f;
 	m_zFar = 10000.0f;
-	SetPivotCamera(60.0f * 3.1415f / 180.0f, 0.0f, 600.0f);
+	m_MaxDimension = 1.0f;
+	//SetPivotCamera(60.0f * 3.1415f / 180.0f, 0.0f, 600.0f);
+	SetPivotCamera(0.0f, 0.0f, 600.0f, 0.0f,0.0f,0.0f);
 }
 
 float *Camera::GetPos()   { return  m_P.v; }
@@ -106,7 +108,7 @@ void Camera::RotateAroundPivot(float dx, float dy)
 
 void Camera::MoveInPivotDir(float dd) 
 {
-	m_P = m_P + m_D * dd;
+	m_P = m_P + (m_D * dd)*m_MaxDimension*0.02f;
 }
 
 void Camera::ShiftPivot(float dx, float dy) 
@@ -120,15 +122,25 @@ void Camera::ShiftPivot(float dx, float dy)
 	m_L = m_L + SH;
 }
 
-void Camera::SetPivotCamera(float teta, float fi, float dist) 
+void Camera::SetPivotCamera(float teta, float fi, float dist, float px, float py, float pz) 
 {
 	vector3 S(sinf(teta) * cosf(fi), sinf(teta) * sinf(fi), cosf(teta));
+	m_L[0] = px;
+	m_L[1] = py;
+	m_L[2] = pz;
 	m_P = m_L + S * dist;
 	m_D = -1.f * S;
 	float lenR = sqrtf(m_D[0] * m_D[0] + m_D[1] * m_D[1]);
-	m_R[0] = -m_D[1] / lenR;
-	m_R[1] =  m_D[0] / lenR;
-	m_R[2] =  0.0f;
+	if (lenR > 0.000000f) {
+		m_R[0] = -m_D[1] / lenR;
+		m_R[1] = m_D[0] / lenR;
+		m_R[2] = 0.0f;
+	}
+	else {
+		m_R[0] = 1.0f;
+		m_R[1] = 0.0f;
+		m_R[2] = 0.0f;
+	}
 	m_U = m_D ^ m_R;
 }
 

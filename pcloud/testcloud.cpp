@@ -22,43 +22,22 @@ static void GetSphere(float rad, float xc, float yc, float zc,int num)
 	}
 }
 
-#if 0
-static void GetPlane(float w, float h, float x, float y, float z, int num, CPoint *dst)
+
+static void GetPlane(float w, float h, float m,float x, float y, float z, int num)
 {
 	float prd = (1.0f / (float)RAND_MAX);
 	for (int n = 0; n < num; n++)
 	{
-		float xf = x  + prd *  (float)rand() -0.5f;
-		float yf =  y + prd *  (float)rand() -0.5f;
-		dst[n].x = xf * w ;
-		dst[n].y = yf * h;
-		dst[n].z = z ;
-		dst[n].attr = 64.0f;
+		float xf =  x  + prd *  w * (float)rand();
+		float yf =  y  + prd *  h * (float)rand();
+		float zf  = z  + prd * m * (float)rand();
+		gpTestCloud->SetPointValue(xf, yf, zf);
 	}
 }
 
-CPoint *GetPoints(int &num)
-{
-	int numInPlane1 = 1024*1024 ;
-	int numInPlane2 = 1024*1024;
-	int numInSpere = 1024*1024*10 ;
-	num = numInPlane1 + numInPlane2 + numInSpere*4;
-	CPoint*pRet = new CPoint[num];
-	memset(pRet, 0, sizeof(CPoint)*num);
-	CPoint*pp = pRet;
-	std::cout << "Start Point Generation" << std::endl;
-	GetPlane(5.5f, 5.5f, 0.0f, 0.0f, 0.0f, numInPlane1, pp); pp += numInPlane1;
-	GetPlane(0.5f, 0.3f, 0.3f, 0.3f, 0.5f, numInPlane2, pp); pp += numInPlane2;
-	GetSphere(2.8f, 2.0f, 2.0f, 0.0f, numInSpere, pp); pp += numInSpere;
-	GetSphere(2.8f, -2.0f, 2.0f, 0.0f, numInSpere, pp); pp += numInSpere;
-	GetSphere(2.8f, 2.0f, -2.0f, 0.0f, numInSpere, pp); pp += numInSpere;
-	GetSphere(2.8f, -2.0f, -2.0f, 0.0f, numInSpere, pp); pp += numInSpere;
-	std::cout << "End Point Generation" << std::endl;
-	return pRet;
-}
 
 
-#endif
+
 
 void* PCloudIn::InitTestCloud(int numPoints)
 {
@@ -68,8 +47,11 @@ void* PCloudIn::InitTestCloud(int numPoints)
 	gpTestCloud->OnStart();
 	gpTestCloud->SetNumPoints(numPoints);
 
-	GetSphere(10.0f, 0.0f, 0.0f, 0.0f, numPoints/2);
-	GetSphere(5.0f, 0.0f, 0.0f, 7.5f, numPoints/2);
+	GetPlane(100.0f, 100.0f, 10.0f,0.0f, 0.0f, 0.0f, numPoints);
+
+	//GetSphere(10000.0f, 5.0f,   1000.0f, 200.0f, numPoints / 2);
+	//GetSphere(10000.0f, 100.0f, 130.0f, 200.0f, numPoints / 2);
+	//GetSphere(5.0f,  5.0f, 0.0f, 7.5f, numPoints/2);
 	//GetSphere(10.0f, -10.0f,  10.0f, 0.0f, numPoints / 4);
 	//GetSphere(10.0f,  10.0f, -10.0f, 0.0f, numPoints / 4);
 	//GetSphere(10.0f,  10.0f,  10.0f, 0.0f, numPoints / 4);

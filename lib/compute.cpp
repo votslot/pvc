@@ -20,9 +20,11 @@ static float matrView4x4[16];
 static const int sMaxW = 2048;
 static const int sMaxH = 2048;
 
+static const int maxPointBuffs = 16;
+static   SSBBuffer bufferTbo[maxPointBuffs];
+
 static   SSBBuffer bufferParams;
 static   SSBBuffer bufferDebug;
-static   SSBBuffer bufferTbo;
 static   SSBBuffer bufferZMap;
 static   SSBBuffer bufferZMapPost;
 static   SSBBuffer bufferMatrView4x4;
@@ -49,7 +51,7 @@ GLuint ComputeInit(int sw,int sh)
 	csPointRender.initFromSource(cs_render_points.c_str());
 	csPointRender.setBufferBinding(&bufferParams,  0);
 	csPointRender.setBufferBinding(&bufferDebug,   1);
-	csPointRender.setBufferBinding(&bufferTbo,     2);
+	csPointRender.setBufferBinding(&bufferTbo[0],  2);
 	csPointRender.setBufferBinding(&bufferZMap,    3);
 	csPointRender.setBufferBinding(&bufferMatrView4x4, 4);
 
@@ -63,7 +65,7 @@ GLuint ComputeInit(int sw,int sh)
 	bufferParams.init();
 	//
 	
-	bufferTbo.init();
+	bufferTbo[0].init();
 
 	//
 	bufferZMap.init();
@@ -87,12 +89,13 @@ GLuint ComputeInit(int sw,int sh)
 		int nn = i ;
 		clutData[nn + 0] =  (float)nn / 1024.0f;
 		clutData[nn + 1] = (float)(nn) / 1024.0f;
-		clutData[nn + 2] = (float)nn / 1024.0f;
+		clutData[nn + 2] = (float)(nn) / 1024.0f;
 		clutData[nn+3] = (float)nn / 1024.0f;
 	}
-	clutData[0] = 1.0f; clutData[1] = 0.0f; clutData[2] = 0.0f;
-	clutData[4] = 0.0f; clutData[5] = 1.0f; clutData[6] = 0.0f;
-	clutData[8] = 0.0f; clutData[9] = 0.0f; clutData[10] = 1.0f;
+	//clutData[0] = 1.0f; clutData[1] = 0.0f; clutData[2] = 0.0f;
+	//clutData[4] = 0.0f; clutData[5] = 1.0f; clutData[6] = 0.0f;
+	//clutData[8] = 0.0f; clutData[9] = 0.0f; clutData[10] = 1.0f;
+	//clutData[255*4] = 0.0f; clutData[255 * 4+1] = 0.0f; clutData[255 * 4 + 2] = 1.0f;
 	bufferClut.init();
 	void *pd = bufferClut.allocateVram(4 * 256 * sizeof(float));
 	memcpy(pd, clutData, 4 * 256 * sizeof(float));
@@ -137,6 +140,8 @@ void ComputeRun(int sw__, int sh__)
 	pParams[1] = (float)pCam->GetScreenY();
 	pParams[2] = (float)pCam->m_zNear;
 	pParams[3] = (float)pCam->m_zFar;
+	pParams[4] = 16777215.0 / (pCam->m_zFar - pCam->m_zNear);
+	pParams[5] = (float)pCam->m_MaxDimension;
 	bufferParams.setData((unsigned char*)pParams, 32 * sizeof(float));
 	// camera
 	pCam->ConvertTo4x4(matrView4x4);
@@ -154,7 +159,7 @@ void ComputeRun(int sw__, int sh__)
 		glUseProgram(csPointRender.m_program);
 		csPointRender.bindBuffer(&bufferParams);
 		csPointRender.bindBuffer(&bufferDebug);
-		csPointRender.bindBuffer(&bufferTbo);
+		csPointRender.bindBuffer(&bufferTbo[0]);
 		csPointRender.bindBuffer(&bufferZMap);
 		csPointRender.bindBuffer(&bufferMatrView4x4);
 
@@ -226,7 +231,7 @@ void ComputeRun(int sw__, int sh__)
 void SetPointData(void *pData, int num)
 {
 	sNumOfPoints = num;
-	bufferTbo.setData(pData, num* sizeof(CPoint));
+	bufferTbo[0].setData(pData, num* sizeof(CPoint));
 	gHasPoints = 1;
 }
 

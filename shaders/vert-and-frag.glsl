@@ -32,14 +32,17 @@ void main()
    uint yy = uint(fragmentUV.y * float(params[1]));
    uint shift = xx + yy* uint(params[0]);
    uint cl = zMap[shift];
+   uint cn = (cl & 0xFF)*4;
+   float rt = clut[cn + 0];
+   float gt = clut[cn + 1];
+   float bt = clut[cn + 2];
+   color = vec3(rt,gt,bt)*fragmentColor;
+
+   /*
    if(cl!=0xFFFFFFFF){
-        uint cn = (cl & 0xFF)*4;
-		float rt = clut[cn + 0];
-		float gt = clut[cn + 1];
-		float bt = clut[cn + 2];
-		color = vec3(rt,gt,bt)*fragmentColor;
    }else{
 		color = vec3(0.0,0.0,0.0);
    }
+   */
 }   
 )"";

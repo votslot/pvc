@@ -17,7 +17,7 @@ R""(
 	if(( xx < uint(screenX)) && (yy< uint(screenY)) ) 
 	{
 	    uint shift = xx +  uint(screenX)* yy;
-		zMap[shift] = 0xFFFFFFFF;
+		zMap[shift] = 0xFFFFFF00;
 	}
  }       
 )"";
@@ -33,6 +33,7 @@ R""(
 	float screenY;
 	float zNear;
 	float zFar;
+	float zScale;
  }; 
  layout(std430,binding = 1) buffer dbg  {  float debugOut[]; }; 
  layout(std430,binding = 2) buffer pt   {  float inputPoints[]; }; 
@@ -42,7 +43,7 @@ R""(
  void main()                           
  {  
     const int grp_size = 32;
-	float zScale = 16777215.0/(zFar -zNear);
+	//float zScale = 16777215.0/(zFar -zNear);
 	float scm = min(screenX,screenY);
     int loc;
 	for( loc = 0; loc< grp_size; loc++)

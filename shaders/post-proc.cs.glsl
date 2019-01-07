@@ -61,50 +61,52 @@ R""(
 	float screenY;
 	float zNear;
 	float zFar;
+	float zScale;
+	float maxDimension;
  }; 
  layout(std430,binding = 1) buffer zmi  {  uint zMapIn[]; }; 
  layout(std430,binding = 2) buffer zmo  {  uint zMapOut[];}; 
 
  void main()                           
- {                                     
+ {    
+    // float prd = scm*zNear/(inCam.z + zNear);
+	// uint zAsInt = uint((inCam.z-zNear) * zScale) <<8;
     const uint xx = gl_GlobalInvocationID.x;
     const uint yy = gl_GlobalInvocationID.y;
-	uint border = 10;
+	uint border = 5;
 	uint ww = uint(screenX);
 	uint hh = uint(screenY);
 
 	if(( xx < ww-border) && (yy< hh-border) &&( xx > border) && ( yy> border)) 
 	{
 	    uint shift = xx +  ww* yy;
-		uint val0 = zMapIn[shift];
-		uint val_ini = val0;
-		uint col = val0 & 0xFF;
+		uint  val0  = zMapIn[shift];
+		uint  val_z = val0 & 0xFFFFFF00;
+		float colf = float(val0 & 0xFF);
 		uint shiftStart = shift- ww*border - border ;
 		uint vv;
 		uint num = border*2 + 1;
-		uint xMin = 0xFFFFFFFF, yMin =  0xFFFFFFFF;
+		// float dz = 1.0/( zFar - zNear);
+		
 		for( uint yi = 0; yi<=num ; yi++)
 		{
 			for( uint xi = 0; xi<=num  ; xi++)
 			{
-			    uint dx = xi - border;
-			    uint dy = yi - border;
 				vv = zMapIn[shiftStart + xi + yi*ww];
-				uint dist = dx*dx + dy*dy;
-				if(( vv < val0) && ( dist< 49) ) {
-					val0 = vv;
-					col  = val0 & 0xFF;
-					xMin = xi;
-					yMin = yi;
+				uint vv_z = vv & 0xFFFFFF00;
+				uint vv_c = vv & 0xFF;
+				if(vv_z < val_z )
+				{
+				    uint br = xi * (num-xi) * yi * (num-yi);
+				    float zz = 10*float(vv>>8)/16777215.0;
+					zz  = clamp( zz, 0.0, 1.0);
+					float colIn = (br==0)? 2.0 : float(vv_c);
+					colf = (1.0 -zz) * colIn + zz * colf;
+					val_z  = vv_z;
 				}
 			}
 		}
-
-		if( ( xMin == 0) || ( xMin == num ) || ( yMin == 0) || ( yMin == num ) )
-		{
-			col = 20 + col/2;
-		}
-		zMapOut[shift] = (val0 & 0xFFFFFF00) | col;
+		zMapOut[shift] = (val_z & 0xFFFFFF00) | uint(colf);
 	}
 	
  }       

@@ -3,6 +3,7 @@
 #include <thread>
 #include "../winui/ui.h"
 #include "../pcloud/pcloud.h"
+#include "camera.h"
 
 
 class UIOutImpl :public UIOut
@@ -42,9 +43,8 @@ void UIOutImpl::OnFileOpen(const char *pPath)
 void UIOutImpl::OnTestRun()
 {
 	extern void SetPointData(void *pData, int num);
-	int num = 1024 * 1024;
+	int num = 1024 ;
 	theCloudImpl.InitTestCloud(num);
-	//SetPointData(ret, num);
 }
 
 void UIOutImpl::OnPaint()
@@ -89,9 +89,9 @@ void  CloudImpl::SetPointValue(float x, float y, float z)
 void CloudImpl::OnDone()
 {
 	extern void SetPointData(void *pData, int num);
-	float prd = 256.0f;
+	//float prd = 256.0f;
 	float ddx = (maxX - minX);
-	float ddy = (maxY - minY); 
+	float ddy = (maxY - minY);
 	float ddz = (maxZ - minZ);
 	float maxD = (ddx > ddy) ? ddx : ddy;
 	maxD = (maxD > ddz) ? maxD : ddz;
@@ -100,17 +100,25 @@ void CloudImpl::OnDone()
 	float cy = (maxY + minY) *0.5f;
 	float cz = (maxZ + minZ) *0.5f;
 
+
 	float *ptr = (float*)(pMem);
 	for (unsigned int i = 0; i < numP; i++) {
 		ptr[3] = 255.0f * (ptr[2] - minZ) / ddz; // color
-		ptr[0] = ((ptr[0] - cx) / maxD) *prd;
-		ptr[1] = ((ptr[1] - cy) / maxD) *prd;
-		ptr[2] = ((ptr[2] - cz) / maxD) *prd;
 		ptr += 4;
 	}
+
+
 	DoPartitionXYZW_Float(pMem, numP);
 
 	SetPointData(pMem, numP);
+	Camera *pCam = Camera::GetCamera();
+	pCam->SetPivotCamera(0.0f, 0.0f, maxD*2.0f, cx, cy, cz);
+	pCam->m_zFar = maxD * 4.0f;
+	pCam->m_MaxDimension = maxD;
+	// f =z*ap + as
+	// z==min f = 0;
+	// z = max f = 1;
+	// (z-min)/(max-min);
 }
 
 void CloudImpl::OnErr(const char *pMsg)

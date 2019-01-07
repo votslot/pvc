@@ -65,7 +65,7 @@ void DoPartition(T * pData, unsigned int first, unsigned int last)
 
 	int numPoints = last - first + 1;
 	if (numPoints < 256) {
-		pData[first].w = 0.0f;
+		//pData[first].w = 0.0f;
 		return;
 	}
 

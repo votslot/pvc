@@ -163,7 +163,7 @@ void OnMouseWhellEvevt(SDL_MouseWheelEvent *pWheel)
 		return;
 	}
 	Camera *pCam = Camera::GetCamera();
-	float prd = 10.0f;
+	float prd = 1.0f;
 	float shift = (pWheel->y > 0) ? prd : -prd;
 	pCam->MoveInPivotDir(shift);
 	sHasEvent = true;

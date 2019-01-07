@@ -3,7 +3,6 @@
 #define _CAMERA_H
 
 class Camera {
-	float m_screenX, m_screenY, m_devSize;
 public:
 	struct vector3 {
 		float v[3];
@@ -12,12 +11,13 @@ public:
 		float& operator[] (int i) { return v[i]; }
 	};
 	vector3 m_P,m_D,m_U,m_R,m_L; // position, dir, up, right, look-at.
-	float m_zNear, m_zFar;
+	float m_screenX, m_screenY, m_devSize;
+	float m_zNear, m_zFar,m_Fov,m_MaxDimension;
 	Camera();
 	static Camera *GetCamera();	
 	void FromWorld(float *pWorldIn, float *pInCamOut);
 	void ToWorld(float *pCamIn, float *pWorldOut);
-	void SetPivotCamera(float teta, float fi, float dist);
+	void SetPivotCamera(float teta, float fi, float dist, float px, float py, float pz);
 	void RotateAroundPivot(float dx, float dy);
 	void MoveInPivotDir(float dd);
 	void ShiftPivot(float dx, float dy);

@@ -46,7 +46,7 @@ public:
 };
 
 class CSShader {
-	static const int m_maxBuffs = 16;
+	static const int m_maxBuffs = 256;
 	int m_bindTable[m_maxBuffs];
 	
 public:
