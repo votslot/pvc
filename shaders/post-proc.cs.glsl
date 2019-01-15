@@ -73,7 +73,7 @@ R""(
 	// uint zAsInt = uint((inCam.z-zNear) * zScale) <<8;
     const uint xx = gl_GlobalInvocationID.x;
     const uint yy = gl_GlobalInvocationID.y;
-	uint border = 5;
+	uint border = 3;
 	uint ww = uint(screenX);
 	uint hh = uint(screenY);
 
@@ -86,7 +86,8 @@ R""(
 		uint shiftStart = shift- ww*border - border ;
 		uint vv;
 		uint num = border*2 + 1;
-		// float dz = 1.0/( zFar - zNear);
+	    float lodFar  = 0.5f *maxDimension/( zFar - zNear);
+		float lodNear = lodFar*0.01;
 		
 		for( uint yi = 0; yi<=num ; yi++)
 		{
@@ -98,9 +99,10 @@ R""(
 				if(vv_z < val_z )
 				{
 				    uint br = xi * (num-xi) * yi * (num-yi);
-				    float zz = 10*float(vv>>8)/16777215.0;
-					zz  = clamp( zz, 0.0, 1.0);
-					float colIn = (br==0)? 2.0 : float(vv_c);
+				    float zz = float(vv>>8)/16777215.0;
+					zz = (zz-lodNear)/( lodFar -lodNear );
+					zz  = clamp( zz*zz, 0.0, 1.0);
+					float colIn = (br==0)? 0.7*float(vv_c): float(vv_c); // border color
 					colf = (1.0 -zz) * colIn + zz * colf;
 					val_z  = vv_z;
 				}

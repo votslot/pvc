@@ -100,10 +100,9 @@ void CloudImpl::OnDone()
 	float cy = (maxY + minY) *0.5f;
 	float cz = (maxZ + minZ) *0.5f;
 
-
 	float *ptr = (float*)(pMem);
 	for (unsigned int i = 0; i < numP; i++) {
-		ptr[3] = 255.0f * (ptr[2] - minZ) / ddz; // color
+		ptr[3] =  255.0f * (ptr[2] - minZ) / ddz; // color
 		ptr += 4;
 	}
 
@@ -115,10 +114,6 @@ void CloudImpl::OnDone()
 	pCam->SetPivotCamera(0.0f, 0.0f, maxD*2.0f, cx, cy, cz);
 	pCam->m_zFar = maxD * 4.0f;
 	pCam->m_MaxDimension = maxD;
-	// f =z*ap + as
-	// z==min f = 0;
-	// z = max f = 1;
-	// (z-min)/(max-min);
 }
 
 void CloudImpl::OnErr(const char *pMsg)

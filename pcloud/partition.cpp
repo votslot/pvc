@@ -7,6 +7,7 @@
 #include <fstream>  
 #include "pcloud.h" 
 
+static int depthMax = 0;
 template<typename T, typename E>
 unsigned int Separate(T *pD, unsigned int shift, E mid, unsigned int first, unsigned int last) 
 {
@@ -14,23 +15,23 @@ unsigned int Separate(T *pD, unsigned int shift, E mid, unsigned int first, unsi
 	for (unsigned int k = first; k <= last; k++) 
 	{
 		E *pv = (E*)((char*)(pD + k) + shift);
-		if (pv[0] <= mid) {
+		if (pv[0] + pv[0] <= mid) {
 			T tmp = pD[cnt];
 			pD[cnt] = pD[k];
 			pD[k] = tmp;
 			cnt++;
 		}
 	}
-#if 0
+#if 1
 	for (unsigned int i = first; i <=last; i++) {
 		E *pv = (E*)((char*)(pD + i) + shift);
 		if (i < cnt) {
-			if (pv[0] > mid) {
+			if (pv[0] + pv[0] > mid) {
 				std::cout <<  pv[0] << std::endl;
 			}
 		}
 		else {
-			if (pv[0] <= mid) {
+			if (pv[0] + pv[0] <= mid) {
 				std::cout << pv[0] << std::endl;
 			}
 		}
@@ -41,7 +42,7 @@ unsigned int Separate(T *pD, unsigned int shift, E mid, unsigned int first, unsi
 }
 
 template<typename T, typename E>
-void DoPartition(T * pData, unsigned int first, unsigned int last)
+void DoPartition(T * pData, unsigned int first, unsigned int last, unsigned int depth)
 {
 	auto minX = pData[first].x;
 	auto maxY = pData[first].y;
@@ -64,24 +65,33 @@ void DoPartition(T * pData, unsigned int first, unsigned int last)
 	auto dz = maxZ - minZ;
 
 	int numPoints = last - first + 1;
-	if (numPoints < 256) {
-		//pData[first].w = 0.0f;
+
+	if (depth > 500)
+	{
+		std::cout << depth << std::endl;
+	}
+	if ((numPoints <=256) || (depth> 255)) {
+		if (depth > depthMax)
+		{
+			depthMax = depth;
+		}
+		//pData[first].w = (float)depth*50.0f;
 		return;
 	}
 
 	unsigned int ret = first;
 	if ((dx >= dy) && (dx >= dz)) {
-		ret = Separate<T, E>(pData, offsetof(class T, x), (maxX + minX) / (E)2, first, last);
+		ret = Separate<T, E>(pData, offsetof(class T, x), (maxX + minX) , first, last);
 	}
 	else if ((dy >= dx) && (dy >= dz)) {
-		ret = Separate<T, E>(pData, offsetof(class T, y), (maxY + minY) / (E)2, first, last);
+		ret = Separate<T, E>(pData, offsetof(class T, y), (maxY + minY) , first, last);
 	}
 	else  if ((dz >= dx) && (dz >= dy)) {
-		ret = Separate<T,E>(pData, offsetof(class T, z) , (maxZ + minZ) / (E)2, first, last);
+		ret = Separate<T,E>(pData, offsetof(class T, z) , (maxZ + minZ) , first, last);
 	}
 
-	DoPartition<T,E>(pData, first, ret - 1);
-	DoPartition<T,E>(pData, ret, last);
+	DoPartition<T,E>(pData, first, ret - 1, depth + 1);
+	DoPartition<T,E>(pData, ret, last, depth + 1);
 }
 
 void DoPartitionXYZW_Float(void *pData, unsigned int num) 
@@ -89,5 +99,5 @@ void DoPartitionXYZW_Float(void *pData, unsigned int num)
 	struct point4f {
 		float x, y, z ,w;
 	};
-	DoPartition<point4f,float>((point4f*)pData, 0, num - 1);
+	DoPartition<point4f,float>((point4f*)pData, 0, num - 1,0);
 }
