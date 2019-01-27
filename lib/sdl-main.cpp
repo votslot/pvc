@@ -282,7 +282,7 @@ int SdlEntryPoint()
 				break;
 			}
 		}
-		if (sHasEvent)
+		//if (sHasEvent)
 		{
 			OnStartLoop();
 			// render to buffer

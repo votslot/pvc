@@ -156,9 +156,9 @@ void CSShader::initFromSource(const char *pSrc)
 {
 	extern GLuint LoadShader(GLenum type, const GLchar *shaderSrc);
 	GLuint csShader = LoadShader(GL_COMPUTE_SHADER, pSrc);
-	m_program = glCreateProgram();
-	glAttachShader(m_program,csShader);
-	glLinkProgram(m_program);
+	m_program = glCreateProgram();                           BaseBuffer::checkError();
+	glAttachShader(m_program,csShader);                      BaseBuffer::checkError();
+	glLinkProgram(m_program);                                BaseBuffer::checkError();
 	int localWorkGroupSize[3];
 	glGetProgramiv(m_program, GL_COMPUTE_WORK_GROUP_SIZE, localWorkGroupSize);
 	m_szx = localWorkGroupSize[0];

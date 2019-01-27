@@ -10,6 +10,23 @@ extern GLuint LoadShader(GLenum type, const GLchar *shaderSrc);
 extern void WaveTest_Init();
 extern void WaveTest_Run();
 
+struct PointStorage 
+{
+	static const int  sMaxBuffs = 16;
+	int numInUse;
+	int numInBuff[sMaxBuffs];
+	SSBBuffer bufferPoints[sMaxBuffs];
+	void Init() 
+	{
+		numInUse = 0;
+		for (int i = 0; i < sMaxBuffs; i++) 
+		{
+			bufferPoints[i].init();
+		}
+	}
+};
+
+
 float *pTest    = NULL;
 static float pParams[32];
 static int sNumOfPoints = 0;
@@ -20,9 +37,7 @@ static float matrView4x4[16];
 static const int sMaxW = 2048;
 static const int sMaxH = 2048;
 
-static const int maxPointBuffs = 16;
-static   SSBBuffer bufferTbo[maxPointBuffs];
-
+static   PointStorage theStorage;
 static   SSBBuffer bufferParams;
 static   SSBBuffer bufferDebug;
 static   SSBBuffer bufferZMap;
@@ -47,13 +62,19 @@ GLuint ComputeInit(int sw,int sh)
 	csCleanRGB.setBufferBinding(&bufferParams, 0);
 	csCleanRGB.setBufferBinding(&bufferZMap, 1);
 
+	theStorage.Init();
+	
+
 	// render points shader
 	csPointRender.initFromSource(cs_render_points.c_str());
 	csPointRender.setBufferBinding(&bufferParams,  0);
 	csPointRender.setBufferBinding(&bufferDebug,   1);
-	csPointRender.setBufferBinding(&bufferTbo[0],  2);
 	csPointRender.setBufferBinding(&bufferZMap,    3);
 	csPointRender.setBufferBinding(&bufferMatrView4x4, 4);
+	for (int m = 0; m < theStorage.sMaxBuffs; m++)
+	{
+		csPointRender.setBufferBinding(&theStorage.bufferPoints[m], 2);
+	}
 
 	//post process shader
 	csPostProc.initFromSource(cs_postproc_w.c_str());
@@ -63,10 +84,7 @@ GLuint ComputeInit(int sw,int sh)
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 	bufferParams.init();
-	//
 	
-	bufferTbo[0].init();
-
 	//
 	bufferZMap.init();
 	bufferZMap.allocate(sMaxW*sMaxH *sizeof(int));
@@ -155,24 +173,21 @@ void ComputeRun(int sw__, int sh__)
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	if (gHasPoints) {
 	
-	  // Render points
+	    // Render points
 		glUseProgram(csPointRender.m_program);
 		csPointRender.bindBuffer(&bufferParams);
 		csPointRender.bindBuffer(&bufferDebug);
-		csPointRender.bindBuffer(&bufferTbo[0]);
 		csPointRender.bindBuffer(&bufferZMap);
 		csPointRender.bindBuffer(&bufferMatrView4x4);
 
-		//for (int m = 0; m < 50; m++) {
-			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-			glMemoryBarrier(GL_ALL_BARRIER_BITS);
+		for (int m = 0; m < theStorage.numInUse; m++) {
+			csPointRender.bindBuffer(&theStorage.bufferPoints[m]);
 			GLuint num_groups_x = sNumOfPoints / 32 / 32;  // max 65535
 			GLuint num_groups_y = 1;
 			glDispatchCompute(num_groups_x, num_groups_y, 1);
 			glMemoryBarrier(GL_ALL_BARRIER_BITS);
 			SSBBuffer::checkError();
-			SSBBuffer::checkError();
-		//}
+		}
 		glUseProgram(0);
 		//GLsync sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 		//int ret = glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
@@ -231,8 +246,10 @@ void ComputeRun(int sw__, int sh__)
 void SetPointData(void *pData, int num)
 {
 	sNumOfPoints = num;
-	bufferTbo[0].setData(pData, num* sizeof(CPoint));
+	theStorage.bufferPoints[0].setData(pData, num * sizeof(CPoint));
+	theStorage.numInUse = 1;
 	gHasPoints = 1;
+	SSBBuffer::checkError();
 }
 
 

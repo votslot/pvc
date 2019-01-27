@@ -114,6 +114,10 @@ void CloudImpl::OnDone()
 	pCam->SetPivotCamera(0.0f, 0.0f, maxD*2.0f, cx, cy, cz);
 	pCam->m_zFar = maxD * 4.0f;
 	pCam->m_MaxDimension = maxD;
+	if (pMem != NULL) 
+	{
+		delete[] pMem;
+	}
 }
 
 void CloudImpl::OnErr(const char *pMsg)
