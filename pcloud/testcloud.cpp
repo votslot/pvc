@@ -18,12 +18,12 @@ static void GetSphere(float rad, float xc, float yc, float zc,int num)
 		float zf = prd * (float)rand() - 0.5f;
 		float d = 2.0f*sqrt(xf*xf + yf * yf + zf*zf);
 		float di = (d > 0.000001f) ? ( rad / d) : 1.0f;
-		gpTestCloud->SetPointValue(xf * di + xc, yf * di + yc, zf * di + zc);
+		gpTestCloud->SetPointValue(xf * di + xc, yf * di + yc, zf * di*5.0f + zc);
 	}
 }
 
 
-static void GetPlane(float w, float h, float m,float x, float y, float z, int num)
+static void GetRandomPlane(float w, float h, float m,float x, float y, float z, int num)
 {
 	float prd = (1.0f / (float)RAND_MAX);
 	for (int n = 0; n < num; n++)
@@ -35,34 +35,46 @@ static void GetPlane(float w, float h, float m,float x, float y, float z, int nu
 	}
 }
 
+static void GetPlane(float x, float y, float z, int numX, int numY, float stepX, float stepY, float stepZ) 
+{
+	for (int i = 0; i < numY; i++) 
+	{
+		for (int j = 0; j < numX; j++) 
+		{
+			float prdx = (stepX / (float)RAND_MAX) * (float)rand();
+			float prdy = (stepY / (float)RAND_MAX) * (float)rand();
+			float xf = prdx + x + stepX * (float)i;
+			float yf = prdy + y + stepY * (float)j;
+			float zf = z+ 2.0f * sinf((float)j * 10.0f*  3.1415f/(float)numX) *  sinf((float)i * 10.0f*  3.1415f / (float)numY);
+			gpTestCloud->SetPointValue(xf, yf, zf);
+		}
+	}
+}
 
 
 
 
-void* PCloudIn::InitTestCloud(int numPoints)
+
+void* PCloudIn::InitTestCloud()
 {
 	if (!gpTestCloud) {
 		return NULL;
 	}
 	gpTestCloud->OnStart();
-	gpTestCloud->SetNumPoints(numPoints);
 
-	GetPlane(100.0f, 100.0f, 10.0f,0.0f, 0.0f, 0.0f, numPoints);
+	
+	GetPlane(0.0f, 0.0f, 0.0f, 256, 256, 0.9f, 0.9f, 0.0f);
 
-	//GetSphere(10000.0f, 5.0f,   1000.0f, 200.0f, numPoints / 2);
-	//GetSphere(10000.0f, 100.0f, 130.0f, 200.0f, numPoints / 2);
-	//GetSphere(5.0f,  5.0f, 0.0f, 7.5f, numPoints/2);
-	//GetSphere(10.0f, -10.0f,  10.0f, 0.0f, numPoints / 4);
-	//GetSphere(10.0f,  10.0f, -10.0f, 0.0f, numPoints / 4);
-	//GetSphere(10.0f,  10.0f,  10.0f, 0.0f, numPoints / 4);
-	/*
-	int numInSphere = numPoints / 16;
-	for (int y = 0; y < 4; y++) {
-		for (int x = 0; x < 4; x++) {
-			GetSphere(10.0f, 10.0f*(float)x, 10.0f*(float)y,0.0, numInSphere);
+	for (int y = 0; y < 3; y++) {
+		for (int x = 0; x < 3; x++) {
+			GetSphere(10, 35.0*(float)x, 35.0*(float)y,  0.0f, 1024 * 1024);
 		}
 	}
-	*/
+
+
+	//GetPlane(120.0f, 120.0f, 0.0f, 2048, 2048, 0.2f, 0.1f, 0.0f);
+	//GetPlane(120.0f, 240.0f, 5.0f, 2048, 2048, 0.1f, 0.1f, 0.0f);
+
 	gpTestCloud->OnDone();
 	return NULL;
 }

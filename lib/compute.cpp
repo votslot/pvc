@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <thread>
+#include <assert.h>
 #include "GL\\glew.h"
 
 #include "cpoints.h"
@@ -12,19 +13,87 @@ extern void WaveTest_Run();
 
 struct PointStorage 
 {
-	static const int  sMaxBuffs = 16;
-	int numInUse;
-	int numInBuff[sMaxBuffs];
+	static const int sMaxBuffs = 32;
+	static const int sMaxAllocSize = 1024 * 1024 * 64;
+	int numPointsInBuff[sMaxBuffs];
 	SSBBuffer bufferPoints[sMaxBuffs];
+	int numInUse;
+	bool hasPoints;
+
+	char *pTemp;
+	int numInTemp = 0;
+	int sizeInTemp;
+	unsigned int maxBuffSz;
+
 	void Init() 
 	{
 		numInUse = 0;
+		sizeInTemp = 0;
+		hasPoints = false;
+		unsigned int maxSSB = SSBBuffer::getMaxSizeInBytes();
+		maxBuffSz = (sMaxAllocSize < maxSSB) ? sMaxAllocSize : maxSSB;
+		pTemp = new char[maxBuffSz];
 		for (int i = 0; i < sMaxBuffs; i++) 
 		{
+			numPointsInBuff[i] = 0;
 			bufferPoints[i].init();
 		}
 	}
+
+	void SetPoint(float x, float y, float z, float w) 
+	{
+		int ptSize = sizeof(float) * 4;
+		if ((sizeInTemp + ptSize*2) >= maxBuffSz)
+		{
+			AddNewBuffer();
+		}
+		float *pDest = (float*)pTemp;
+		pDest += numInTemp * 4;
+		pDest[0] = x;
+		pDest[1] = y;
+		pDest[2] = z;
+		pDest[3] = w;
+		numInTemp++;
+		sizeInTemp += ptSize;
+	}
+
+	void DoneAddPoits() 
+	{
+		if (sizeInTemp > 0) 
+		{
+			AddNewBuffer();
+		}
+		//DoPartitionXYZW_Float(pMem, numP);
+		hasPoints = true;
+	}
+
+	void AddNewBuffer() 
+	{
+		assert(numInUse < sMaxBuffs);
+		bufferPoints[numInUse].setData(pTemp, sizeInTemp);
+		numPointsInBuff[numInUse] = numInTemp;
+		numInUse++;
+		sizeInTemp = 0;
+		numInTemp = 0;
+	}
+
+	void Release()
+	{
+	
+	}
 };
+
+static  PointStorage theStorage;
+
+void Compute_AddPoint(float x, float y, float z, float w)
+{
+	theStorage.SetPoint(x, y, z, w);
+}
+
+void Compute_DoneAddPoits()
+{
+	theStorage.DoneAddPoits();
+}
 
 
 float *pTest    = NULL;
@@ -37,7 +106,7 @@ static float matrView4x4[16];
 static const int sMaxW = 2048;
 static const int sMaxH = 2048;
 
-static   PointStorage theStorage;
+
 static   SSBBuffer bufferParams;
 static   SSBBuffer bufferDebug;
 static   SSBBuffer bufferZMap;
@@ -62,19 +131,17 @@ GLuint ComputeInit(int sw,int sh)
 	csCleanRGB.setBufferBinding(&bufferParams, 0);
 	csCleanRGB.setBufferBinding(&bufferZMap, 1);
 
-	theStorage.Init();
-	
-
 	// render points shader
+	theStorage.Init();
 	csPointRender.initFromSource(cs_render_points.c_str());
 	csPointRender.setBufferBinding(&bufferParams,  0);
 	csPointRender.setBufferBinding(&bufferDebug,   1);
-	csPointRender.setBufferBinding(&bufferZMap,    3);
-	csPointRender.setBufferBinding(&bufferMatrView4x4, 4);
 	for (int m = 0; m < theStorage.sMaxBuffs; m++)
 	{
 		csPointRender.setBufferBinding(&theStorage.bufferPoints[m], 2);
 	}
+	csPointRender.setBufferBinding(&bufferZMap, 3);
+	csPointRender.setBufferBinding(&bufferMatrView4x4, 4);
 
 	//post process shader
 	csPostProc.initFromSource(cs_postproc_w.c_str());
@@ -171,7 +238,7 @@ void ComputeRun(int sw__, int sh__)
 	csCleanRGB.bindBuffer(&bufferParams);
 	glDispatchCompute(sMaxW /32, sMaxH/32, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-	if (gHasPoints) {
+	if (theStorage.hasPoints) {
 	
 	    // Render points
 		glUseProgram(csPointRender.m_program);
@@ -182,7 +249,7 @@ void ComputeRun(int sw__, int sh__)
 
 		for (int m = 0; m < theStorage.numInUse; m++) {
 			csPointRender.bindBuffer(&theStorage.bufferPoints[m]);
-			GLuint num_groups_x = sNumOfPoints / 32 / 32;  // max 65535
+			GLuint num_groups_x = theStorage.numPointsInBuff[m] / 32 / 32;  // max 65535
 			GLuint num_groups_y = 1;
 			glDispatchCompute(num_groups_x, num_groups_y, 1);
 			glMemoryBarrier(GL_ALL_BARRIER_BITS);
@@ -247,6 +314,7 @@ void SetPointData(void *pData, int num)
 {
 	sNumOfPoints = num;
 	theStorage.bufferPoints[0].setData(pData, num * sizeof(CPoint));
+	theStorage.numPointsInBuff[0] = num;
 	theStorage.numInUse = 1;
 	gHasPoints = 1;
 	SSBBuffer::checkError();

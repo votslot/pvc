@@ -30,6 +30,13 @@ void SSBBuffer::init()
 	checkError();
 }
 
+unsigned int SSBBuffer::getMaxSizeInBytes()
+{
+	GLint size;
+	glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &size);
+	return size;
+}
+
 	
 void SSBBuffer::setData(void *pD, unsigned int sizeInBytes)
 {

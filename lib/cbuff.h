@@ -21,6 +21,7 @@ public:
 	void allocate(unsigned int sizeInBytes);
 	void* allocateVram(unsigned int sizeInBytes);
 	void getData(unsigned int sizeInBytes, void *pOut);
+	static unsigned int getMaxSizeInBytes();
 };
 
 class TexR32f :public BaseBuffer {
