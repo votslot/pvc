@@ -2,6 +2,8 @@
 #ifndef _CAMERA_H
 #define _CAMERA_H
 
+#include "..\lib\vec3d.h"
+
 class Camera {
 public:
 	struct vector3 {

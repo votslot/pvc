@@ -190,6 +190,7 @@
     <ClInclude Include="..\lib\camera.h" />
     <ClInclude Include="..\lib\cbuff.h" />
     <ClInclude Include="..\lib\compute.h" />
+    <ClInclude Include="..\lib\vec3d.h" />
     <ClInclude Include="..\pcloud\pcloud.h" />
     <ClInclude Include="..\winui\ui.h" />
     <ClInclude Include="stdafx.h" />

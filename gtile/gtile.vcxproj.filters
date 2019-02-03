@@ -44,6 +44,9 @@
     <ClInclude Include="..\pcloud\pcloud.h">
       <Filter>pcloud</Filter>
     </ClInclude>
+    <ClInclude Include="..\lib\vec3d.h">
+      <Filter>lib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gtile.cpp">

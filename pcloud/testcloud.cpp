@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>  
 #include "pcloud.h" 
+#include "..\lib\vec3d.h"
 
 PCloudIn *gpTestCloud = 0;
 
@@ -45,10 +46,15 @@ static void GetPlane(float x, float y, float z, int numX, int numY, float stepX,
 			float prdy = (stepY / (float)RAND_MAX) * (float)rand();
 			float xf = prdx + x + stepX * (float)i;
 			float yf = prdy + y + stepY * (float)j;
-			float zf = z+ 2.0f * sinf((float)j * 10.0f*  3.1415f/(float)numX) *  sinf((float)i * 10.0f*  3.1415f / (float)numY);
+			float zf = z+ 8.0f * sinf((float)j * 10.0f*  3.1415f/(float)numX) *  sinf((float)i * 10.0f*  3.1415f / (float)numY);
 			gpTestCloud->SetPointValue(xf, yf, zf);
 		}
 	}
+}
+
+static void GetPlane2(pcv::vector3 A, pcv::vector3 B, pcv::vector3 C, pcv::vector3 D)
+{
+
 }
 
 
@@ -65,8 +71,8 @@ void* PCloudIn::InitTestCloud()
 	
 	GetPlane(0.0f, 0.0f, 0.0f, 256, 256, 0.9f, 0.9f, 0.0f);
 
-	for (int y = 0; y < 3; y++) {
-		for (int x = 0; x < 3; x++) {
+	for (int y = 0; y < 2; y++) {
+		for (int x = 0; x < 2; x++) {
 			GetSphere(10, 35.0*(float)x, 35.0*(float)y,  0.0f, 1024 * 1024);
 		}
 	}
