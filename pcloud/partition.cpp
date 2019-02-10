@@ -2,6 +2,7 @@
 #include <memory.h>
 #include <math.h>
 #include <stdlib.h> 
+#include<functional>
 #include "stdio.h"
 #include <iostream>
 #include <fstream>  
@@ -42,7 +43,7 @@ unsigned int Separate(T *pD, unsigned int shift, E mid, unsigned int first, unsi
 }
 
 template<typename T, typename E>
-void DoPartition(T * pData, unsigned int first, unsigned int last, unsigned int depth)
+void DoPartition(T * pData, unsigned int first, unsigned int last, unsigned int depth, std::function<void(int a, int b)> func)
 {
 	auto minX = pData[first].x;
 	auto maxY = pData[first].y;
@@ -75,7 +76,8 @@ void DoPartition(T * pData, unsigned int first, unsigned int last, unsigned int 
 		{
 			depthMax = depth;
 		}
-		//pData[first].w = (float)depth*50.0f;
+		func(first, last);
+		pData[first].w = 1.0f;
 		return;
 	}
 
@@ -90,14 +92,14 @@ void DoPartition(T * pData, unsigned int first, unsigned int last, unsigned int 
 		ret = Separate<T,E>(pData, offsetof(class T, z) , (maxZ + minZ) , first, last);
 	}
 
-	DoPartition<T,E>(pData, first, ret - 1, depth + 1);
-	DoPartition<T,E>(pData, ret, last, depth + 1);
+	DoPartition<T,E>(pData, first, ret - 1, depth + 1,func);
+	DoPartition<T,E>(pData, ret, last, depth + 1,func);
 }
 
-void DoPartitionXYZW_Float(void *pData, unsigned int num) 
+void DoPartitionXYZW_Float(void *pData, unsigned int num, std::function<void(unsigned int a, unsigned int b)> func)
 {
 	struct point4f {
 		float x, y, z ,w;
 	};
-	DoPartition<point4f,float>((point4f*)pData, 0, num - 1,0);
+	DoPartition<point4f,float>((point4f*)pData, 0, num - 1,0,func);
 }

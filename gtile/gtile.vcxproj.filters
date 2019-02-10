@@ -99,5 +99,8 @@
     <None Include="..\shaders\post-proc.cs.glsl">
       <Filter>pcloud\shaders</Filter>
     </None>
+    <None Include="..\shaders\ginclude.glsl">
+      <Filter>pcloud\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

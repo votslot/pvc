@@ -1,6 +1,7 @@
 
 #ifndef _PCLOUD_H_
 #define _PCLOUD_H_
+#include<functional>
 
 class PCloudIn 
 {
@@ -15,6 +16,7 @@ class PCloudIn
 	  void* InitTestCloud();
 };
 
-void DoPartitionXYZW_Float(void *pData, unsigned int num);
+
+void DoPartitionXYZW_Float(void *pData, unsigned int num, std::function<void(unsigned int  a, unsigned int  b)> func);
 
 #endif

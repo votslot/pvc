@@ -36,13 +36,16 @@ void main()
    float rt = clut[cn + 0];
    float gt = clut[cn + 1];
    float bt = clut[cn + 2];
+  
    color = vec3(rt,gt,bt)*fragmentColor;
-
    /*
-   if(cl!=0xFFFFFFFF){
+   if( cn==4)
+   {
+	color = vec3(rt,gt,bt)*fragmentColor;
    }else{
-		color = vec3(0.0,0.0,0.0);
+	color = vec3(0.0,0.0,0.0);
    }
    */
+  
 }   
 )"";

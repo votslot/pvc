@@ -211,6 +211,7 @@
     <ClCompile Include="gtile.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\shaders\ginclude.glsl" />
     <None Include="..\shaders\post-proc.cs.glsl" />
     <None Include="..\shaders\test.cs.glsl" />
     <None Include="..\shaders\vert-and-frag.glsl" />

@@ -1,4 +1,8 @@
 
+#include "ginclude.glsl"
+
+
+#if 0
 const std::string cs_postproc = 
 R""(
  #version 430 core 
@@ -49,11 +53,12 @@ R""(
 	}
  }       
 )"";
+#endif
 
 
-const std::string cs_postproc_w = 
+const std::string cs_postproc_w = cs_glversion + 
 R""(
- #version 430 core 
+ //#version 430 core 
  layout(local_size_x = 32,local_size_y =32) in; 
  layout(std430,binding = 0) buffer in1 
  {  

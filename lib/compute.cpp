@@ -6,37 +6,65 @@
 #include "cpoints.h"
 #include "cbuff.h"
 #include "camera.h"
+#include "..\pcloud\pcloud.h"
 
-extern GLuint LoadShader(GLenum type, const GLchar *shaderSrc);
+
 extern void WaveTest_Init();
 extern void WaveTest_Run();
 
-struct PointStorage 
+struct Partition 
 {
+	unsigned int fisrt;
+	unsigned int last;
+	float sz;
+	float pad;
+};
+
+class PointStorage 
+{
+public:
 	static const int sMaxBuffs = 32;
 	static const int sMaxAllocSize = 1024 * 1024 * 64;
+	int maxPointsInBuff = 0;
 	int numPointsInBuff[sMaxBuffs];
+	int numPartitionsInBuff[sMaxBuffs];
 	SSBBuffer bufferPoints[sMaxBuffs];
+	SSBBuffer bufferPartition[sMaxBuffs];
+
 	int numInUse;
 	bool hasPoints;
 
-	char *pTemp;
-	int numInTemp = 0;
+	char *pTemp = NULL;
+	int numPointsInTemp = 0;
+
+	Partition *pPartitions = NULL;
+	int numPartitions = 0;
+
 	int sizeInTemp;
 	unsigned int maxBuffSz;
 
 	void Init() 
 	{
+		std::string tst1 = R""(bbb)"";
+		std::string tst2 = tst1 + R""(222)"" ;
+		//std::string tst2 = tst1 + tst2;
+
 		numInUse = 0;
 		sizeInTemp = 0;
+		numPartitions = 0;
 		hasPoints = false;
 		unsigned int maxSSB = SSBBuffer::getMaxSizeInBytes();
 		maxBuffSz = (sMaxAllocSize < maxSSB) ? sMaxAllocSize : maxSSB;
+		maxPointsInBuff = maxBuffSz / (4 * sizeof(float));
 		pTemp = new char[maxBuffSz];
+		pPartitions = new Partition[maxPointsInBuff];
+
 		for (int i = 0; i < sMaxBuffs; i++) 
 		{
 			numPointsInBuff[i] = 0;
+			numPartitionsInBuff[i] = 0;
 			bufferPoints[i].init();
+			bufferPartition[i].init();
 		}
 	}
 
@@ -48,12 +76,12 @@ struct PointStorage
 			AddNewBuffer();
 		}
 		float *pDest = (float*)pTemp;
-		pDest += numInTemp * 4;
+		pDest += numPointsInTemp * 4;
 		pDest[0] = x;
 		pDest[1] = y;
 		pDest[2] = z;
 		pDest[3] = w;
-		numInTemp++;
+		numPointsInTemp++;
 		sizeInTemp += ptSize;
 	}
 
@@ -63,18 +91,32 @@ struct PointStorage
 		{
 			AddNewBuffer();
 		}
-		//DoPartitionXYZW_Float(pMem, numP);
 		hasPoints = true;
 	}
-
+	
 	void AddNewBuffer() 
 	{
 		assert(numInUse < sMaxBuffs);
+		std::function<void(int a, int b)> OnDonePartition = [=](unsigned  int first, unsigned int last) 
+		{ 
+			pPartitions[numPartitions].fisrt = first;
+			pPartitions[numPartitions].last  = last;
+			pPartitions[numPartitions].sz =  4321.0f;
+			pPartitions[numPartitions].pad = 5678.0f;
+			numPartitions++;
+		};
+		
+		DoPartitionXYZW_Float(pTemp, numPointsInTemp, OnDonePartition);
+
 		bufferPoints[numInUse].setData(pTemp, sizeInTemp);
-		numPointsInBuff[numInUse] = numInTemp;
+		bufferPartition[numInUse].setData(pPartitions, numPartitions*sizeof(Partition));
+		numPointsInBuff[numInUse] = numPointsInTemp;
+		numPartitionsInBuff[numInUse] = numPartitions;
 		numInUse++;
+
 		sizeInTemp = 0;
-		numInTemp = 0;
+		numPointsInTemp = 0;
+		numPartitions = 0;
 	}
 
 	void Release()
@@ -139,6 +181,7 @@ GLuint ComputeInit(int sw,int sh)
 	for (int m = 0; m < theStorage.sMaxBuffs; m++)
 	{
 		csPointRender.setBufferBinding(&theStorage.bufferPoints[m], 2);
+		csPointRender.setBufferBinding(&theStorage.bufferPartition[m], 5);
 	}
 	csPointRender.setBufferBinding(&bufferZMap, 3);
 	csPointRender.setBufferBinding(&bufferMatrView4x4, 4);
@@ -177,23 +220,17 @@ GLuint ComputeInit(int sw,int sh)
 		clutData[nn + 2] = (float)(nn) / 1024.0f;
 		clutData[nn+3] = (float)nn / 1024.0f;
 	}
-	//clutData[0] = 1.0f; clutData[1] = 0.0f; clutData[2] = 0.0f;
-	//clutData[4] = 0.0f; clutData[5] = 1.0f; clutData[6] = 0.0f;
-	//clutData[8] = 0.0f; clutData[9] = 0.0f; clutData[10] = 1.0f;
-	//clutData[255*4] = 0.0f; clutData[255 * 4+1] = 0.0f; clutData[255 * 4 + 2] = 1.0f;
+	clutData[4] = 0.0f; clutData[5] = 1.0f; clutData[6] = 0.0f;
 	bufferClut.init();
 	void *pd = bufferClut.allocateVram(4 * 256 * sizeof(float));
 	memcpy(pd, clutData, 4 * 256 * sizeof(float));
 	//bufferClut.setData(clutData, 4 * 256 * sizeof(float));
 
 	//Set debug data
-	/*
 	bufferDebug.init();
 	pTest = new float[1024 * 1024 *4];
 	for (int i = 0; i < 1024 * 1024 * 4; i++) pTest[i] = 0.0;
 	bufferDebug.setData(pTest, 1024 * 1024 * 4 * sizeof(float));
-	*/
-
 
 	if (gRunWaveTest) {
 		WaveTest_Init();
@@ -238,8 +275,8 @@ void ComputeRun(int sw__, int sh__)
 	csCleanRGB.bindBuffer(&bufferParams);
 	glDispatchCompute(sMaxW /32, sMaxH/32, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-	if (theStorage.hasPoints) {
-	
+	if (theStorage.hasPoints) 
+	{
 	    // Render points
 		glUseProgram(csPointRender.m_program);
 		csPointRender.bindBuffer(&bufferParams);
@@ -249,6 +286,7 @@ void ComputeRun(int sw__, int sh__)
 
 		for (int m = 0; m < theStorage.numInUse; m++) {
 			csPointRender.bindBuffer(&theStorage.bufferPoints[m]);
+			csPointRender.bindBuffer(&theStorage.bufferPartition[m]);
 			GLuint num_groups_x = theStorage.numPointsInBuff[m] / 32 / 32;  // max 65535
 			GLuint num_groups_y = 1;
 			glDispatchCompute(num_groups_x, num_groups_y, 1);
@@ -297,14 +335,15 @@ void ComputeRun(int sw__, int sh__)
 	}
 
 	// test 
-	if ( 0)
+#if 0
+	if (theStorage.hasPoints)
 	{
 		csPointRender.bindBuffer(&bufferDebug);
 		bufferDebug.getData(32*sizeof(float), pTest);
-		for (int y = 0; y < 4; y++) {
-			printf("%f\n", pTest[y]);
-		}
+		for (int y = 0; y < 4; y++)  printf("%f", pTest[y]);
+		printf("\n");
 	}
+#endif
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	n_call++;
