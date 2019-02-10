@@ -32,10 +32,10 @@ R""(
 
  void main()                           
  {  
-    const int grp_size = 32;
+    int grp_size = int(globs.wrkLoad);
 	//float zScale = 16777215.0/(zFar -zNear);
 	float scm = min(globs.screenX,globs.screenY);
-    int loc;
+    int loc = 0;
 	for( loc = 0; loc< grp_size; loc++)
 	{
 	    const uint offset = (gl_GlobalInvocationID.x*grp_size + loc)*4;
@@ -45,7 +45,6 @@ R""(
 		uint color = uint (inputPoints[offset + 3]);
 
 		vec4 inCam = World2View * vec4(xIn,yIn,zIn,1.0) ;
-		//if( (inCam.z > zNear) && (inCam.z < zFar) && ( color==1 ) )
 		if( (inCam.z > globs.zNear) && (inCam.z < globs.zFar)  )
 		{
 			float prd = scm*globs.zNear/(inCam.z + globs.zNear);

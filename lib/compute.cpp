@@ -7,18 +7,12 @@
 #include "cbuff.h"
 #include "camera.h"
 #include "..\pcloud\pcloud.h"
+#include "..\shaders\ginclude.h"
 
 
 extern void WaveTest_Init();
 extern void WaveTest_Run();
 
-struct Partition 
-{
-	unsigned int fisrt;
-	unsigned int last;
-	float sz;
-	float pad;
-};
 
 class PointStorage 
 {
@@ -45,10 +39,7 @@ public:
 
 	void Init() 
 	{
-		std::string tst1 = R""(bbb)"";
-		std::string tst2 = tst1 + R""(222)"" ;
-		//std::string tst2 = tst1 + tst2;
-
+	
 		numInUse = 0;
 		sizeInTemp = 0;
 		numPartitions = 0;
@@ -99,7 +90,7 @@ public:
 		assert(numInUse < sMaxBuffs);
 		std::function<void(int a, int b)> OnDonePartition = [=](unsigned  int first, unsigned int last) 
 		{ 
-			pPartitions[numPartitions].fisrt = first;
+			pPartitions[numPartitions].first = first;
 			pPartitions[numPartitions].last  = last;
 			pPartitions[numPartitions].sz =  4321.0f;
 			pPartitions[numPartitions].pad = 5678.0f;
@@ -256,14 +247,15 @@ GLuint GetClutData()
 void ComputeRun(int sw__, int sh__)
 {
 	static int n_call = 0;
-	// params
 	Camera *pCam = Camera::GetCamera();
-	pParams[0] = (float)pCam->GetScreenX();
-	pParams[1] = (float)pCam->GetScreenY();
-	pParams[2] = (float)pCam->m_zNear;
-	pParams[3] = (float)pCam->m_zFar;
-	pParams[4] = 16777215.0 / (pCam->m_zFar - pCam->m_zNear);
-	pParams[5] = (float)pCam->m_MaxDimension;
+	GlobalParams *pGlob = (GlobalParams*)pParams;
+	pGlob->screenX   = (float)pCam->GetScreenX();
+	pGlob->screenY   = (float)pCam->GetScreenY();
+	pGlob->zNear     = (float)pCam->m_zNear;
+	pGlob->zFar      = (float)pCam->m_zFar;
+	pGlob->zScale = 16777215.0 / (pCam->m_zFar - pCam->m_zNear);
+	pGlob->maxDimension = (float)pCam->m_MaxDimension;
+	pGlob->wrkLoad = 32;
 	bufferParams.setData((unsigned char*)pParams, 32 * sizeof(float));
 	// camera
 	pCam->ConvertTo4x4(matrView4x4);
@@ -287,7 +279,7 @@ void ComputeRun(int sw__, int sh__)
 		for (int m = 0; m < theStorage.numInUse; m++) {
 			csPointRender.bindBuffer(&theStorage.bufferPoints[m]);
 			csPointRender.bindBuffer(&theStorage.bufferPartition[m]);
-			GLuint num_groups_x = theStorage.numPointsInBuff[m] / 32 / 32;  // max 65535
+			GLuint num_groups_x = theStorage.numPointsInBuff[m] / csPointRender.m_szx/ pGlob->wrkLoad;  // max 65535
 			GLuint num_groups_y = 1;
 			glDispatchCompute(num_groups_x, num_groups_y, 1);
 			glMemoryBarrier(GL_ALL_BARRIER_BITS);
@@ -349,6 +341,7 @@ void ComputeRun(int sw__, int sh__)
 	n_call++;
 }
 
+#if 0
 void SetPointData(void *pData, int num)
 {
 	sNumOfPoints = num;
@@ -358,6 +351,8 @@ void SetPointData(void *pData, int num)
 	gHasPoints = 1;
 	SSBBuffer::checkError();
 }
+#endif
+
 
 
 

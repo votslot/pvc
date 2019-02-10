@@ -17,6 +17,8 @@ R""(
 		float zNear;
 		float zFar;
 		float zScale;
+		float maxDimension;
+		uint  wrkLoad;
 	};
 
 	struct Partition
