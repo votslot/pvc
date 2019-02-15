@@ -1,4 +1,5 @@
 #include <iostream>
+#include <assert.h>
 #include "GL/glew.h"
 #include "cbuff.h"
 
@@ -171,6 +172,7 @@ void CSShader::initFromSource(const char *pSrc)
 	m_szx = localWorkGroupSize[0];
 	m_szy = localWorkGroupSize[1];
 	m_szz = localWorkGroupSize[2];
+	assert(m_szx > 0);
 	BaseBuffer::checkError();
 }
 

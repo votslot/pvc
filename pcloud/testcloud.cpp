@@ -153,7 +153,7 @@ static void GetAllPlaneNew()
 		//gpTestCloud->SetPointValue(xs, ys, zs);
 	}
 
-	int zMapX = 2048*2,zMapY = 2048*2;
+	int zMapX = 1024*4,zMapY = 1024*4;
 	float *pZMap = new float[zMapX*zMapY];
 	memset(pZMap, 0, zMapX*zMapY* sizeof(float));
 

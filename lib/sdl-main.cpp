@@ -40,7 +40,7 @@ static int sleepTime = 0;
 void OnStartLoop() 
 {
 	sStartTime = std::chrono::high_resolution_clock::now();
-    Sleep(16);
+   // Sleep(16);
 }
 
 void OnEndLoop() 

@@ -18,7 +18,7 @@ class PointStorage
 {
 public:
 	static const int sMaxBuffs = 32;
-	static const int sMaxAllocSize = 1024 * 1024 * 64;
+	static const int sMaxAllocSize = 1024 * 1024 * 32;
 	int maxPointsInBuff = 0;
 	int numPointsInBuff[sMaxBuffs];
 	int numPartitionsInBuff[sMaxBuffs];
@@ -62,7 +62,7 @@ public:
 	void SetPoint(float x, float y, float z, float w) 
 	{
 		int ptSize = sizeof(float) * 4;
-		if ((sizeInTemp + ptSize*2) >= maxBuffSz)
+		if ((sizeInTemp ) >= maxBuffSz)
 		{
 			AddNewBuffer();
 		}
@@ -231,8 +231,8 @@ GLuint ComputeInit(int sw,int sh)
 
 GLuint GetSrcBuff() 
 {
-	//return  bufferZMap.gb;
-	return  bufferZMapPost.gb;
+	return  bufferZMap.gb;
+	//return  bufferZMapPost.gb;
 }
 GLuint GetParamsBuff() 
 {
@@ -255,7 +255,7 @@ void ComputeRun(int sw__, int sh__)
 	pGlob->zFar      = (float)pCam->m_zFar;
 	pGlob->zScale = 16777215.0 / (pCam->m_zFar - pCam->m_zNear);
 	pGlob->maxDimension = (float)pCam->m_MaxDimension;
-	pGlob->wrkLoad = 32;
+	pGlob->wrkLoad = 64;
 	bufferParams.setData((unsigned char*)pParams, 32 * sizeof(float));
 	// camera
 	pCam->ConvertTo4x4(matrView4x4);
@@ -279,8 +279,10 @@ void ComputeRun(int sw__, int sh__)
 		for (int m = 0; m < theStorage.numInUse; m++) {
 			csPointRender.bindBuffer(&theStorage.bufferPoints[m]);
 			csPointRender.bindBuffer(&theStorage.bufferPartition[m]);
-			GLuint num_groups_x = theStorage.numPointsInBuff[m] / csPointRender.m_szx/ pGlob->wrkLoad;  // max 65535
-			GLuint num_groups_y = 1;
+			//GLuint num_groups_x = theStorage.numPointsInBuff[m] / csPointRender.m_szx/ pGlob->wrkLoad;  // max 65535
+			//GLuint num_groups_y = 1;
+			GLuint num_groups_x = 1;
+			GLuint num_groups_y = (theStorage.numPointsInBuff[m] / csPointRender.m_szx / pGlob->wrkLoad);
 			glDispatchCompute(num_groups_x, num_groups_y, 1);
 			glMemoryBarrier(GL_ALL_BARRIER_BITS);
 			SSBBuffer::checkError();
@@ -297,6 +299,7 @@ void ComputeRun(int sw__, int sh__)
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	glUseProgram(csPostProc.m_program);
 
+#if 0
 	for (int m = 0; m < 1; m++)
 	{
 		csPostProc.setBufferBinding(&bufferZMap, 1);
@@ -319,6 +322,8 @@ void ComputeRun(int sw__, int sh__)
 
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	}
+#endif
+
 	glUseProgram(0);
 
 
