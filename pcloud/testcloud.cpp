@@ -197,6 +197,9 @@ void* PCloudIn::InitTestCloud()
 	}
 	gpTestCloud->OnStart();
 
+	
+	GetRandomPlane(100.0f, 100.0f, 0.1f, 0.0f, 0.0f, 0.0f, 1024 * 1024 * 8);
+
 	/*
 	GetPlane(0.0f, 0.0f, 0.0f, 256, 256, 0.9f, 0.9f, 0.0f);
 	for (int y = 0; y < 2; y++) {
@@ -205,6 +208,7 @@ void* PCloudIn::InitTestCloud()
 		}
 	}
 	*/
+	
 
 
 	pcv::vector3 A(0.0,  0.0,  0.0);
@@ -215,7 +219,7 @@ void* PCloudIn::InitTestCloud()
 	//GetPlane3(A, B, C, 256 * 256);
 	//GetPlane3(B, C, D, 1024 * 1024);
 	//GetAllPlane(100, 100);
-	GetAllPlaneNew();
+	//GetAllPlaneNew();
 
 	//GetPlane(120.0f, 120.0f, 0.0f, 2048, 2048, 0.2f, 0.1f, 0.0f);
 	//GetPlane(120.0f, 240.0f, 5.0f, 2048, 2048, 0.1f, 0.1f, 0.0f);

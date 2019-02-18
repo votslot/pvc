@@ -8,6 +8,23 @@
 #include <fstream>  
 #include "pcloud.h" 
 
+typedef int(*compFuncType) (const void*a, const void*b);
+template<typename T> static int CompX(const void*a, const void*b)
+{
+	return ((((T*)a)->x < ((T*)b)->x)) ? -1 : 1;
+}
+
+template<typename T> static int CompY(const void*a, const void*b)
+{
+	return ((((T*)a)->y < ((T*)b)->y)) ? -1 : 1;
+}
+
+template<typename T> static int CompZ(const void*a, const void*b)
+{
+	return ((((T*)a)->z < ((T*)b)->z)) ? -1 : 1;
+}
+
+
 static int depthMax = 0;
 template<typename T, typename E>
 unsigned int Separate(T *pD, unsigned int shift, E mid, unsigned int first, unsigned int last) 
@@ -96,10 +113,64 @@ void DoPartition(T * pData, unsigned int first, unsigned int last, unsigned int 
 	DoPartition<T,E>(pData, ret, last, depth + 1,func);
 }
 
+
+
+
+template<typename T>
+void BuildGroups( const T * pData, unsigned int first,  unsigned int last ,compFuncType *compFunc)
+{
+	auto minX = pData[first].x;
+	auto maxY = pData[first].y;
+	auto minZ = pData[first].z;
+	auto maxX = pData[first].x;
+	auto minY = pData[first].y;
+	auto maxZ = pData[first].z;
+
+	for (unsigned int k = first; k <= last; k++)
+	{
+		if (pData[k].x < minX)  minX = pData[k].x;
+		if (pData[k].y < minY)  minY = pData[k].y;
+		if (pData[k].z < minZ)  minZ = pData[k].z;
+		if (pData[k].x > maxX)  maxX = pData[k].x;
+		if (pData[k].y > maxY)  maxY = pData[k].y;
+		if (pData[k].z > maxZ)  maxZ = pData[k].z;
+	}
+	auto dx = maxX - minX;
+	auto dy = maxY - minY;
+	auto dz = maxZ - minZ;
+	int numPoints = last - first + 1;
+	//std::cout << "num= " << numPoints << std::endl;
+	if (numPoints <= 4096)
+	{
+		return;
+	}
+
+	if ((dx >= dy) && (dx >= dz)) {
+		std::qsort((void*)(pData + first), last - first + 1, sizeof(T), compFunc[0]);
+	}
+	else if ((dy >= dx) && (dy >= dz)) {
+		std::qsort((void*)(pData + first), last - first + 1, sizeof(T), compFunc[1]);
+	}
+	else  if ((dz >= dx) && (dz >= dy)) {
+		std::qsort((void*)(pData + first), last - first + 1, sizeof(T), compFunc[2]);
+	}
+	
+	unsigned int mid = (first + last) / 2;
+	BuildGroups<T>(pData, first,    mid-1, compFunc);
+	BuildGroups<T>(pData, mid , last,    compFunc);
+
+}
+
 void DoPartitionXYZW_Float(void *pData, unsigned int num, std::function<void(unsigned int a, unsigned int b)> func)
 {
 	struct point4f {
 		float x, y, z ,w;
 	};
-	DoPartition<point4f,float>((point4f*)pData, 0, num - 1,0,func);
+	std::cout << "building group" << std::endl;
+	static compFuncType compFuncXYZ[3] = { CompX<point4f>,CompY<point4f>,CompZ<point4f> };
+	BuildGroups<point4f>((point4f*)pData, 0, num-1, compFuncXYZ);
+
+	
+
+	//DoPartition<point4f,float>((point4f*)pData, 0, num - 1,0,func);
 }

@@ -23,7 +23,7 @@ R""(
 const std::string cs_render_points = cs_glversion + cs_structs +
 R""(
  precision mediump float;
- layout(local_size_x = 32,local_size_y =1) in;   
+ layout(local_size_x = 64,local_size_y =1) in;   
  layout(std430,binding = 0) buffer in1  {  GlobalParams globs; };
  layout(std430,binding = 1) buffer dbg  {  float debugOut[]; }; 
  layout(std430,binding = 2) buffer ptt  {  vec4 inputPoints[]; }; 

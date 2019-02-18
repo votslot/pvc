@@ -18,7 +18,7 @@ class PointStorage
 {
 public:
 	static const int sMaxBuffs = 32;
-	static const int sMaxAllocSize = 1024 * 1024 * 32;
+	static const int sMaxAllocSize = 1024 * 1024 * 64;
 	int maxPointsInBuff = 0;
 	int numPointsInBuff[sMaxBuffs];
 	int numPartitionsInBuff[sMaxBuffs];
