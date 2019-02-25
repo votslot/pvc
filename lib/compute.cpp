@@ -18,7 +18,7 @@ class PointStorage
 {
 public:
 	static const int sMaxBuffs = 32;
-	static const int sMaxAllocSize = 1024 * 1024 * 64;
+	static const int sMaxAllocSize = 1024 * 1024 * 128;
 	int maxPointsInBuff = 0;
 	int numPointsInBuff[sMaxBuffs];
 	int numPartitionsInBuff[sMaxBuffs];
@@ -212,6 +212,13 @@ GLuint ComputeInit(int sw,int sh)
 		clutData[nn+3] = (float)nn / 1024.0f;
 	}
 	clutData[4] = 0.0f; clutData[5] = 1.0f; clutData[6] = 0.0f;
+	clutData[8] = 1.0f; clutData[9] = 0.0f; clutData[10] = 0.0f;
+	clutData[12] = 0.0f; clutData[13] = 0.0f; clutData[14] = 1.0f;
+	clutData[16] = 1.0f; clutData[17] = 1.0f; clutData[18] = 0.0f;
+	clutData[20] = 0.5f; clutData[21] = 0.0f; clutData[22] = 0.0f;
+	clutData[24] = 0.0f; clutData[25] = 0.5f; clutData[26] = 0.0f;
+	clutData[28] = 0.5f; clutData[29] = 0.5f; clutData[30] = 0.0f;
+	clutData[32] = 0.0f; clutData[33] = 0.5f; clutData[34] = 0.5f;
 	bufferClut.init();
 	void *pd = bufferClut.allocateVram(4 * 256 * sizeof(float));
 	memcpy(pd, clutData, 4 * 256 * sizeof(float));
@@ -299,7 +306,7 @@ void ComputeRun(int sw__, int sh__)
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	glUseProgram(csPostProc.m_program);
 
-#if 0
+#if 1
 	for (int m = 0; m < 1; m++)
 	{
 		csPostProc.setBufferBinding(&bufferZMap, 1);

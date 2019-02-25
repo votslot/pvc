@@ -171,7 +171,7 @@ void Camera::ToWorld(float *pCamIn, float *pWorldOut)
 }
 
 /*
- W2V matrix memry layout
+ W2V matrix memory layout
 
  Rx Ux Dx 0
  Ry Uy Dy 0

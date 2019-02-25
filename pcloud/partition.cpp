@@ -170,6 +170,14 @@ void DoPartitionXYZW_Float(void *pData, unsigned int num, std::function<void(uns
 	static compFuncType compFuncXYZ[3] = { CompX<point4f>,CompY<point4f>,CompZ<point4f> };
 	BuildGroups<point4f>((point4f*)pData, 0, num-1, compFuncXYZ);
 
+	point4f *pT = (point4f*)pData;
+	for (int k = 0; k < num; k++) 
+	{
+		int ng = k / 4096;
+		pT[k].w = (float) ( ng &7) + 1.0f;
+	
+	}
+
 	
 
 	//DoPartition<point4f,float>((point4f*)pData, 0, num - 1,0,func);
