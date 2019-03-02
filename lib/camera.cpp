@@ -170,6 +170,18 @@ void Camera::ToWorld(float *pCamIn, float *pWorldOut)
 	pWorldOut[2] = pCamIn[0] * pR[2] + pCamIn[1] * pU[2] + pCamIn[2] * pD[2] + pC[2];
 }
 
+static void Mat2Mat(float *A, float *B, float *C) 
+{
+	int m = 0;
+	for (int l = 0; l < 16; l+=4) 
+	{
+		for (int c = 0; c < 4; c++)
+		{
+			C[m++] = A[l + 0]*B[0+c] + A[l + 1]*B[4+c] + A[l + 2]*B[8+c] + A[l + 3]*B[12+c];
+		}
+	}
+}
+
 /*
  W2V matrix memory layout
 
@@ -192,6 +204,40 @@ void Camera::ConvertTo4x4(float *pOut)
 	pOut[12] = -(m_P[0] * m_R[0] + m_P[1] * m_R[1] + m_P[2] * m_R[2]);
 	pOut[13] = -(m_P[0] * m_U[0] + m_P[1] * m_U[1] + m_P[2] * m_U[2]);
 	pOut[14] = -(m_P[0] * m_D[0] + m_P[1] * m_D[1] + m_P[2] * m_D[2]);
+}
+
+void Camera::GetProjectionMat4x4(float screenX, float screenY, float zNear, float zFar, float *pOut)
+{
+	memset(pOut, 0, 16 * sizeof(float));
+	float W2V[16],SP[16];
+	float toScreen[4][4];
+
+	float scm = (screenX < screenY) ? screenX : screenY;
+	toScreen[0][0] = 1.0;
+	toScreen[1][0] = 0.0;
+	toScreen[2][0] = 0.5*screenX / (scm*zNear);
+	toScreen[3][0] = 0.5*screenX / scm;
+
+	toScreen[0][1] = 0.0;
+	toScreen[1][1] = 1.0;
+	toScreen[2][1] = 0.5*screenY / (scm*zNear);
+	toScreen[3][1] = 0.5*screenY / scm;
+
+	toScreen[0][2] = 0.0;
+	toScreen[1][2] = 0.0;
+	toScreen[2][2] = 1.0 / (zFar - zNear);
+	toScreen[3][2] = -zNear / (zFar - zNear);
+
+	toScreen[0][3] = 0.0;
+	toScreen[1][3] = 0.0;
+	toScreen[2][3] = 1.0 / (scm*zNear);
+	toScreen[3][3] = 1.0 / scm;
+	
+	memcpy(SP, toScreen, 16 * sizeof(float));
+	
+	ConvertTo4x4(W2V);
+	Mat2Mat(W2V, SP, pOut);
+
 }
 
 

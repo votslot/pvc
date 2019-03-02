@@ -38,14 +38,8 @@ void main()
    float bt = clut[cn + 2];
   
    color = vec3(rt,gt,bt)*fragmentColor;
-   /*
-   if( cn==4)
-   {
-	color = vec3(rt,gt,bt)*fragmentColor;
-   }else{
-	color = vec3(0.0,0.0,0.0);
-   }
-   */
+   // color = vec3(1.0,1.0,0.0)*fragmentColor;
+  
   
 }   
 )"";

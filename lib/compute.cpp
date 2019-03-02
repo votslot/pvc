@@ -265,9 +265,10 @@ void ComputeRun(int sw__, int sh__)
 	pGlob->wrkLoad = 64;
 	bufferParams.setData((unsigned char*)pParams, 32 * sizeof(float));
 	// camera
-	pCam->ConvertTo4x4(matrView4x4);
+	//pCam->ConvertTo4x4(matrView4x4);
+	pCam->GetProjectionMat4x4(pGlob->screenX, pGlob->screenY, pGlob->zNear, pGlob->zFar, matrView4x4);
 	bufferMatrView4x4.setData(matrView4x4, 16 * sizeof(float));
-
+	
 	// clean dst zMap buffer
 	glUseProgram(csCleanRGB.m_program);
 	csCleanRGB.bindBuffer(&bufferZMap);

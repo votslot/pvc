@@ -34,6 +34,7 @@ R""(
  void main()                           
  {  
 
+    /*
     float scm = min(globs.screenX,globs.screenY);
     mat4 toScreen;
 	toScreen[0][0] = 1.0;
@@ -56,13 +57,17 @@ R""(
  	toScreen[2][3] = 1.0/(scm*globs.zNear);
  	toScreen[3][3] = 1.0/scm;
 
-	mat4 finMat = toScreen * World2View ;
+	 mat4 finMat = toScreen * World2View ;
+   */
+	mat4 finMat = World2View ;
     int grp_size = int(globs.wrkLoad);
 	
  	uint offset = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * gl_WorkGroupSize.x * globs.wrkLoad;
-	for( int loc = 0; loc< globs.wrkLoad; loc++, offset += gl_WorkGroupSize.x)
+	
+	int steps = 1;
+	for( int loc = 0; loc < globs.wrkLoad; loc+=steps, offset += gl_WorkGroupSize.x*steps)
 	{
-		vec4 pt  = inputPoints[offset];
+	    vec4 pt  = inputPoints[offset];
 		uint color = uint(pt.w);
 		vec4 vf =   finMat * vec4(pt.x, pt.y, pt.z, 1.0) ;
 

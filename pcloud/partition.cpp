@@ -142,6 +142,10 @@ void BuildGroups( const T * pData, unsigned int first,  unsigned int last ,compF
 	//std::cout << "num= " << numPoints << std::endl;
 	if (numPoints <= 4096)
 	{
+		if (numPoints != 4096) 
+		{
+			std::cout << "num= " << numPoints << std::endl;
+		}
 		return;
 	}
 
@@ -155,14 +159,15 @@ void BuildGroups( const T * pData, unsigned int first,  unsigned int last ,compF
 		std::qsort((void*)(pData + first), last - first + 1, sizeof(T), compFunc[2]);
 	}
 	
-	unsigned int mid = (first + last) / 2;
-	BuildGroups<T>(pData, first,    mid-1, compFunc);
-	BuildGroups<T>(pData, mid , last,    compFunc);
+	//unsigned int mid = (first + last) / 2;
+	BuildGroups<T>(pData, first,    first - 1 + numPoints/2, compFunc);
+	BuildGroups<T>(pData, first + numPoints / 2, last,    compFunc);
 
 }
 
 void DoPartitionXYZW_Float(void *pData, unsigned int num, std::function<void(unsigned int a, unsigned int b)> func)
 {
+	
 	struct point4f {
 		float x, y, z ,w;
 	};
@@ -170,14 +175,15 @@ void DoPartitionXYZW_Float(void *pData, unsigned int num, std::function<void(uns
 	static compFuncType compFuncXYZ[3] = { CompX<point4f>,CompY<point4f>,CompZ<point4f> };
 	BuildGroups<point4f>((point4f*)pData, 0, num-1, compFuncXYZ);
 
+#if 1
 	point4f *pT = (point4f*)pData;
 	for (int k = 0; k < num; k++) 
 	{
-		int ng = k / 4096;
+		int ng =  k / 4096;
 		pT[k].w = (float) ( ng &7) + 1.0f;
 	
 	}
-
+#endif
 	
 
 	//DoPartition<point4f,float>((point4f*)pData, 0, num - 1,0,func);
