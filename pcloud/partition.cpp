@@ -116,8 +116,8 @@ void DoPartition(T * pData, unsigned int first, unsigned int last, unsigned int 
 
 
 
-template<typename T>
-void BuildGroups( const T * pData, unsigned int first,  unsigned int last ,compFuncType *compFunc)
+template<typename T,typename P>
+void BuildGroups( const T * pData, unsigned int first,  unsigned int last ,compFuncType *compFunc, std::function<void(partitionData<P> *pD)> donePartitionFunc)
 {
 	auto minX = pData[first].x;
 	auto maxY = pData[first].y;
@@ -142,6 +142,17 @@ void BuildGroups( const T * pData, unsigned int first,  unsigned int last ,compF
 	//std::cout << "num= " << numPoints << std::endl;
 	if (numPoints <= 4096)
 	{
+		partitionData<P> part;
+		part.numPoints = numPoints;
+		part.first = first;
+		part.minX = minX;
+		part.minY = minY;
+		part.minZ = minZ;
+		part.maxX = maxX;
+		part.maxY = maxY;
+		part.maxZ = maxZ;
+
+		donePartitionFunc(&part);
 		if (numPoints != 4096) 
 		{
 			std::cout << "num= " << numPoints << std::endl;
@@ -160,12 +171,12 @@ void BuildGroups( const T * pData, unsigned int first,  unsigned int last ,compF
 	}
 	
 	//unsigned int mid = (first + last) / 2;
-	BuildGroups<T>(pData, first,    first - 1 + numPoints/2, compFunc);
-	BuildGroups<T>(pData, first + numPoints / 2, last,    compFunc);
+	BuildGroups<T>(pData, first,                first - 1 + numPoints/2, compFunc, donePartitionFunc);
+	BuildGroups<T>(pData, first + numPoints / 2, last,                   compFunc, donePartitionFunc);
 
 }
 
-void DoPartitionXYZW_Float(void *pData, unsigned int num, std::function<void(unsigned int a, unsigned int b)> func)
+void DoPartitionXYZW_Float(void *pData, unsigned int num, std::function<void(partitionData<float> *pD)> func)
 {
 	
 	struct point4f {
@@ -173,9 +184,9 @@ void DoPartitionXYZW_Float(void *pData, unsigned int num, std::function<void(uns
 	};
 	std::cout << "building group" << std::endl;
 	static compFuncType compFuncXYZ[3] = { CompX<point4f>,CompY<point4f>,CompZ<point4f> };
-	BuildGroups<point4f>((point4f*)pData, 0, num-1, compFuncXYZ);
+	BuildGroups<point4f>((point4f*)pData, 0, num-1, compFuncXYZ,func);
 
-#if 1
+#if 0
 	point4f *pT = (point4f*)pData;
 	for (int k = 0; k < num; k++) 
 	{

@@ -19,14 +19,23 @@ R""(
 		float zScale;
 		float maxDimension;
 		uint  wrkLoad;
+		float px;
+		float py;
+		float pz;
+		float pad0;
+		float pad1;
 	};
 
 	struct Partition
 	{
+		float cx;
+		float cy;
+		float cz;
+		float sz;
 		uint first;
 		uint last;
-		float sz;
-		float pad;
+		uint ndx;
+		float pad1;
 	};
 )"";
 

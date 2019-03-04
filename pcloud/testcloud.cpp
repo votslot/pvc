@@ -28,11 +28,21 @@ static void GetSphere(float rad, float xc, float yc, float zc,int num)
 static void GetRandomPlane(float w, float h, float m,float x, float y, float z, int num)
 {
 	float prd = (1.0f / (float)RAND_MAX);
+	float cx = x + w * 0.5f;
+	float cy = y + h * 0.5f;
+	float amp = w * 0.9f;
+	float amp_max = w * 0.5f;
 	for (int n = 0; n < num; n++)
 	{
 		float xf =  x  + prd *  w * (float)rand();
 		float yf =  y  + prd *  h * (float)rand();
-		float zf =  5.0f * sinf(25.0f* xf / w) * cos(25.0f* yf / h);
+		float ddx = xf - cx;
+		float ddy = yf - cy;
+		float rr = sqrtf( ddx * ddx + ddy * ddy);
+		float ssf = sinf(80.0f* rr / w);
+		float zf = (rr == 0.0f) ? 1.0f : (ssf)/(rr);
+		zf =  zf * amp;
+		if (zf > amp_max) zf = amp_max;
 		gpTestCloud->SetPointValue(xf, yf, zf);
 	}
 }
@@ -197,9 +207,24 @@ void* PCloudIn::InitTestCloud()
 	}
 	gpTestCloud->OnStart();
 
+	for (int x = 0; x < 8; x++) 
+	{
+		for (int y = 0; y < 8; y++) 
+		{
+			GetRandomPlane(100.0f, 100.0f, 0.1f,  x*200.0f, y*200.0f, 0.0f, 1024 * 1024);
+		}
+	}
+
 	//GetSphere(10.0f, 0.0f, 0.0f, 0.0f, 1024 * 1024*4);
 	
-	GetRandomPlane(100.0f, 100.0f, 0.1f, 0.0f, 0.0f, 0.0f, 1024*1024*8);
+	//GetRandomPlane(100.0f, 100.0f, 0.1f, 0.0f,   0.0f,     0.0f,   1024 * 1024 * 8);
+	//GetRandomPlane(100.0f, 100.0f, 0.1f, 0.0f,   100.0f,   0.0f,   1024 * 1024 * 8);
+	//GetRandomPlane(100.0f, 100.0f, 0.1f, 100.0f, 0.0f,     0.0f,   1024 * 1024 * 8);
+	//GetRandomPlane(100.0f, 100.0f, 0.1f, 100.0f, 100.0f,   0.0f,   1024 * 1024 * 8);
+
+	//GetRandomPlane(100.0f, 100.0f, 0.1f, 100.0f, 200.0f, 0.0f, 1024 * 1024 * 8);
+	GetRandomPlane(100.0f, 100.0f, 0.1f, 0.0f, 200.0f, 0.0f, 1024 * 1024 );
+	//GetRandomPlane(100.0f, 100.0f, 0.1f, 100.0f, 200.0f, 0.0f, 1024 * 1024);
 
 	//GetPlane(0.0f, 0.0f, 0.0f, 1024, 1024, 0.9f, 0.9f, 0.0f);
 	/*

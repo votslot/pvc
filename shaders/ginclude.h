@@ -11,14 +11,23 @@
 		float zScale;
 		float maxDimension;
 		unsigned int wrkLoad;
+		float px;
+		float py;
+		float pz;
+		float pad0;
+		float pad1;
 	};
 	
 	struct Partition
 	{
+		float cx;
+		float cy;
+		float cz;
+		float sz;
 		unsigned int first;
 		unsigned int last;
-		float sz;
-		float pad;
+		unsigned int ndx;
+		float pad1;
 	};
 	
 

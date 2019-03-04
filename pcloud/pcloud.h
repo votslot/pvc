@@ -17,6 +17,19 @@ class PCloudIn
 };
 
 
-void DoPartitionXYZW_Float(void *pData, unsigned int num, std::function<void(unsigned int  a, unsigned int  b)> func);
+template<typename P>
+struct partitionData 
+{
+	int numPoints;
+	int first;
+	float  minX;
+	float  minY;
+	float  minZ;
+	float  maxX;
+	float  maxY;
+	float  maxZ;
+};
+
+void DoPartitionXYZW_Float(void *pData, unsigned int num, std::function<void(partitionData<float> *pD)> func);
 
 #endif

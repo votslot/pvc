@@ -33,43 +33,23 @@ R""(
 
  void main()                           
  {  
-
-    /*
-    float scm = min(globs.screenX,globs.screenY);
-    mat4 toScreen;
-	toScreen[0][0] = 1.0;
- 	toScreen[1][0] = 0.0;
- 	toScreen[2][0] = 0.5*globs.screenX /(scm*globs.zNear);
- 	toScreen[3][0] = 0.5*globs.screenX/scm;
-
-	toScreen[0][1] = 0.0;
- 	toScreen[1][1] = 1.0;
- 	toScreen[2][1] = 0.5*globs.screenY /(scm*globs.zNear);
- 	toScreen[3][1] = 0.5*globs.screenY/scm;
-
-	toScreen[0][2] = 0.0;
- 	toScreen[1][2] = 0.0;
- 	toScreen[2][2] = 1.0/( globs.zFar - globs.zNear);
- 	toScreen[3][2] = -globs.zNear/( globs.zFar - globs.zNear);
-
-	toScreen[0][3] = 0.0;
- 	toScreen[1][3] = 0.0;
- 	toScreen[2][3] = 1.0/(scm*globs.zNear);
- 	toScreen[3][3] = 1.0/scm;
-
-	 mat4 finMat = toScreen * World2View ;
-   */
-	mat4 finMat = World2View ;
-    int grp_size = int(globs.wrkLoad);
-	
+    Partition part = partitions[gl_GlobalInvocationID.y];
+	uint partColor = (part.ndx & 7) + 1;
+	float dx = globs.px -  part.cx;
+ 	float dy = globs.py -  part.cy;
+ 	float dz = globs.pz -  part.cz;
+	float dd = sqrt( dx*dx + dy*dy +dz*dz);
+	float szs = 128.0/(  globs.screenX * part.sz * globs.zNear/( dd + 0.000001) );
+	//int steps = (int)szs;
+	int steps  = clamp( int(szs), 1, 32);
+	//steps = 1;
+ 	
  	uint offset = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * gl_WorkGroupSize.x * globs.wrkLoad;
-	
-	int steps = 1;
 	for( int loc = 0; loc < globs.wrkLoad; loc+=steps, offset += gl_WorkGroupSize.x*steps)
 	{
 	    vec4 pt  = inputPoints[offset];
 		uint color = uint(pt.w);
-		vec4 vf =   finMat * vec4(pt.x, pt.y, pt.z, 1.0) ;
+		vec4 vf =    World2View  * vec4(pt.x, pt.y, pt.z, 1.0) ;
 
 		if( (vf.z > 0.0) && (vf.z < 1.0) && ( vf.x < globs.screenX *vf.w ) && ( vf.y < globs.screenY * vf.w) &&(vf.x>0.0) &&(vf.y>0.0)  )
 		{
@@ -77,7 +57,7 @@ R""(
 			uint yy = uint(vf.y/vf.w);
 			uint shift = xx + yy * ( uint(globs.screenX));
 			uint zAsInt = uint((vf.z*16777215.0)) <<8;
-			zAsInt =  (zAsInt & 0xFFFFFF00 ) | ( color & 0xFF); // add color
+			zAsInt =  (zAsInt & 0xFFFFFF00 ) | ( partColor & 0xFF); // add color
 			atomicMin(zMap[shift],zAsInt);
 		}
 	}

@@ -16,6 +16,11 @@ extern void WaveTest_Run();
 
 class PointStorage 
 {
+	struct pointp4
+	{
+		float  x, y, z, w;
+	};
+
 public:
 	static const int sMaxBuffs = 32;
 	static const int sMaxAllocSize = 1024 * 1024 * 128;
@@ -88,16 +93,39 @@ public:
 	void AddNewBuffer() 
 	{
 		assert(numInUse < sMaxBuffs);
-		std::function<void(int a, int b)> OnDonePartition = [=](unsigned  int first, unsigned int last) 
+		std::function<void(partitionData<float> *pD)> OnDonePartition = [=](partitionData<float> *pDt)
 		{ 
-			pPartitions[numPartitions].first = first;
-			pPartitions[numPartitions].last  = last;
-			pPartitions[numPartitions].sz =  4321.0f;
-			pPartitions[numPartitions].pad = 5678.0f;
+			float dx = pDt->maxX - pDt->minX;
+			float dy = pDt->maxY - pDt->minY;
+			float dz = pDt->maxZ - pDt->minX;
+			float dMax = (dx > dy) ? dx : dy;
+			dMax = (dMax > dz) ? dMax : dz;
+
+			pPartitions[numPartitions].cx = (pDt->maxX + pDt->minX) *0.5f;
+			pPartitions[numPartitions].cy = (pDt->maxY + pDt->minY) *0.5f;
+			pPartitions[numPartitions].cz = (pDt->maxZ + pDt->minZ) *0.5f;
+			pPartitions[numPartitions].sz = dMax;
+			pPartitions[numPartitions].ndx = numPartitions;
+			if ((numPartitions & 31) == 0) std::cout << ".";
 			numPartitions++;
+
+			pointp4 *pPt = (pointp4*)pTemp;
+
+			if (pDt->numPoints == 4096) 
+			{
+				for (int n = 0; n < 4096; n++) 
+				{
+					int k1 = pDt->first + (rand() & 4095);
+					int k2 = pDt->first + (rand() & 4095);
+					pointp4 ptTemp = pPt[k1];
+					pPt[k1] = pPt[k2];
+					pPt[k2] = ptTemp;
+				}
+			}
 		};
 		
 		DoPartitionXYZW_Float(pTemp, numPointsInTemp, OnDonePartition);
+		std::cout << "done" << std::endl;
 
 		bufferPoints[numInUse].setData(pTemp, sizeInTemp);
 		bufferPartition[numInUse].setData(pPartitions, numPartitions*sizeof(Partition));
@@ -263,6 +291,9 @@ void ComputeRun(int sw__, int sh__)
 	pGlob->zScale = 16777215.0 / (pCam->m_zFar - pCam->m_zNear);
 	pGlob->maxDimension = (float)pCam->m_MaxDimension;
 	pGlob->wrkLoad = 64;
+	pGlob->px = pCam->m_P[0];
+	pGlob->py = pCam->m_P[1];
+	pGlob->pz = pCam->m_P[2];
 	bufferParams.setData((unsigned char*)pParams, 32 * sizeof(float));
 	// camera
 	//pCam->ConvertTo4x4(matrView4x4);
