@@ -124,6 +124,7 @@ public:
 			}
 		};
 		
+		unsigned int pow2 = (unsigned int ) log2(numPointsInTemp);
 		DoPartitionXYZW_Float(pTemp, numPointsInTemp, OnDonePartition);
 		std::cout << "done" << std::endl;
 

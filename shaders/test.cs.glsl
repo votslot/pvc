@@ -43,11 +43,10 @@ R""(
 	//int steps = (int)szs;
 	int steps  = clamp( int(szs), 1, 32);
 	//steps = 1;
- 	
- 	uint offset = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * gl_WorkGroupSize.x * globs.wrkLoad;
+  	uint offset = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * gl_WorkGroupSize.x * globs.wrkLoad;
 	for( int loc = 0; loc < globs.wrkLoad; loc+=steps, offset += gl_WorkGroupSize.x*steps)
 	{
-	    vec4 pt  = inputPoints[offset];
+	    vec4 pt  = inputPoints[offset] ;
 		uint color = uint(pt.w);
 		vec4 vf =    World2View  * vec4(pt.x, pt.y, pt.z, 1.0) ;
 
@@ -59,7 +58,9 @@ R""(
 			uint zAsInt = uint((vf.z*16777215.0)) <<8;
 			zAsInt =  (zAsInt & 0xFFFFFF00 ) | ( partColor & 0xFF); // add color
 			atomicMin(zMap[shift],zAsInt);
+			//zMap[shift]=zAsInt;
 		}
+		
 	}
 	//debugOut[0] =  partitions[0].sz;
 	//debugOut[1] =  partitions[0].pad;
