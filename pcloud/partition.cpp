@@ -37,6 +37,18 @@ template<typename T> static float getV(T* pD, int k, int n)
 	return pp[n];
 }
 
+unsigned int getNearestPow2(unsigned int val) 
+{
+	for (int k = 31; k >=0; k--) 
+	{
+		if (val & (1 << k))
+		{
+			return 1 << k;
+		}
+	}
+	return 0;
+}
+
 template<typename T>
 void Separate( T *pData, unsigned int firstIn,  unsigned int lastIn, unsigned int nval,  unsigned int pivotIndexIn , compFuncType comp, int nn)
 {
@@ -162,10 +174,19 @@ void BuildGroups( T * pData, unsigned int first,  unsigned int last ,compFuncTyp
 	
 	//std::qsort((void*)(pData + first), last - first + 1, sizeof(T), compFunc[n]);
 	unsigned int numPt = last - first + 1;
-	Separate<T>(pData , first,  last, first + (numPt/2) -1, first, compFunc[n],n);
+	unsigned int pivot;
+	if( (numPt & (numPt - 1))==0  )// is power of 2
+	{
+		pivot = first + (numPt / 2) - 1;
+	}
+	else 
+	{
+		pivot = first + getNearestPow2(numPt) - 1;
+	}
 
-	BuildGroups<T>(pData, first,                first - 1 + numPoints/2, compFunc, donePartitionFunc);
-	BuildGroups<T>(pData, first + numPoints / 2, last,                   compFunc, donePartitionFunc);
+	Separate<T>(pData , first,  last, pivot, first, compFunc[n],n);
+	BuildGroups<T>(pData, first,   pivot,   compFunc, donePartitionFunc);
+	BuildGroups<T>(pData, pivot+1, last,    compFunc, donePartitionFunc);
 
 }
 
@@ -178,6 +199,7 @@ void DoPartitionXYZW_Float(void *pData, unsigned int num, std::function<void(par
 	static compFuncType compFuncXYZ[3] = { CompX<point4f>,CompY<point4f>,CompZ<point4f> };
 	
 
+	//unsigned int aa = getNearestPow2(1025);
 	if(0)
 	{
 		int numInTest = 32000;

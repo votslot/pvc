@@ -34,7 +34,7 @@ R""(
  void main()                           
  {  
     Partition part = partitions[gl_GlobalInvocationID.y];
-	uint partColor = (part.ndx & 7) + 1;
+	uint partColor = 8;//(part.ndx & 7) + 1;
 	float dx = globs.px -  part.cx;
  	float dy = globs.py -  part.cy;
  	float dz = globs.pz -  part.cz;

@@ -109,8 +109,8 @@ public:
 			if ((numPartitions & 31) == 0) std::cout << ".";
 			numPartitions++;
 
+			// shuffle points
 			pointp4 *pPt = (pointp4*)pTemp;
-
 			if (pDt->numPoints == 4096) 
 			{
 				for (int n = 0; n < 4096; n++) 
@@ -123,8 +123,7 @@ public:
 				}
 			}
 		};
-		
-		unsigned int pow2 = (unsigned int ) log2(numPointsInTemp);
+
 		DoPartitionXYZW_Float(pTemp, numPointsInTemp, OnDonePartition);
 		std::cout << "done" << std::endl;
 
@@ -247,7 +246,7 @@ GLuint ComputeInit(int sw,int sh)
 	clutData[20] = 0.5f; clutData[21] = 0.0f; clutData[22] = 0.0f;
 	clutData[24] = 0.0f; clutData[25] = 0.5f; clutData[26] = 0.0f;
 	clutData[28] = 0.5f; clutData[29] = 0.5f; clutData[30] = 0.0f;
-	clutData[32] = 0.0f; clutData[33] = 0.5f; clutData[34] = 0.5f;
+	clutData[32] = 0.9f; clutData[33] = 0.9f; clutData[34] = 0.9f;
 	bufferClut.init();
 	void *pd = bufferClut.allocateVram(4 * 256 * sizeof(float));
 	memcpy(pd, clutData, 4 * 256 * sizeof(float));
@@ -267,8 +266,8 @@ GLuint ComputeInit(int sw,int sh)
 
 GLuint GetSrcBuff() 
 {
-	return  bufferZMap.gb;
-	//return  bufferZMapPost.gb;
+	//return  bufferZMap.gb;
+	return  bufferZMapPost.gb;
 }
 GLuint GetParamsBuff() 
 {
@@ -338,31 +337,14 @@ void ComputeRun(int sw__, int sh__)
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	glUseProgram(csPostProc.m_program);
-
-#if 1
-	for (int m = 0; m < 1; m++)
-	{
-		csPostProc.setBufferBinding(&bufferZMap, 1);
-		csPostProc.setBufferBinding(&bufferZMapPost, 2);
-		csPostProc.bindBuffer(&bufferParams);
-		csPostProc.bindBuffer(&bufferZMap);
-		csPostProc.bindBuffer(&bufferZMapPost);
-		glDispatchCompute(sMaxW / 32, sMaxH / 32, 1);
-		glMemoryBarrier(GL_ALL_BARRIER_BITS);
-
-	    /*
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		csPostProc.setBufferBinding(&bufferZMap, 2);
-		csPostProc.setBufferBinding(&bufferZMapPost, 1);
-		csPostProc.bindBuffer(&bufferParams);
-		csPostProc.bindBuffer(&bufferZMapPost);
-		csPostProc.bindBuffer(&bufferZMap);
-		glDispatchCompute(sMaxW / 32, sMaxH / 32, 1);
-		*/
-
-		glMemoryBarrier(GL_ALL_BARRIER_BITS);
-	}
-#endif
+	csPostProc.setBufferBinding(&bufferZMap, 1);
+	csPostProc.setBufferBinding(&bufferZMapPost, 2);
+	csPostProc.bindBuffer(&bufferParams);
+	csPostProc.bindBuffer(&bufferZMap);
+	csPostProc.bindBuffer(&bufferZMapPost);
+	glDispatchCompute(sMaxW / 32, sMaxH / 32, 1);
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 	glUseProgram(0);
 

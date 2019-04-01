@@ -55,7 +55,7 @@ R""(
 )"";
 #endif
 
-
+#if 0
 const std::string cs_postproc_w = cs_glversion + 
 R""(
  //#version 430 core 
@@ -116,7 +116,30 @@ R""(
 		zMapOut[shift] = (val_z & 0xFFFFFF00) | uint(colf);
 	}
 	
- }       
+ }  
+ #endif
+
+ const std::string cs_postproc_w = cs_glversion + cs_structs +
+R""(
+ layout(local_size_x = 32,local_size_y =32) in; 
+ layout(std430,binding = 0) buffer in1  {  GlobalParams globs; };
+ layout(std430,binding = 1) buffer zmi  {  uint zMapIn[]; }; 
+ layout(std430,binding = 2) buffer zmo  {  uint zMapOut[];}; 
+
+ void main()                           
+ {    
+    const uint xx = gl_GlobalInvocationID.x;
+    const uint yy = gl_GlobalInvocationID.y;
+	uint ww = uint(globs.screenX);
+	uint hh = uint(globs.screenY);
+	if(( xx < ww) && (yy< hh)) 
+	{
+	    uint shift = xx +  ww* yy;
+		zMapOut[shift] = zMapIn[shift];
+	}
+ }  
+
+
 )"";
 
 

@@ -207,19 +207,19 @@ void* PCloudIn::InitTestCloud()
 	}
 	gpTestCloud->OnStart();
 
-	
-	for (int x = 0; x < 8; x++) 
+	/*
+	for (int x = 0; x < 2; x++) 
 	{
-		for (int y = 0; y < 8; y++) 
+		for (int y = 0; y < 2; y++) 
 		{
 			GetRandomPlane(100.0f, 100.0f, 0.1f,  x*100.0f, y*100.0f, 0.0f, 1024 * 1024);
 		}
 	}
-	
+	*/
 
 	//GetSphere(100.0f, 0.0f, 0.0f, 0.0f, 1024 * 1024*4);
 	
-	//GetRandomPlane(100.0f, 100.0f, 0.1f, 0.0f,   0.0f,     0.0f,   1024 * 1024 * 8);
+	// GetRandomPlane(100.0f, 100.0f, 0.1f, 0.0f,   0.0f,     0.0f,   1024 * 1024 * 8);
 	//GetRandomPlane(100.0f, 100.0f, 0.1f, 0.0f,   100.0f,   0.0f,   1024 * 1024 * 8);
 	//GetRandomPlane(100.0f, 100.0f, 0.1f, 100.0f, 0.0f,     0.0f,   1024 * 1024 * 8);
 	//GetRandomPlane(100.0f, 100.0f, 0.1f, 100.0f, 100.0f,   0.0f,   1024 * 1024 * 8);
@@ -228,7 +228,7 @@ void* PCloudIn::InitTestCloud()
 	//GetRandomPlane(100.0f, 100.0f, 0.1f, 0.0f, 200.0f, 0.0f, 1024 * 1024 );
 	//GetRandomPlane(100.0f, 100.0f, 0.1f, 100.0f, 200.0f, 0.0f, 1024 * 1024);
 
-	//GetPlane(0.0f, 0.0f, 0.0f, 1024*8, 1024*8, 0.9f, 0.9f, 0.0f);
+	GetPlane(0.0f, 0.0f, 0.0f, 1024, 1025, 0.9f, 0.9f, 0.0f);
 	/*
 	GetPlane(0.0f, 0.0f, 0.0f, 256, 256, 0.9f, 0.9f, 0.0f);
 	for (int y = 0; y < 2; y++) {
