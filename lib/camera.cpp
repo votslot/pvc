@@ -237,6 +237,29 @@ void Camera::GetProjectionMat4x4(float screenX, float screenY, float zNear, floa
 	
 	ConvertTo4x4(W2V);
 	Mat2Mat(W2V, SP, pOut);
+}
+
+void Camera::GetVew2World4x4(float *pOut) 
+{
+	pOut[0] = 1.0f;
+	pOut[1] = 0.0f;
+	pOut[2] = 0.0f;
+	pOut[3] = 0.0f;
+
+	pOut[4] = 0.0f;
+	pOut[5] = 1.0f;
+	pOut[6] = 0.0f;
+	pOut[7] = 0.0f;
+
+	pOut[8]  = 0.0f;
+	pOut[9]  = 0.0f;
+	pOut[10] = 1.0f;
+	pOut[11] = 0.0f;
+
+	pOut[12] = 0.0f;
+	pOut[13] = 0.0f;
+	pOut[14] = 0.0f;
+	pOut[15] = 1.0f;
 
 }
 

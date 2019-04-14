@@ -25,6 +25,7 @@ public:
 	void ShiftPivot(float dx, float dy);
 	void ConvertTo4x4(float *pOut);
 	void GetProjectionMat4x4(float screenX, float screenY, float zNear, float zFar, float *pOut);
+	void GetVew2World4x4(float *pOut);
 	void SetScreenPixSize(int sx, int sy);
 	float *GetUp();
 	float *GetRight();

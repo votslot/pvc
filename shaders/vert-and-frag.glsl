@@ -32,10 +32,14 @@ void main()
    uint yy = uint(fragmentUV.y * float(globs.screenY));
    uint shift = xx + yy* uint(globs.screenX);
    uint cl = zMap[shift];
-   uint cn = (cl & 0xFF)*4;
-   float rt = clut[cn + 0];
-   float gt = clut[cn + 1];
-   float bt = clut[cn + 2];
+ //  uint cn = (cl & 0xFF)*4;
+//   float rt = clut[cn + 0];
+ //  float gt = clut[cn + 1];
+ //  float bt = clut[cn + 2];
+     float rt = cl & 0x000000FF;
+     float gt = (cl & 0x0000FF00)>>8;
+     float bt = (cl & 0x00FF0000)>>16;
+
   
    color = vec3(rt,gt,bt)*fragmentColor;
    // color = vec3(1.0,1.0,0.0)*fragmentColor;

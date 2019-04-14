@@ -22,8 +22,12 @@ R""(
 		float px;
 		float py;
 		float pz;
+		float bbMinZ;
+		float bbMaxZ;
+		float scrMin;
 		float pad0;
 		float pad1;
+		float pad2;
 	};
 
 	struct Partition

@@ -29,6 +29,8 @@ public:
 	int numPartitionsInBuff[sMaxBuffs];
 	SSBBuffer bufferPoints[sMaxBuffs];
 	SSBBuffer bufferPartition[sMaxBuffs];
+	float bbZMin = FLT_MAX;
+	float bbZMax = FLT_MIN;
 
 	int numInUse;
 	bool hasPoints;
@@ -62,6 +64,8 @@ public:
 			bufferPoints[i].init();
 			bufferPartition[i].init();
 		}
+		bbZMin = FLT_MAX;
+		bbZMax = FLT_MIN;
 	}
 
 	void SetPoint(float x, float y, float z, float w) 
@@ -77,6 +81,8 @@ public:
 		pDest[1] = y;
 		pDest[2] = z;
 		pDest[3] = w;
+		if (z < bbZMin) bbZMin = z;
+		if (z > bbZMax) bbZMax = z;
 		numPointsInTemp++;
 		sizeInTemp += ptSize;
 	}
@@ -158,14 +164,14 @@ void Compute_DoneAddPoits()
 
 
 float *pTest    = NULL;
-static float pParams[32];
 static int sNumOfPoints = 0;
 static void *pPoints;
 static float clutData[256 * 4];
-static float matrView4x4[16];
+//static float matrView4x4[16];
 
 static const int sMaxW = 2048;
 static const int sMaxH = 2048;
+GlobalParams pGlob;
 
 
 static   SSBBuffer bufferParams;
@@ -174,6 +180,7 @@ static   SSBBuffer bufferZMap;
 static   SSBBuffer bufferZMapPost;
 static   SSBBuffer bufferMatrView4x4;
 static   SSBBuffer bufferClut;
+static   SSBBuffer bufferView2World;
 
 static CSShader csPointRender;
 static CSShader csCleanRGB;
@@ -210,10 +217,10 @@ GLuint ComputeInit(int sw,int sh)
 	csPostProc.setBufferBinding(&bufferParams, 0);
 	csPostProc.setBufferBinding(&bufferZMap, 1);
 	csPostProc.setBufferBinding(&bufferZMapPost, 2);
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	csPostProc.setBufferBinding(&bufferView2World, 3);
 
 	bufferParams.init();
-	
+	bufferView2World.init();
 	//
 	bufferZMap.init();
 	bufferZMap.allocate(sMaxW*sMaxH *sizeof(int));
@@ -222,13 +229,9 @@ GLuint ComputeInit(int sw,int sh)
 	//
 	bufferMatrView4x4.init();
 	bufferMatrView4x4.allocate(16 * sizeof(float));
-	
-	//Set params
-	pParams[0] = 512;
-	pParams[1] = 512;
-	//pParams[2] = sMaxW;
-	//pParams[3] = sMaxH;
-	bufferParams.setData(pParams, 32 * sizeof(float));
+	bufferView2World.init();
+	bufferView2World.allocate(16 * sizeof(float));
+	bufferParams.setData(&pGlob, sizeof(GlobalParams));
 
 	//clut
 	for (int i = 0; i < 1024; i+=4) 
@@ -283,21 +286,23 @@ void ComputeRun(int sw__, int sh__)
 {
 	static int n_call = 0;
 	Camera *pCam = Camera::GetCamera();
-	GlobalParams *pGlob = (GlobalParams*)pParams;
-	pGlob->screenX   = (float)pCam->GetScreenX();
-	pGlob->screenY   = (float)pCam->GetScreenY();
-	pGlob->zNear     = (float)pCam->m_zNear;
-	pGlob->zFar      = (float)pCam->m_zFar;
-	pGlob->zScale = 16777215.0 / (pCam->m_zFar - pCam->m_zNear);
-	pGlob->maxDimension = (float)pCam->m_MaxDimension;
-	pGlob->wrkLoad = 64;
-	pGlob->px = pCam->m_P[0];
-	pGlob->py = pCam->m_P[1];
-	pGlob->pz = pCam->m_P[2];
-	bufferParams.setData((unsigned char*)pParams, 32 * sizeof(float));
+	pGlob.screenX   = (float)pCam->GetScreenX();
+	pGlob.screenY   = (float)pCam->GetScreenY();
+	pGlob.zNear     = (float)pCam->m_zNear;
+	pGlob.zFar      = (float)pCam->m_zFar;
+	pGlob.zScale = 16777215.0 / (pCam->m_zFar - pCam->m_zNear);
+	pGlob.maxDimension = (float)pCam->m_MaxDimension;
+	pGlob.wrkLoad = 64;
+	pGlob.px = pCam->m_P[0];
+	pGlob.py = pCam->m_P[1];
+	pGlob.pz = pCam->m_P[2];
+	pGlob.bbMinZ = theStorage.bbZMin;
+	pGlob.bbMaxZ = theStorage.bbZMax;
+	pGlob.scrMin = (pGlob.screenX < pGlob.screenY) ? pGlob.screenX : pGlob.screenY;
+	bufferParams.setData((unsigned char*)(&pGlob), sizeof(GlobalParams));
 	// camera
-	//pCam->ConvertTo4x4(matrView4x4);
-	pCam->GetProjectionMat4x4(pGlob->screenX, pGlob->screenY, pGlob->zNear, pGlob->zFar, matrView4x4);
+	float matrView4x4[16];
+	pCam->GetProjectionMat4x4(pGlob.screenX, pGlob.screenY, pGlob.zNear, pGlob.zFar, matrView4x4);
 	bufferMatrView4x4.setData(matrView4x4, 16 * sizeof(float));
 	
 	// clean dst zMap buffer
@@ -321,7 +326,7 @@ void ComputeRun(int sw__, int sh__)
 			//GLuint num_groups_x = theStorage.numPointsInBuff[m] / csPointRender.m_szx/ pGlob->wrkLoad;  // max 65535
 			//GLuint num_groups_y = 1;
 			GLuint num_groups_x = 1;
-			GLuint num_groups_y = (theStorage.numPointsInBuff[m] / csPointRender.m_szx / pGlob->wrkLoad);
+			GLuint num_groups_y = (theStorage.numPointsInBuff[m] / csPointRender.m_szx / pGlob.wrkLoad);
 			glDispatchCompute(num_groups_x, num_groups_y, 1);
 			glMemoryBarrier(GL_ALL_BARRIER_BITS);
 			SSBBuffer::checkError();
@@ -334,6 +339,9 @@ void ComputeRun(int sw__, int sh__)
 	}
 
 	// post proc
+	float Vew2World4x4[16];
+	pCam->GetVew2World4x4(Vew2World4x4);
+	bufferView2World.setData(Vew2World4x4, 16 * sizeof(float));
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	glUseProgram(csPostProc.m_program);
@@ -342,8 +350,8 @@ void ComputeRun(int sw__, int sh__)
 	csPostProc.bindBuffer(&bufferParams);
 	csPostProc.bindBuffer(&bufferZMap);
 	csPostProc.bindBuffer(&bufferZMapPost);
+	csPostProc.bindBuffer(&bufferView2World);
 	glDispatchCompute(sMaxW / 32, sMaxH / 32, 1);
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 	glUseProgram(0);

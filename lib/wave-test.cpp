@@ -27,28 +27,18 @@ void WaveTest_Init()
 {
 	csWaveTest.initFromSource(cs_wave_test.c_str());
 	csWaveTest.setBufferBinding(&bufferWaveTest, 0);
-	csWaveTest.setBufferBinding(&bufferAtom, 1);
-	csWaveTest.setBufferBinding(&bufferMatr44, 2);
+	csWaveTest.setBufferBinding(&bufferMatr44, 1);
 	bufferWaveTest.init();
-	bufferAtom.init();
 	bufferMatr44.init();
 	bufferWaveTest.allocate(1024 * sizeof(int));
-	bufferAtom.allocate(1024 * sizeof(int));
 	bufferMatr44.allocate(16 * sizeof(float));
 }
 
 void WaveTest_Run() 
 {
-	
-	for (int k = 0; k < 16; k++) {
-		atoms[k] = 123.0f;
-	}
-	bufferAtom.setData((unsigned char*)atoms, 16 * sizeof(int));
 	bufferMatr44.setData((unsigned char*)mData, 16 * sizeof(float));
-
 	glUseProgram(csWaveTest.m_program);
 	csWaveTest.bindBuffer(&bufferWaveTest);
-	csWaveTest.bindBuffer(&bufferAtom);
 	csWaveTest.bindBuffer(&bufferMatr44);
 	glDispatchCompute(64 / csWaveTest.m_szx, 1, 1);
 	glUseProgram(0);
