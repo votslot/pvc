@@ -56,13 +56,20 @@ R""(
 			uint yy = uint(vf.y/vf.w);
 			uint shift = xx + yy * ( uint(globs.screenX));
 			uint zAsInt = uint((vf.z*16777215.0)) <<8;
-			zAsInt =  (zAsInt & 0xFFFFFF00 ) | ( partColor & 0xFF); // add color
+			zAsInt =  (zAsInt & 0xFFFFFF00 ) | ( color & 0xFF); // add color
 			atomicMin(zMap[shift],zAsInt);
-			//zMap[shift]=zAsInt;
+		}
+		// debuf
+		if(color==63)
+		{
+			debugOut[0] =  pt.z;
+			debugOut[1] =  vf.z;
+			debugOut[2] =  222.0;
+			debugOut[3] =  333.0;
+			debugOut[4] =  444.0;
+			debugOut[5] =  555.0;
 		}
 		
 	}
-	//debugOut[0] =  partitions[0].sz;
-	//debugOut[1] =  partitions[0].pad;
  }       
 )"";

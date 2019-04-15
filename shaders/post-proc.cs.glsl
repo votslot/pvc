@@ -128,6 +128,7 @@ R""(
  layout(std430,binding = 1) buffer zmi  {  uint zMapIn[]; }; 
  layout(std430,binding = 2) buffer zmo  {  uint zMapOut[];}; 
  layout(std430,binding = 3) buffer mt4  {  mat4 View2World;}; 
+ layout(std430,binding = 4) buffer dbg  {  float dbOut[];}; 
 
  void main()                           
  {    
@@ -139,18 +140,31 @@ R""(
 	{
 	    uint shift = xx +  ww* yy;
 		if(zMapIn[shift] !=  0xFFFFFF00){
+		    uint col =  zMapIn[shift] & 0xFF;
 		    uint zi  = (zMapIn[shift]>>8) & 0x00FFFFFF;
-			float zf = globs.zNear + float(zi)/globs.zScale;
-			float tmp = ( globs.scrMin * globs.zNear) / (globs.zNear + zf );
-			float xf = (float(xx) - globs.screenX * 0.5) /tmp;
-			float yf = (float(yy) - globs.screenY * 0.5) /tmp;
-			vec4 vf =   vec4(xf, yf, zf, 1.0) ;
-			vec4 world = View2World * vf;
-			zMapOut[shift] = (world.y>0.0) ?  0xFFFFFFF : 0xFF;
+			/*
+			float zff =  float(zi)/16777215.0;
+			float zf  =  (globs.zFar - globs.zNear )*zff;
+			*/
+			float zf  =  (globs.zFar - globs.zNear )*float(zi)/16777215.0;
+			float xf = (float(xx) - globs.screenX * 0.5) /globs.scrMin;
+			float yf = (float(yy) - globs.screenY * 0.5) /globs.scrMin;
+			vec4 rt =  vec4( View2World[0][0],View2World[0][1],View2World[0][2],1);
+			vec4 up =  vec4( View2World[1][0],View2World[1][1],View2World[1][2],1);
+			vec4 dr =  vec4( View2World[2][0],View2World[2][1],View2World[2][2],1);
+			vec4 pos = vec4( View2World[3][0],View2World[3][1],View2World[3][2],1);
+			vec4 res = pos + ( rt * xf + up * yf + globs.zNear * dr) * (zf/ globs.zNear);
+			zMapOut[shift] = ( col == 64) ?  0xFFFFFFF : 0xFF;
+			if( col==63){
+				dbOut[0] =  res.x;
+				dbOut[1] =  res.y;
+				dbOut[2] =  res.z;
+			}
 		}else
 		{
 			zMapOut[shift] = 0;
 		}
+
 	}
  }  
 )"";

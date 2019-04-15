@@ -218,6 +218,7 @@ GLuint ComputeInit(int sw,int sh)
 	csPostProc.setBufferBinding(&bufferZMap, 1);
 	csPostProc.setBufferBinding(&bufferZMapPost, 2);
 	csPostProc.setBufferBinding(&bufferView2World, 3);
+	csPostProc.setBufferBinding(&bufferDebug, 4);
 
 	bufferParams.init();
 	bufferView2World.init();
@@ -351,27 +352,28 @@ void ComputeRun(int sw__, int sh__)
 	csPostProc.bindBuffer(&bufferZMap);
 	csPostProc.bindBuffer(&bufferZMapPost);
 	csPostProc.bindBuffer(&bufferView2World);
+	csPostProc.bindBuffer(&bufferDebug);
 	glDispatchCompute(sMaxW / 32, sMaxH / 32, 1);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 	glUseProgram(0);
 
 
-	if (gRunWaveTest) {
-		WaveTest_Run();
-	}
 
 	// test 
-#if 0
+#if 1
 	if (theStorage.hasPoints)
 	{
 		csPointRender.bindBuffer(&bufferDebug);
 		bufferDebug.getData(32*sizeof(float), pTest);
-		for (int y = 0; y < 4; y++)  printf("%f", pTest[y]);
+		for (int y = 0; y < 8; y++)  printf("%f ", pTest[y]);
 		printf("\n");
 	}
 #endif
 
+	if (gRunWaveTest) {
+		WaveTest_Run();
+	}
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	n_call++;
 }

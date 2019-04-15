@@ -25,7 +25,7 @@ public:
 	CloudImpl() :numP(0) {}
 	void OnStart();
 	void SetNumPoints(int num);
-	void SetPointValue(float x, float y, float z);
+	void SetPointValue(float x, float y, float z,float w);
 	void OnDone();
 	void OnErr(const char *pMsg);
 };
@@ -65,7 +65,7 @@ void  CloudImpl::SetNumPoints(int num)
 	std::cout << "NUM=" << numP << std::endl;
 }
 
-void  CloudImpl::SetPointValue(float x, float y, float z)
+void  CloudImpl::SetPointValue(float x, float y, float z,float w)
 {		
 	if (x < minX) minX = x;
 	if (y < minY) minY = y;
@@ -73,7 +73,7 @@ void  CloudImpl::SetPointValue(float x, float y, float z)
 	if (x > maxX) maxX = x;
 	if (y > maxY) maxY = y;
 	if (z > maxZ) maxZ = z;
-	Compute_AddPoint(x, y, z, 255.0f);
+	Compute_AddPoint(x, y, z, w);
 	numCurr++;
 }
 

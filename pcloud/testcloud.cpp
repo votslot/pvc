@@ -20,7 +20,7 @@ static void GetSphere(float rad, float xc, float yc, float zc,int num)
 		float zf = prd * (float)rand() - 0.5f;
 		float d = sqrtf(xf*xf + yf * yf + zf*zf);
 		float di = (d > 0.000001f) ? ( rad / d) : 1.0f;
-		gpTestCloud->SetPointValue(xf * di + xc, yf * di + yc, zf * di+ zc);
+		gpTestCloud->SetPointValue(xf * di + xc, yf * di + yc, zf * di+ zc,0.0f);
 	}
 }
 
@@ -43,7 +43,7 @@ static void GetRandomPlane(float w, float h, float m,float x, float y, float z, 
 		float zf = (rr == 0.0f) ? 1.0f : (ssf)/(rr);
 		zf =  zf * amp;
 		if (zf > amp_max) zf = amp_max;
-		gpTestCloud->SetPointValue(xf, yf, zf);
+		gpTestCloud->SetPointValue(xf, yf, zf,0.0f);
 	}
 }
 
@@ -58,7 +58,12 @@ static void GetPlane(float x, float y, float z, int numX, int numY, float stepX,
 			float xf =  x + stepX * (float)i;
 			float yf =  y + stepY * (float)j;
 			float zf = z;// +8.0f * sinf((float)j * 10.0f*  3.1415f / (float)numX) *  sinf((float)i * 10.0f*  3.1415f / (float)numY);
-			gpTestCloud->SetPointValue(xf, yf, zf);
+			if ((i == numY-1) && (j == numX-1)) {
+				gpTestCloud->SetPointValue(xf, yf, zf, 63.0f);
+			}
+			else {
+				gpTestCloud->SetPointValue(xf, yf, zf, 64.0f);
+			}
 		}
 	}
 }
@@ -74,7 +79,7 @@ static void GetPlane3(pcv::vector3 A, pcv::vector3 B, pcv::vector3 C, int num)
 		pcv::vector3 T2 = C - A;
 		pcv::vector3 U = A + (T1*r1) + (T2*r2);
 		if ((r1 + r2) < 1.0f) {
-			gpTestCloud->SetPointValue(U[0], U[1], U[2]);
+			gpTestCloud->SetPointValue(U[0], U[1], U[2],0.0f);
 		}
 	}
 }
@@ -188,7 +193,7 @@ static void GetAllPlaneNew()
 			
 			float xr = (float)i + ((float)rand() / (float)(RAND_MAX)) - 0.5f;
 			float yr = (float)j + ((float)rand() / (float)(RAND_MAX)) - 0.5f;
-			gpTestCloud->SetPointValue(xr*0.3f, yr*0.3f, pZMap[j + i * zMapX]);
+			gpTestCloud->SetPointValue(xr*0.3f, yr*0.3f, pZMap[j + i * zMapX],0.0f);
 		}
 	}
 
@@ -229,7 +234,7 @@ void* PCloudIn::InitTestCloud()
 	//GetRandomPlane(100.0f, 100.0f, 0.1f, 0.0f, 200.0f, 0.0f, 1024 * 1024 );
 	//GetRandomPlane(100.0f, 100.0f, 0.1f, 100.0f, 200.0f, 0.0f, 1024 * 1024);
 
-	GetPlane(0.0f, 0.0f, 0.0f, 64,127, 0.9f, 0.9f, 0.0f);
+	GetPlane(0.0f, 0.0f, 1000.0f, 64,64, 10.0f, 10.0f, 0.0f);
 	/*
 	GetPlane(0.0f, 0.0f, 0.0f, 256, 256, 0.9f, 0.9f, 0.0f);
 	for (int y = 0; y < 2; y++) {

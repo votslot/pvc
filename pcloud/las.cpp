@@ -81,7 +81,7 @@ static void ReadLas(const std::string &path)
 	{
 		fs.read(pPoinRecord, lasH.poitDataRecordLength);
 		PointDataXYZ *pXYZ = (PointDataXYZ *)pPoinRecord;
-		if (gpLasCloud) gpLasCloud->SetPointValue((float)pXYZ->x*float(lasH.xScale), (float)pXYZ->y*float(lasH.yScale), (float)pXYZ->z*float(lasH.zScale));
+		if (gpLasCloud) gpLasCloud->SetPointValue((float)pXYZ->x*float(lasH.xScale), (float)pXYZ->y*float(lasH.yScale), (float)pXYZ->z*float(lasH.zScale),0.0f);
 	}
 	fs.close();
 	delete[]pPoinRecord;
