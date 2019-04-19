@@ -41,7 +41,7 @@ void main()
      float bt = (cl & 0x00FF0000)>>16;
 
   
-   color = vec3(rt,gt,bt)*fragmentColor;
+   color = vec3(rt/255.0,gt/255.0,bt/255.0)*fragmentColor;
    // color = vec3(1.0,1.0,0.0)*fragmentColor;
   
   

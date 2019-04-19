@@ -361,7 +361,7 @@ void ComputeRun(int sw__, int sh__)
 
 
 	// test 
-#if 1
+#if 0
 	if (theStorage.hasPoints)
 	{
 		csPointRender.bindBuffer(&bufferDebug);
