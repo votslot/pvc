@@ -6,161 +6,13 @@
 #include "cpoints.h"
 #include "cbuff.h"
 #include "camera.h"
+#include "storage.h"
 #include "..\pcloud\pcloud.h"
 #include "..\shaders\ginclude.h"
 
 
 extern void WaveTest_Init();
 extern void WaveTest_Run();
-
-
-class PointStorage 
-{
-	struct pointp4
-	{
-		float  x, y, z, w;
-	};
-
-public:
-	static const int sMaxBuffs = 32;
-	static const int sMaxAllocSize = 1024 * 1024 * 128;
-	int maxPointsInBuff = 0;
-	int numPointsInBuff[sMaxBuffs];
-	int numPartitionsInBuff[sMaxBuffs];
-	SSBBuffer bufferPoints[sMaxBuffs];
-	SSBBuffer bufferPartition[sMaxBuffs];
-	float bbZMin = FLT_MAX;
-	float bbZMax = FLT_MIN;
-
-	int numInUse;
-	bool hasPoints;
-
-	char *pTemp = NULL;
-	int numPointsInTemp = 0;
-
-	Partition *pPartitions = NULL;
-	int numPartitions = 0;
-
-	int sizeInTemp;
-	unsigned int maxBuffSz;
-
-	void Init() 
-	{
-	
-		numInUse = 0;
-		sizeInTemp = 0;
-		numPartitions = 0;
-		hasPoints = false;
-		unsigned int maxSSB = SSBBuffer::getMaxSizeInBytes();
-		maxBuffSz = (sMaxAllocSize < maxSSB) ? sMaxAllocSize : maxSSB;
-		maxPointsInBuff = maxBuffSz / (4 * sizeof(float));
-		pTemp = new char[maxBuffSz];
-		pPartitions = new Partition[maxPointsInBuff];
-
-		for (int i = 0; i < sMaxBuffs; i++) 
-		{
-			numPointsInBuff[i] = 0;
-			numPartitionsInBuff[i] = 0;
-			bufferPoints[i].init();
-			bufferPartition[i].init();
-		}
-		bbZMin = FLT_MAX;
-		bbZMax = FLT_MIN;
-	}
-
-	void SetPoint(float x, float y, float z, float w) 
-	{
-		int ptSize = sizeof(float) * 4;
-		if ((sizeInTemp ) >= maxBuffSz)
-		{
-			AddNewBuffer();
-		}
-		float *pDest = (float*)pTemp;
-		pDest += numPointsInTemp * 4;
-		pDest[0] = x;
-		pDest[1] = y;
-		pDest[2] = z;
-		pDest[3] = w;
-		if (z < bbZMin) bbZMin = z;
-		if (z > bbZMax) bbZMax = z;
-		numPointsInTemp++;
-		sizeInTemp += ptSize;
-	}
-
-	void DoneAddPoits() 
-	{
-		if (sizeInTemp > 0) 
-		{
-			AddNewBuffer();
-		}
-		hasPoints = true;
-	}
-	
-	void AddNewBuffer() 
-	{
-		assert(numInUse < sMaxBuffs);
-		std::function<void(partitionData<float> *pD)> OnDonePartition = [=](partitionData<float> *pDt)
-		{ 
-			float dx = pDt->maxX - pDt->minX;
-			float dy = pDt->maxY - pDt->minY;
-			float dz = pDt->maxZ - pDt->minX;
-			float dMax = (dx > dy) ? dx : dy;
-			dMax = (dMax > dz) ? dMax : dz;
-
-			pPartitions[numPartitions].cx = (pDt->maxX + pDt->minX) *0.5f;
-			pPartitions[numPartitions].cy = (pDt->maxY + pDt->minY) *0.5f;
-			pPartitions[numPartitions].cz = (pDt->maxZ + pDt->minZ) *0.5f;
-			pPartitions[numPartitions].sz = dMax;
-			pPartitions[numPartitions].ndx = numPartitions;
-			if ((numPartitions & 31) == 0) std::cout << ".";
-			numPartitions++;
-
-			// shuffle points
-			pointp4 *pPt = (pointp4*)pTemp;
-			if (pDt->numPoints == 4096) 
-			{
-				for (int n = 0; n < 4096; n++) 
-				{
-					int k1 = pDt->first + (rand() & 4095);
-					int k2 = pDt->first + (rand() & 4095);
-					pointp4 ptTemp = pPt[k1];
-					pPt[k1] = pPt[k2];
-					pPt[k2] = ptTemp;
-				}
-			}
-		};
-
-		DoPartitionXYZW_Float(pTemp, numPointsInTemp, OnDonePartition);
-		std::cout << "done" << std::endl;
-
-		bufferPoints[numInUse].setData(pTemp, sizeInTemp);
-		bufferPartition[numInUse].setData(pPartitions, numPartitions*sizeof(Partition));
-		numPointsInBuff[numInUse] = numPointsInTemp;
-		numPartitionsInBuff[numInUse] = numPartitions;
-		numInUse++;
-
-		sizeInTemp = 0;
-		numPointsInTemp = 0;
-		numPartitions = 0;
-	}
-
-	void Release()
-	{
-	
-	}
-};
-
-static  PointStorage theStorage;
-
-void Compute_AddPoint(float x, float y, float z, float w)
-{
-	theStorage.SetPoint(x, y, z, w);
-}
-
-void Compute_DoneAddPoits()
-{
-	theStorage.DoneAddPoits();
-}
 
 
 float *pTest    = NULL;
@@ -194,20 +46,22 @@ int gRunWaveTest = 0;
 
 GLuint ComputeInit(int sw,int sh)
 {
+	PointStorage  * pst = PointStorage::GetInstatnce();
     // clean shader
 	csCleanRGB.initFromSource(cs_clean.c_str());
 	csCleanRGB.setBufferBinding(&bufferParams, 0);
 	csCleanRGB.setBufferBinding(&bufferZMap, 1);
 
 	// render points shader
-	theStorage.Init();
+	pst->Init();
 	csPointRender.initFromSource(cs_render_points.c_str());
 	csPointRender.setBufferBinding(&bufferParams,  0);
 	csPointRender.setBufferBinding(&bufferDebug,   1);
-	for (int m = 0; m < theStorage.sMaxBuffs; m++)
+	//for (int m = 0; m < theStorage.sMaxBuffs; m++)
+	for (int m = 0; m < pst->getNumAvailableBuffers(); m++)
 	{
-		csPointRender.setBufferBinding(&theStorage.bufferPoints[m], 2);
-		csPointRender.setBufferBinding(&theStorage.bufferPartition[m], 5);
+		csPointRender.setBufferBinding(pst->GetPointBuffer(m), 2);
+		csPointRender.setBufferBinding(pst->GetPartitionBuffer(m), 5);
 	}
 	csPointRender.setBufferBinding(&bufferZMap, 3);
 	csPointRender.setBufferBinding(&bufferMatrView4x4, 4);
@@ -286,19 +140,20 @@ GLuint GetClutData()
 void ComputeRun(int sw__, int sh__)
 {
 	static int n_call = 0;
+	PointStorage  * pst = PointStorage::GetInstatnce();
 	Camera *pCam = Camera::GetCamera();
 	pGlob.screenX   = (float)pCam->GetScreenX();
 	pGlob.screenY   = (float)pCam->GetScreenY();
 	pGlob.zNear     = (float)pCam->m_zNear;
 	pGlob.zFar      = (float)pCam->m_zFar;
-	pGlob.zScale = 16777215.0 / (pCam->m_zFar - pCam->m_zNear);
+	pGlob.zScale = 16777215.0f / (pCam->m_zFar - pCam->m_zNear);
 	pGlob.maxDimension = (float)pCam->m_MaxDimension;
 	pGlob.wrkLoad = 64;
 	pGlob.px = pCam->m_P[0];
 	pGlob.py = pCam->m_P[1];
 	pGlob.pz = pCam->m_P[2];
-	pGlob.bbMinZ = theStorage.bbZMin;
-	pGlob.bbMaxZ = theStorage.bbZMax;
+	pGlob.bbMinZ = pst->GetZMin();
+	pGlob.bbMaxZ = pst->GetZMax();
 	pGlob.scrMin = (pGlob.screenX < pGlob.screenY) ? pGlob.screenX : pGlob.screenY;
 	bufferParams.setData((unsigned char*)(&pGlob), sizeof(GlobalParams));
 	// camera
@@ -312,53 +167,49 @@ void ComputeRun(int sw__, int sh__)
 	csCleanRGB.bindBuffer(&bufferParams);
 	glDispatchCompute(sMaxW /32, sMaxH/32, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-	if (theStorage.hasPoints) 
+
+	// Render points
+	if (pst->IsReady()) 
 	{
-	    // Render points
 		glUseProgram(csPointRender.m_program);
 		csPointRender.bindBuffer(&bufferParams);
 		csPointRender.bindBuffer(&bufferDebug);
 		csPointRender.bindBuffer(&bufferZMap);
 		csPointRender.bindBuffer(&bufferMatrView4x4);
 
-		for (int m = 0; m < theStorage.numInUse; m++) {
-			csPointRender.bindBuffer(&theStorage.bufferPoints[m]);
-			csPointRender.bindBuffer(&theStorage.bufferPartition[m]);
-			//GLuint num_groups_x = theStorage.numPointsInBuff[m] / csPointRender.m_szx/ pGlob->wrkLoad;  // max 65535
-			//GLuint num_groups_y = 1;
+		for (int m = 0; m < pst->GetNumBuffersInUse(); m++) {
+			csPointRender.bindBuffer(pst->GetPointBuffer(m));
+			csPointRender.bindBuffer(pst->GetPartitionBuffer(m));
 			GLuint num_groups_x = 1;
-			GLuint num_groups_y = (theStorage.numPointsInBuff[m] / csPointRender.m_szx / pGlob.wrkLoad);
+			GLuint num_groups_y = (pst->GetNumPointsInBuffer(m) / csPointRender.m_szx / pGlob.wrkLoad);
 			glDispatchCompute(num_groups_x, num_groups_y, 1);
 			glMemoryBarrier(GL_ALL_BARRIER_BITS);
 			SSBBuffer::checkError();
 		}
 		glUseProgram(0);
-		//GLsync sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-		//int ret = glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
 		SSBBuffer::checkError();
-		//std::cout << std::this_thread::get_id() << std::endl;
 	}
 
 	// post proc
-	float Vew2World4x4[16];
-	pCam->GetVew2World4x4(Vew2World4x4);
-	bufferView2World.setData(Vew2World4x4, 16 * sizeof(float));
-	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
-	glUseProgram(csPostProc.m_program);
-	csPostProc.setBufferBinding(&bufferZMap, 1);
-	csPostProc.setBufferBinding(&bufferZMapPost, 2);
-	csPostProc.bindBuffer(&bufferParams);
-	csPostProc.bindBuffer(&bufferZMap);
-	csPostProc.bindBuffer(&bufferZMapPost);
-	csPostProc.bindBuffer(&bufferView2World);
-	csPostProc.bindBuffer(&bufferDebug);
-	glDispatchCompute(sMaxW / 32, sMaxH / 32, 1);
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	{
+		float Vew2World4x4[16];
+		pCam->GetVew2World4x4(Vew2World4x4);
+		bufferView2World.setData(Vew2World4x4, 16 * sizeof(float));
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		glMemoryBarrier(GL_ALL_BARRIER_BITS);
+		glUseProgram(csPostProc.m_program);
+		csPostProc.setBufferBinding(&bufferZMap, 1);
+		csPostProc.setBufferBinding(&bufferZMapPost, 2);
+		csPostProc.bindBuffer(&bufferParams);
+		csPostProc.bindBuffer(&bufferZMap);
+		csPostProc.bindBuffer(&bufferZMapPost);
+		csPostProc.bindBuffer(&bufferView2World);
+		csPostProc.bindBuffer(&bufferDebug);
+		glDispatchCompute(sMaxW / 32, sMaxH / 32, 1);
+		glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	}
 
 	glUseProgram(0);
-
-
 
 	// test 
 #if 0
@@ -378,17 +229,16 @@ void ComputeRun(int sw__, int sh__)
 	n_call++;
 }
 
-#if 0
-void SetPointData(void *pData, int num)
+void Compute_AddPoint(float x, float y, float z, float w)
 {
-	sNumOfPoints = num;
-	theStorage.bufferPoints[0].setData(pData, num * sizeof(CPoint));
-	theStorage.numPointsInBuff[0] = num;
-	theStorage.numInUse = 1;
-	gHasPoints = 1;
-	SSBBuffer::checkError();
+	PointStorage::GetInstatnce()->SetPoint(x, y, z, w);
 }
-#endif
+
+void Compute_DoneAddPoints()
+{
+	PointStorage::GetInstatnce()->DoneAddPoints();
+}
+
 
 
 

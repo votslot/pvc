@@ -50,6 +50,9 @@
     <ClInclude Include="..\shaders\ginclude.h">
       <Filter>pcloud\shaders</Filter>
     </ClInclude>
+    <ClInclude Include="..\lib\storage.h">
+      <Filter>lib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gtile.cpp">
@@ -87,6 +90,9 @@
     </ClCompile>
     <ClCompile Include="..\pcloud\partition.cpp">
       <Filter>pcloud</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\storage.cpp">
+      <Filter>lib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

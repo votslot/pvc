@@ -190,6 +190,7 @@
     <ClInclude Include="..\lib\camera.h" />
     <ClInclude Include="..\lib\cbuff.h" />
     <ClInclude Include="..\lib\compute.h" />
+    <ClInclude Include="..\lib\storage.h" />
     <ClInclude Include="..\lib\vec3d.h" />
     <ClInclude Include="..\pcloud\pcloud.h" />
     <ClInclude Include="..\shaders\ginclude.h" />
@@ -203,6 +204,7 @@
     <ClCompile Include="..\lib\cbuff.cpp" />
     <ClCompile Include="..\lib\compute.cpp" />
     <ClCompile Include="..\lib\sdl-main.cpp" />
+    <ClCompile Include="..\lib\storage.cpp" />
     <ClCompile Include="..\lib\trisample.cpp" />
     <ClCompile Include="..\lib\wave-test.cpp" />
     <ClCompile Include="..\pcloud\las.cpp" />

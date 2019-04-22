@@ -143,10 +143,6 @@ R""(
 		{
 		    uint col =  zMapIn[shift] & 0xFF;
 		    uint zi  = (zMapIn[shift]>>8) & 0x00FFFFFF;
-			/*
-			float zff =  float(zi)/16777215.0;
-			float zf  =  (globs.zFar - globs.zNear )*zff;
-			*/
 			float zf  =  (globs.zFar - globs.zNear )*float(zi)/16777215.0;
 			float xf = (float(xx) - globs.screenX * 0.5) /globs.scrMin;
 			float yf = (float(yy) - globs.screenY * 0.5) /globs.scrMin;
@@ -155,10 +151,9 @@ R""(
 			vec4 dr =  vec4( View2World[2][0],View2World[2][1],View2World[2][2],1);
 			vec4 pos = vec4( View2World[3][0],View2World[3][1],View2World[3][2],1);
 			vec4 res = pos + ( rt * xf + up * yf + globs.zNear * dr) * (zf/ globs.zNear);
-			float colorV =128 + 128.0 * (res.z - globs.bbMinZ)/(globs.bbMaxZ - globs.bbMinZ);
+			float colorV =128  + 128.0 * (res.z - globs.bbMinZ)/(globs.bbMaxZ - globs.bbMinZ);
 			uint colorI = uint(colorV);
 			zMapOut[shift] = colorI | (colorI<<8) | ( colorI<<16);
-			//zMapOut[shift] = 0x001010;
 		}else
 		{
 			zMapOut[shift] = 0x800000;

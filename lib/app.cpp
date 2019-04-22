@@ -88,7 +88,7 @@ void CloudImpl::OnDone()
 	float cy = (maxY + minY) *0.5f;
 	float cz = (maxZ + minZ) *0.5f;
 
-	Compute_DoneAddPoits();
+	Compute_DoneAddPoints();
 	Camera *pCam = Camera::GetCamera();
 	pCam->SetPivotCamera(0.0f, 0.0f, maxD*2.0f, cx, cy, cz);
 	pCam->m_zFar = maxD * 4.0f;

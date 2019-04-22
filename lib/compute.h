@@ -4,6 +4,6 @@
 unsigned int ComputeInit(int sw, int sh);
 void ComputeRun(int sw, int sh);
 void Compute_AddPoint(float x, float y, float z, float w);
-void Compute_DoneAddPoits();
+void Compute_DoneAddPoints();
 
 #endif
