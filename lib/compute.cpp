@@ -1,6 +1,9 @@
 ﻿#include <iostream>
 #include <thread>
 #include <assert.h>
+#include <tuple>
+#include <vector>
+#include <algorithm>
 #include "GL\\glew.h"
 
 #include "cpoints.h"
@@ -25,6 +28,7 @@ static const int sMaxW = 2048;
 static const int sMaxH = 2048;
 GlobalParams pGlob;
 
+//std::tuple<SSBBuffer, SSBBuffer, SSBBuffer> buffer;
 
 static   SSBBuffer bufferParams;
 static   SSBBuffer bufferDebug;
@@ -43,6 +47,9 @@ int gRunWaveTest = 0;
 
 #include "..\shaders\test.cs.glsl"
 #include "..\shaders\post-proc.cs.glsl"
+
+
+
 
 GLuint ComputeInit(int sw,int sh)
 {
@@ -162,32 +169,18 @@ void ComputeRun(int sw__, int sh__)
 	bufferMatrView4x4.setData(matrView4x4, 16 * sizeof(float));
 	
 	// clean dst zMap buffer
-	glUseProgram(csCleanRGB.m_program);
-	csCleanRGB.bindBuffer(&bufferZMap);
-	csCleanRGB.bindBuffer(&bufferParams);
-	glDispatchCompute(sMaxW /32, sMaxH/32, 1);
-	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	csCleanRGB.execute(sMaxW / 32, sMaxH / 32, 1, { &bufferParams, &bufferZMap } );
 
 	// Render points
-	if (pst->IsReady()) 
+	if (pst->IsReady())
 	{
-		glUseProgram(csPointRender.m_program);
-		csPointRender.bindBuffer(&bufferParams);
-		csPointRender.bindBuffer(&bufferDebug);
-		csPointRender.bindBuffer(&bufferZMap);
-		csPointRender.bindBuffer(&bufferMatrView4x4);
-
 		for (int m = 0; m < pst->GetNumBuffersInUse(); m++) {
-			csPointRender.bindBuffer(pst->GetPointBuffer(m));
-			csPointRender.bindBuffer(pst->GetPartitionBuffer(m));
+			SSBBuffer *pPoints     = pst->GetPointBuffer(m);
+			SSBBuffer *pPartitions = pst->GetPartitionBuffer(m);
 			GLuint num_groups_x = 1;
 			GLuint num_groups_y = (pst->GetNumPointsInBuffer(m) / csPointRender.m_szx / pGlob.wrkLoad);
-			glDispatchCompute(num_groups_x, num_groups_y, 1);
-			glMemoryBarrier(GL_ALL_BARRIER_BITS);
-			SSBBuffer::checkError();
+			csPointRender.execute(num_groups_x, num_groups_y, 1, { &bufferParams,&bufferDebug,pPoints,&bufferZMap,&bufferMatrView4x4,pPartitions });
 		}
-		glUseProgram(0);
-		SSBBuffer::checkError();
 	}
 
 	// post proc
@@ -195,21 +188,8 @@ void ComputeRun(int sw__, int sh__)
 		float Vew2World4x4[16];
 		pCam->GetVew2World4x4(Vew2World4x4);
 		bufferView2World.setData(Vew2World4x4, 16 * sizeof(float));
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		glMemoryBarrier(GL_ALL_BARRIER_BITS);
-		glUseProgram(csPostProc.m_program);
-		csPostProc.setBufferBinding(&bufferZMap, 1);
-		csPostProc.setBufferBinding(&bufferZMapPost, 2);
-		csPostProc.bindBuffer(&bufferParams);
-		csPostProc.bindBuffer(&bufferZMap);
-		csPostProc.bindBuffer(&bufferZMapPost);
-		csPostProc.bindBuffer(&bufferView2World);
-		csPostProc.bindBuffer(&bufferDebug);
-		glDispatchCompute(sMaxW / 32, sMaxH / 32, 1);
-		glMemoryBarrier(GL_ALL_BARRIER_BITS);
+		csPostProc.execute(sMaxW / 32, sMaxH / 32, 1, { &bufferParams ,&bufferZMap,&bufferZMapPost,&bufferView2World,&bufferDebug });
 	}
-
-	glUseProgram(0);
 
 	// test 
 #if 0

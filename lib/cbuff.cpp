@@ -188,6 +188,27 @@ void CSShader::bindBuffer(const BaseBuffer *pBuff)
 	pBuff->bind(n);
 }
 
+void  CSShader::execute(int x, int y, int z, std::initializer_list <SSBBuffer*> inputs) 
+{
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	glUseProgram(m_program);
+
+	int i = 0;
+	for (SSBBuffer* bf : inputs) {
+		bf->bind(i);
+		i++;
+	}
+
+	glDispatchCompute(x, y, z);
+    glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	glUseProgram(0);
+}
+
+
+
+
+
 
 
 

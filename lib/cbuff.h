@@ -1,5 +1,9 @@
 #include <iostream>
+#include <tuple>
+#include <algorithm>
 #include "GL/glew.h"
+
+
 
 class BaseBuffer 
 {
@@ -23,6 +27,8 @@ public:
 	void getData(unsigned int sizeInBytes, void *pOut);
 	static unsigned int getMaxSizeInBytes();
 };
+
+
 
 class TexR32f :public BaseBuffer {
 public:
@@ -57,4 +63,8 @@ public:
 	void initFromSource(const char *pSrc);
 	void setBufferBinding(const BaseBuffer *pBuff, int bIndex);
 	void bindBuffer(const BaseBuffer *pBuff);
+
+	void SetBuffer() {}
+	void execute(int x, int y, int z, std::initializer_list <SSBBuffer*> inputs);
+	
 };
