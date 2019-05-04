@@ -37,10 +37,12 @@ static   SSBBuffer bufferZMapPost;
 static   SSBBuffer bufferMatrView4x4;
 static   SSBBuffer bufferClut;
 static   SSBBuffer bufferView2World;
+static   SSBBuffer bufferColorizeData;
 
 static CSShader csPointRender;
 static CSShader csCleanRGB;
 static CSShader csPostProc;
+static CSShader csColorize;
 
 int gHasPoints = 0; 
 int gRunWaveTest = 0;
@@ -54,47 +56,36 @@ int gRunWaveTest = 0;
 GLuint ComputeInit(int sw,int sh)
 {
 	PointStorage  * pst = PointStorage::GetInstatnce();
+	pst->Init();
+
     // clean shader
 	csCleanRGB.initFromSource(cs_clean.c_str());
-	csCleanRGB.setBufferBinding(&bufferParams, 0);
-	csCleanRGB.setBufferBinding(&bufferZMap, 1);
-
 	// render points shader
-	pst->Init();
 	csPointRender.initFromSource(cs_render_points.c_str());
-	csPointRender.setBufferBinding(&bufferParams,  0);
-	csPointRender.setBufferBinding(&bufferDebug,   1);
-	//for (int m = 0; m < theStorage.sMaxBuffs; m++)
-	for (int m = 0; m < pst->getNumAvailableBuffers(); m++)
-	{
-		csPointRender.setBufferBinding(pst->GetPointBuffer(m), 2);
-		csPointRender.setBufferBinding(pst->GetPartitionBuffer(m), 5);
-	}
-	csPointRender.setBufferBinding(&bufferZMap, 3);
-	csPointRender.setBufferBinding(&bufferMatrView4x4, 4);
-
 	//post process shader
 	csPostProc.initFromSource(cs_postproc_w.c_str());
-	csPostProc.setBufferBinding(&bufferParams, 0);
-	csPostProc.setBufferBinding(&bufferZMap, 1);
-	csPostProc.setBufferBinding(&bufferZMapPost, 2);
-	csPostProc.setBufferBinding(&bufferView2World, 3);
-	csPostProc.setBufferBinding(&bufferDebug, 4);
-
+	// colorization shader
+	csColorize.initFromSource(cs_colorize.c_str());
+	
+	//
 	bufferParams.init();
+	bufferParams.setData(&pGlob, sizeof(GlobalParams));
+	//
 	bufferView2World.init();
+	bufferView2World.allocate(16 * sizeof(float));
 	//
 	bufferZMap.init();
 	bufferZMap.allocate(sMaxW*sMaxH *sizeof(int));
+	//
 	bufferZMapPost.init();
 	bufferZMapPost.allocate(sMaxW*sMaxH * sizeof(int));
 	//
 	bufferMatrView4x4.init();
 	bufferMatrView4x4.allocate(16 * sizeof(float));
-	bufferView2World.init();
-	bufferView2World.allocate(16 * sizeof(float));
-	bufferParams.setData(&pGlob, sizeof(GlobalParams));
-
+	//
+	bufferColorizeData.init();
+	bufferColorizeData.allocate(sizeof(ColorizeData));
+	
 	//clut
 	for (int i = 0; i < 1024; i+=4) 
 	{
@@ -144,6 +135,17 @@ GLuint GetClutData()
 	return bufferClut.gb;
 }
 
+static void Colorize(PointStorage  * pst)
+{
+	ColorizeData cd;
+	cd.xMin = pst->GetXMin();
+	cd.xMax = pst->GetXMax();
+	cd.yMin = pst->GetYMin();
+	cd.yMax = pst->GetYMax();
+	bufferColorizeData.setData(&cd, sizeof(ColorizeData));
+	csColorize.execute(sMaxW / 32, sMaxH / 32, 1, { &bufferColorizeData, &bufferZMap,&bufferDebug });
+}
+
 void ComputeRun(int sw__, int sh__)
 {
 	static int n_call = 0;
@@ -171,10 +173,16 @@ void ComputeRun(int sw__, int sh__)
 	// clean dst zMap buffer
 	csCleanRGB.execute(sMaxW / 32, sMaxH / 32, 1, { &bufferParams, &bufferZMap } );
 
+	//Colorize
+	if (pst->IsReady())
+	{
+		Colorize(pst);
+	}
+
 	// Render points
 	if (pst->IsReady())
 	{
-		for (int m = 0; m < pst->GetNumBuffersInUse(); m++) {
+			for (int m = 0; m < pst->GetNumBuffersInUse(); m++) {
 			SSBBuffer *pPoints     = pst->GetPointBuffer(m);
 			SSBBuffer *pPartitions = pst->GetPartitionBuffer(m);
 			GLuint num_groups_x = 1;

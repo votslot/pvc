@@ -18,6 +18,10 @@ public:
 	int numPartitionsInBuff[sMaxBuffs];
 	SSBBuffer bufferPoints[sMaxBuffs];
 	SSBBuffer bufferPartition[sMaxBuffs];
+	float bbXMin = FLT_MAX;
+	float bbXMax = FLT_MIN;
+	float bbYMin = FLT_MAX;
+	float bbYMax = FLT_MIN;
 	float bbZMin = FLT_MAX;
 	float bbZMax = FLT_MIN;
 
@@ -69,6 +73,10 @@ public:
 		pDest[1] = y;
 		pDest[2] = z;
 		pDest[3] = w;
+		if (x < bbXMin) bbXMin = x;
+		if (x > bbXMax) bbXMax = x;
+		if (y < bbYMin) bbYMin = y;
+		if (y > bbYMax) bbYMax = y;
 		if (z < bbZMin) bbZMin = z;
 		if (z > bbZMax) bbZMax = z;
 		numPointsInTemp++;
@@ -138,11 +146,11 @@ public:
 	}
 
 	//-------------------
-	float GetXMin() { return 0.0f; }
-	float GetYMin() { return 0.0f; }
+	float GetXMin() { return bbXMin; }
+	float GetYMin() { return bbYMin; }
 	float GetZMin() { return bbZMin; }
-	float GetXMax() { return 0.0f; }
-	float GetYMax() { return 0.0f; }
+	float GetXMax() { return bbXMax; }
+	float GetYMax() { return bbYMax; }
 	float GetZMax() { return bbZMax; }
 
 	bool IsReady() 

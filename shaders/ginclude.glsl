@@ -43,5 +43,18 @@ R""(
 	};
 )"";
 
+const std::string  cs_struct_colorize = 
+R""(
+struct ColorizeData 
+	{
+		float xMin;
+		float xMax;
+		float yMin;
+		float yMax;
+		float zMin;
+		float zMaz;
+	};
+)"";
+
 #endif
 

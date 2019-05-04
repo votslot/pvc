@@ -59,6 +59,7 @@ R""(
 			atomicMin(zMap[shift],zAsInt);
 		}
 		// debuf
+		/*
 		if(color==63)
 		{
 			debugOut[0] =  pt.z;
@@ -68,6 +69,7 @@ R""(
 			debugOut[4] =  444.0;
 			debugOut[5] =  555.0;
 		}
+		*/
 		
 	}
  }       

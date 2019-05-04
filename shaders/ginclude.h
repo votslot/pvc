@@ -33,5 +33,16 @@
 		unsigned int ndx;
 		float pad1;
 	};
+
+	struct ColorizeData 
+	{
+		float xMin;
+		float xMax;
+		float yMin;
+		float yMax;
+		float zMin;
+		float zMaz;
+	};
+
 #endif
 
