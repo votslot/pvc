@@ -182,6 +182,10 @@ public:
 	{
 		return numInUse;
 	}
+	int GetZBits()
+	{
+		return 24;
+	}
 };
 
 static  PointStorageImpl theStorage;

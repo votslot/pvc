@@ -13,12 +13,16 @@ R""(
  {    
     const uint xx = gl_GlobalInvocationID.x;
     const uint yy = gl_GlobalInvocationID.y;
+	dbOut[0] = params.xMin;
+	dbOut[1] = params.xMax;
+	dbOut[2] = params.yMin;
+	dbOut[3] = params.yMax;
  }
 
 )"";
 
 
-const std::string cs_postproc_w = cs_glversion + cs_structs +
+const std::string cs_postproc_w = cs_glversion + cs_const_val + cs_structs +
 R""(
  layout(local_size_x = 32,local_size_y =32) in; 
  layout(std430,binding = 0) buffer in1  {  GlobalParams globs; };
@@ -28,7 +32,9 @@ R""(
  layout(std430,binding = 4) buffer dbg  {  float dbOut[];}; 
 
  void main()                           
- {    
+ {   
+    const uint msk_z = (1 << cZbuffBits) - 1;
+	const uint msk_v = (1 << (32 - cZbuffBits)) -1 ;
     const uint xx = gl_GlobalInvocationID.x;
     const uint yy = gl_GlobalInvocationID.y;
 	uint ww = uint(globs.screenX);
@@ -38,9 +44,8 @@ R""(
 	    uint shift = xx +  ww* yy;
 		if(zMapIn[shift] !=  0xFFFFFF00)
 		{
-		    uint col =  zMapIn[shift] & 0xFF;
 		    uint zi  = (zMapIn[shift]>>8) & 0x00FFFFFF;
-			float zf  =  (globs.zFar - globs.zNear )*float(zi)/16777215.0;
+			float zf  =  (globs.zFar - globs.zNear )*float(zi)/float(msk_z);
 			float xf = (float(xx) - globs.screenX * 0.5) /globs.scrMin;
 			float yf = (float(yy) - globs.screenY * 0.5) /globs.scrMin;
 			vec4 rt =  vec4( View2World[0][0],View2World[0][1],View2World[0][2],1);
@@ -48,9 +53,10 @@ R""(
 			vec4 dr =  vec4( View2World[2][0],View2World[2][1],View2World[2][2],1);
 			vec4 pos = vec4( View2World[3][0],View2World[3][1],View2World[3][2],1);
 			vec4 res = pos + ( rt * xf + up * yf + globs.zNear * dr) * (zf/ globs.zNear);
-			float colorV =128  + 128.0 * (res.z - globs.bbMinZ)/(globs.bbMaxZ - globs.bbMinZ);
-			uint colorI = uint(colorV);
-			zMapOut[shift] = colorI | (colorI<<8) | ( colorI<<16);
+			uint colorX = uint(  255.0 * (res.x - globs.bbMinX)/(globs.bbMaxX - globs.bbMinX));
+			uint colorY = uint(  255.0 * (res.y - globs.bbMinY)/(globs.bbMaxY - globs.bbMinY));
+			uint colorZ = uint( 128  + 128.0 * (res.z - globs.bbMinZ)/(globs.bbMaxZ - globs.bbMinZ));
+			zMapOut[shift] =  colorX | (colorY<<8) | ( colorZ<<16);
 		}else
 		{
 			zMapOut[shift] = 0x800000;

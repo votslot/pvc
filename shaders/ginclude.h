@@ -2,18 +2,37 @@
 #ifndef _G_INCLUDE_H
 #define _G_INCLUDE_H
 
+
+typedef unsigned int uint;
+
+
+#ifndef FOR_SHADER
+#define FOR_SHADER 0
+#endif
+
+#include "ginclude-shared.h"
+
+#ifdef FOR_SHADER
+#undef FOR_SHADER 
+#endif
+
+#if 0
 	struct  GlobalParams
 	{
 		float screenX;
 		float screenY;
 		float zNear;
 		float zFar;
-		float zScale;
+		float zRange;
 		float maxDimension;
 		unsigned int wrkLoad;
 		float px;
 		float py;
 		float pz;
+		float bbMinX;
+		float bbMaxX;
+		float bbMinY;
+		float bbMaxY;
 		float bbMinZ;
 		float bbMaxZ;
 		float scrMin;
@@ -22,6 +41,7 @@
 		float pad2;
 	};
 	
+	/*
 	struct Partition
 	{
 		float cx;
@@ -31,6 +51,18 @@
 		unsigned int first;
 		unsigned int last;
 		unsigned int ndx;
+		float pad1;
+	};
+	*/
+	struct Partition
+	{
+		float cx;
+		float cy;
+		float cz;
+		float sz;
+		uint first;
+		uint last;
+		uint ndx;
 		float pad1;
 	};
 
@@ -43,6 +75,7 @@
 		float zMin;
 		float zMaz;
 	};
+#endif
 
 #endif
 

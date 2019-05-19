@@ -53,6 +53,15 @@
     <ClInclude Include="..\lib\storage.h">
       <Filter>lib</Filter>
     </ClInclude>
+    <ClInclude Include="..\lib\colorize.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shaders\strdecl.h">
+      <Filter>pcloud\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shaders\ginclude-shared.h">
+      <Filter>pcloud\shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gtile.cpp">
@@ -92,6 +101,9 @@
       <Filter>pcloud</Filter>
     </ClCompile>
     <ClCompile Include="..\lib\storage.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\colorize.cpp">
       <Filter>lib</Filter>
     </ClCompile>
   </ItemGroup>

@@ -213,25 +213,25 @@ void Camera::GetProjectionMat4x4(float screenX, float screenY, float zNear, floa
 	float toScreen[4][4];
 
 	float scm = (screenX < screenY) ? screenX : screenY;
-	toScreen[0][0] = 1.0;
-	toScreen[1][0] = 0.0;
-	toScreen[2][0] = 0.5*screenX / (scm*zNear);
-	toScreen[3][0] = 0.5*screenX / scm;
+	toScreen[0][0] = 1.0f;
+	toScreen[1][0] = 0.0f;
+	toScreen[2][0] = 0.5f*screenX / (scm*zNear);
+	toScreen[3][0] = 0.5f*screenX / scm;
 
-	toScreen[0][1] = 0.0;
-	toScreen[1][1] = 1.0;
-	toScreen[2][1] = 0.5*screenY / (scm*zNear);
-	toScreen[3][1] = 0.5*screenY / scm;
+	toScreen[0][1] = 0.0f;
+	toScreen[1][1] = 1.0f;
+	toScreen[2][1] = 0.5f*screenY / (scm*zNear);
+	toScreen[3][1] = 0.5f*screenY / scm;
 
-	toScreen[0][2] = 0.0;
-	toScreen[1][2] = 0.0;
-	toScreen[2][2] = 1.0 / (zFar - zNear);
+	toScreen[0][2] = 0.0f;
+	toScreen[1][2] = 0.0f;
+	toScreen[2][2] = 1.0f / (zFar - zNear);
 	toScreen[3][2] = -zNear / (zFar - zNear);
 
-	toScreen[0][3] = 0.0;
-	toScreen[1][3] = 0.0;
-	toScreen[2][3] = 1.0 / (scm*zNear);
-	toScreen[3][3] = 1.0 / scm;
+	toScreen[0][3] = 0.0f;
+	toScreen[1][3] = 0.0f;
+	toScreen[2][3] = 1.0f / (scm*zNear);
+	toScreen[3][3] = 1.0f / scm;
 	
 	memcpy(SP, toScreen, 16 * sizeof(float));
 	

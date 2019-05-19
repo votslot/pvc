@@ -1,27 +1,23 @@
 
 
-#ifndef _G_INCLUDE_GLSL
-#define _G_INCLUDE_GLSL
 
-#ifndef FOR_SHADER
-#define FOR_SHADER 1
+
+#if ( FOR_SHADER==1)
+#include <string>
+const std::string endline = "\n";
+#ifndef  DECLARE_STRUCT_AS_STRING
+	#define DECLARE_STRUCT_AS_STRING(_stringname, _v)  const std::string _stringname=#_v+endline;
 #endif
 
-const std::string cs_glversion = 
-R""(
-	#version 430 core 
-)"";
-
-#include "ginclude-shared.h"
-
-#ifdef FOR_SHADER
-#undef FOR_SHADER 
+#else
+#ifndef  DECLARE_STRUCT_AS_STRING
+	#define DECLARE_STRUCT_AS_STRING(_stringname, _v) _v
 #endif
-
-#if 0
- DECLARE_STRUCT_AS_STRING(cs_macro_zbits, 
-	#define mZbits 24
- );
+#endif 
+ 
+DECLARE_STRUCT_AS_STRING(cs_const_val,
+	const uint cZbuffBits = 24;
+);
 
  DECLARE_STRUCT_AS_STRING(cs_structs, 
 	struct  GlobalParams
@@ -64,6 +60,7 @@ R""(
  DECLARE_STRUCT_AS_STRING(cs_struct_colorize, 
 	struct ColorizeData 
 	{
+		float blah;
 		float xMin;
 		float xMax;
 		float yMin;
@@ -72,9 +69,10 @@ R""(
 		float zMaz;
 	};);
 
+#ifdef  DECLARE_STRUCT_AS_STRING
+#undef  DECLARE_STRUCT_AS_STRING
+#endif 
 
-#define DECLARE_STRUCT_AS_STRING(_stringname, _v) _v
-#endif
 
-#endif
+
 

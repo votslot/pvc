@@ -189,11 +189,14 @@
   <ItemGroup>
     <ClInclude Include="..\lib\camera.h" />
     <ClInclude Include="..\lib\cbuff.h" />
+    <ClInclude Include="..\lib\colorize.h" />
     <ClInclude Include="..\lib\compute.h" />
     <ClInclude Include="..\lib\storage.h" />
     <ClInclude Include="..\lib\vec3d.h" />
     <ClInclude Include="..\pcloud\pcloud.h" />
+    <ClInclude Include="..\shaders\ginclude-shared.h" />
     <ClInclude Include="..\shaders\ginclude.h" />
+    <ClInclude Include="..\shaders\strdecl.h" />
     <ClInclude Include="..\winui\ui.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -202,6 +205,7 @@
     <ClCompile Include="..\lib\app.cpp" />
     <ClCompile Include="..\lib\camera.cpp" />
     <ClCompile Include="..\lib\cbuff.cpp" />
+    <ClCompile Include="..\lib\colorize.cpp" />
     <ClCompile Include="..\lib\compute.cpp" />
     <ClCompile Include="..\lib\sdl-main.cpp" />
     <ClCompile Include="..\lib\storage.cpp" />

@@ -10,6 +10,7 @@
 #include "cbuff.h"
 #include "camera.h"
 #include "storage.h"
+#include "colorize.h"
 #include "..\pcloud\pcloud.h"
 #include "..\shaders\ginclude.h"
 
@@ -37,12 +38,10 @@ static   SSBBuffer bufferZMapPost;
 static   SSBBuffer bufferMatrView4x4;
 static   SSBBuffer bufferClut;
 static   SSBBuffer bufferView2World;
-static   SSBBuffer bufferColorizeData;
 
 static CSShader csPointRender;
 static CSShader csCleanRGB;
 static CSShader csPostProc;
-static CSShader csColorize;
 
 int gHasPoints = 0; 
 int gRunWaveTest = 0;
@@ -52,11 +51,27 @@ int gRunWaveTest = 0;
 
 
 
+#define DECLARE_VAl_AS_STRING1(_a,_v) _a ##_v 
+#define someVal 24
 
 GLuint ComputeInit(int sw,int sh)
 {
 	PointStorage  * pst = PointStorage::GetInstatnce();
 	pst->Init();
+
+#if 1
+	//DECLARE_STRUCT_AS_STRING1(#, define xaxa 123)
+	const std::string endline = "\n";
+	const std::string xaxa = std::to_string(someVal) + endline;
+	uint msk_z = (1 << cZbuffBits) - 1;
+	uint msk_v = (1 << (32 - cZbuffBits)) -1 ;
+	uint msk_z1 = ~msk_v;
+	printf("msk_z1=%x  msk_v=%x \n", msk_z1, msk_v);
+	//std::cout << cZbuffBits << std::endl;
+#endif
+	std::cout << cs_render_points.c_str() << std::endl;
+
+
 
     // clean shader
 	csCleanRGB.initFromSource(cs_clean.c_str());
@@ -64,8 +79,6 @@ GLuint ComputeInit(int sw,int sh)
 	csPointRender.initFromSource(cs_render_points.c_str());
 	//post process shader
 	csPostProc.initFromSource(cs_postproc_w.c_str());
-	// colorization shader
-	csColorize.initFromSource(cs_colorize.c_str());
 	
 	//
 	bufferParams.init();
@@ -83,8 +96,6 @@ GLuint ComputeInit(int sw,int sh)
 	bufferMatrView4x4.init();
 	bufferMatrView4x4.allocate(16 * sizeof(float));
 	//
-	bufferColorizeData.init();
-	bufferColorizeData.allocate(sizeof(ColorizeData));
 	
 	//clut
 	for (int i = 0; i < 1024; i+=4) 
@@ -135,16 +146,6 @@ GLuint GetClutData()
 	return bufferClut.gb;
 }
 
-static void Colorize(PointStorage  * pst)
-{
-	ColorizeData cd;
-	cd.xMin = pst->GetXMin();
-	cd.xMax = pst->GetXMax();
-	cd.yMin = pst->GetYMin();
-	cd.yMax = pst->GetYMax();
-	bufferColorizeData.setData(&cd, sizeof(ColorizeData));
-	csColorize.execute(sMaxW / 32, sMaxH / 32, 1, { &bufferColorizeData, &bufferZMap,&bufferDebug });
-}
 
 void ComputeRun(int sw__, int sh__)
 {
@@ -155,12 +156,16 @@ void ComputeRun(int sw__, int sh__)
 	pGlob.screenY   = (float)pCam->GetScreenY();
 	pGlob.zNear     = (float)pCam->m_zNear;
 	pGlob.zFar      = (float)pCam->m_zFar;
-	pGlob.zScale = 16777215.0f / (pCam->m_zFar - pCam->m_zNear);
+	pGlob.zRange = (float)(1 << 24); //16777215.0f;// / (pCam->m_zFar - pCam->m_zNear);
 	pGlob.maxDimension = (float)pCam->m_MaxDimension;
 	pGlob.wrkLoad = 64;
 	pGlob.px = pCam->m_P[0];
 	pGlob.py = pCam->m_P[1];
 	pGlob.pz = pCam->m_P[2];
+	pGlob.bbMinX = pst->GetXMin();
+	pGlob.bbMaxX = pst->GetXMax(); 
+	pGlob.bbMinY = pst->GetYMin();
+	pGlob.bbMaxY = pst->GetYMax();
 	pGlob.bbMinZ = pst->GetZMin();
 	pGlob.bbMaxZ = pst->GetZMax();
 	pGlob.scrMin = (pGlob.screenX < pGlob.screenY) ? pGlob.screenX : pGlob.screenY;
@@ -173,22 +178,17 @@ void ComputeRun(int sw__, int sh__)
 	// clean dst zMap buffer
 	csCleanRGB.execute(sMaxW / 32, sMaxH / 32, 1, { &bufferParams, &bufferZMap } );
 
-	//Colorize
-	if (pst->IsReady())
-	{
-		Colorize(pst);
-	}
-
 	// Render points
 	if (pst->IsReady())
 	{
-			for (int m = 0; m < pst->GetNumBuffersInUse(); m++) {
-			SSBBuffer *pPoints     = pst->GetPointBuffer(m);
-			SSBBuffer *pPartitions = pst->GetPartitionBuffer(m);
-			GLuint num_groups_x = 1;
-			GLuint num_groups_y = (pst->GetNumPointsInBuffer(m) / csPointRender.m_szx / pGlob.wrkLoad);
-			csPointRender.execute(num_groups_x, num_groups_y, 1, { &bufferParams,&bufferDebug,pPoints,&bufferZMap,&bufferMatrView4x4,pPartitions });
-		}
+			for (int m = 0; m < pst->GetNumBuffersInUse(); m++)
+			{
+				SSBBuffer *pPoints     = pst->GetPointBuffer(m);
+				SSBBuffer *pPartitions = pst->GetPartitionBuffer(m);
+				GLuint num_groups_x = 1;
+				GLuint num_groups_y = (pst->GetNumPointsInBuffer(m) / csPointRender.m_szx / pGlob.wrkLoad);
+				csPointRender.execute(num_groups_x, num_groups_y, 1, { &bufferParams,&bufferDebug,pPoints,&bufferZMap,&bufferMatrView4x4,pPartitions });
+			}
 	}
 
 	// post proc
@@ -217,6 +217,12 @@ void ComputeRun(int sw__, int sh__)
 	n_call++;
 }
 
+////////////////////////////////////////////////////////////
+//
+//
+////////////////////////////////////////////////////////////
+
+
 void Compute_AddPoint(float x, float y, float z, float w)
 {
 	PointStorage::GetInstatnce()->SetPoint(x, y, z, w);
@@ -225,7 +231,11 @@ void Compute_AddPoint(float x, float y, float z, float w)
 void Compute_DoneAddPoints()
 {
 	PointStorage::GetInstatnce()->DoneAddPoints();
-}
+	IColorize* ic = IColorize::GetInstance();
+	ic->Init();
+	ic->DoColorize(PointStorage::GetInstatnce());
+};
+
 
 
 

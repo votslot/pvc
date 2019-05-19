@@ -1,4 +1,5 @@
 
+
 #include "ginclude.glsl"
 
 const std::string cs_clean = cs_glversion + cs_structs +
@@ -20,7 +21,7 @@ R""(
 )"";
 
 
-const std::string cs_render_points = cs_glversion + cs_structs +
+const std::string cs_render_points = cs_glversion + cs_const_val+ cs_structs + cs_structs_partition+
 R""(
  precision mediump float;
  layout(local_size_x = 64,local_size_y =1) in;   
@@ -30,9 +31,10 @@ R""(
  layout(std430,binding = 3) buffer zm   {  uint zMap[]; }; 
  layout(std430,binding = 4) buffer vv   {  mat4 World2View; };
  layout(std430,binding = 5) buffer pp   {  Partition partitions[]; }; 
-
  void main()                           
  {  
+	const uint msk_z = (1 << cZbuffBits) - 1;
+	const uint msk_v = (1 << (32 - cZbuffBits)) -1 ;
     Partition part = partitions[gl_GlobalInvocationID.y];
 	uint partColor = 8;//(part.ndx & 7) + 1;
 	float dx = globs.px -  part.cx;
@@ -54,11 +56,12 @@ R""(
 			uint xx = uint(vf.x/vf.w);
 			uint yy = uint(vf.y/vf.w);
 			uint shift = xx + yy * ( uint(globs.screenX));
-			uint zAsInt = uint((vf.z*16777215.0)) <<8;
-			zAsInt =  (zAsInt & 0xFFFFFF00 ) | ( color & 0xFF); // add color
+			//uint zAsInt = uint((vf.z*globs.zRange)) <<8;
+			uint zAsInt = uint(vf.z* float(msk_z)) <<(32-cZbuffBits);
+			zAsInt =  (zAsInt & (~ msk_v ) ) | ( color &  msk_v); // add color
 			atomicMin(zMap[shift],zAsInt);
 		}
-		// debuf
+		// debug
 		/*
 		if(color==63)
 		{
