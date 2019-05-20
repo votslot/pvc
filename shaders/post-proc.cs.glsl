@@ -44,7 +44,7 @@ R""(
 	    uint shift = xx +  ww* yy;
 		if(zMapIn[shift] !=  0xFFFFFF00)
 		{
-		    uint zi  = (zMapIn[shift]>>8) & 0x00FFFFFF;
+		    uint zi  = (zMapIn[shift]>>(32 - cZbuffBits)) & msk_z;
 			float zf  =  (globs.zFar - globs.zNear )*float(zi)/float(msk_z);
 			float xf = (float(xx) - globs.screenX * 0.5) /globs.scrMin;
 			float yf = (float(yy) - globs.screenY * 0.5) /globs.scrMin;

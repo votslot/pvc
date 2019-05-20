@@ -21,13 +21,14 @@ R""(
 )"";
 
 
-const std::string cs_render_points = cs_glversion + cs_const_val+ cs_structs + cs_structs_partition+
+const std::string cs_render_points = cs_glversion + cs_const_val+ cs_struct_point + cs_structs + cs_structs_partition+
 R""(
  precision mediump float;
  layout(local_size_x = 64,local_size_y =1) in;   
  layout(std430,binding = 0) buffer in1  {  GlobalParams globs; };
  layout(std430,binding = 1) buffer dbg  {  float debugOut[]; }; 
- layout(std430,binding = 2) buffer ptt  {  vec4 inputPoints[]; }; 
+// layout(std430,binding = 2) buffer ptt  {  vec4 inputPoints[]; }; 
+ layout(std430,binding = 2) buffer ptt  {  RenderPoint inputPoints[]; }; 
  layout(std430,binding = 3) buffer zm   {  uint zMap[]; }; 
  layout(std430,binding = 4) buffer vv   {  mat4 World2View; };
  layout(std430,binding = 5) buffer pp   {  Partition partitions[]; }; 
@@ -47,7 +48,7 @@ R""(
   	uint offset = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * gl_WorkGroupSize.x * globs.wrkLoad;
 	for( int loc = 0; loc < globs.wrkLoad; loc+=steps, offset += gl_WorkGroupSize.x*steps)
 	{
-	    vec4 pt  = inputPoints[offset] ;
+		RenderPoint pt = inputPoints[offset] ;
 		uint color = uint(pt.w);
 		vec4 vf =    World2View  * vec4(pt.x, pt.y, pt.z, 1.0) ;
 

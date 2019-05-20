@@ -196,7 +196,6 @@
     <ClInclude Include="..\pcloud\pcloud.h" />
     <ClInclude Include="..\shaders\ginclude-shared.h" />
     <ClInclude Include="..\shaders\ginclude.h" />
-    <ClInclude Include="..\shaders\strdecl.h" />
     <ClInclude Include="..\winui\ui.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />

@@ -22,7 +22,6 @@ public:
 	virtual float GetXMax() = 0;
 	virtual float GetYMax() = 0;
 	virtual float GetZMax() = 0;
-	virtual int GetZBits() = 0;
 	static PointStorage  * GetInstatnce();
 };
 

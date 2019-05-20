@@ -56,9 +56,6 @@
     <ClInclude Include="..\lib\colorize.h">
       <Filter>lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\shaders\strdecl.h">
-      <Filter>pcloud\shaders</Filter>
-    </ClInclude>
     <ClInclude Include="..\shaders\ginclude-shared.h">
       <Filter>pcloud\shaders</Filter>
     </ClInclude>

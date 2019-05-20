@@ -16,7 +16,7 @@ const std::string endline = "\n";
 #endif 
  
 DECLARE_STRUCT_AS_STRING(cs_const_val,
-	const uint cZbuffBits = 24;
+	const uint cZbuffBits = 16;
 );
 
  DECLARE_STRUCT_AS_STRING(cs_structs, 
@@ -43,6 +43,15 @@ DECLARE_STRUCT_AS_STRING(cs_const_val,
 		float pad1;
 		float pad2;
 	};);
+
+ DECLARE_STRUCT_AS_STRING(cs_struct_point,
+ struct RenderPoint
+ {
+	 float x;
+	 float y;
+	 float z;
+	 uint w;
+ };);
 
  DECLARE_STRUCT_AS_STRING(cs_structs_partition, 
 	 struct Partition
