@@ -28,7 +28,7 @@ DECLARE_STRUCT_AS_STRING(cs_const_val,
 		float zFar;
 		float zRange;
 		float maxDimension;
-		unsigned int wrkLoad;
+		uint wrkLoad;
 		float px;
 		float py;
 		float pz;
