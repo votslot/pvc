@@ -27,7 +27,6 @@ R""(
  layout(local_size_x = 64,local_size_y =1) in;   
  layout(std430,binding = 0) buffer in1  {  GlobalParams globs; };
  layout(std430,binding = 1) buffer dbg  {  float debugOut[]; }; 
-// layout(std430,binding = 2) buffer ptt  {  vec4 inputPoints[]; }; 
  layout(std430,binding = 2) buffer ptt  {  RenderPoint inputPoints[]; }; 
  layout(std430,binding = 3) buffer zm   {  uint zMap[]; }; 
  layout(std430,binding = 4) buffer vv   {  mat4 World2View; };
@@ -57,7 +56,6 @@ R""(
 			uint xx = uint(vf.x/vf.w);
 			uint yy = uint(vf.y/vf.w);
 			uint shift = xx + yy * ( uint(globs.screenX));
-			//uint zAsInt = uint((vf.z*globs.zRange)) <<8;
 			uint zAsInt = uint(vf.z* float(msk_z)) <<(32-cZbuffBits);
 			zAsInt =  (zAsInt & (~ msk_v ) ) | ( color &  msk_v); // add color
 			atomicMin(zMap[shift],zAsInt);
