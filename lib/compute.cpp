@@ -59,19 +59,7 @@ GLuint ComputeInit(int sw,int sh)
 	PointStorage  * pst = PointStorage::GetInstatnce();
 	pst->Init();
 
-#if 1
-	//DECLARE_STRUCT_AS_STRING1(#, define xaxa 123)
-	const std::string endline = "\n";
-	const std::string xaxa = std::to_string(someVal) + endline;
-	uint msk_z = (1 << cZbuffBits) - 1;
-	uint msk_v = (1 << (32 - cZbuffBits)) -1 ;
-	uint msk_z1 = ~msk_v;
-	printf("msk_z1=%x  msk_v=%x \n", msk_z1, msk_v);
-	//std::cout << cZbuffBits << std::endl;
-#endif
-	std::cout << cs_render_points.c_str() << std::endl;
-
-
+	//std::cout << cs_render_points.c_str() << std::endl;
 
     // clean shader
 	csCleanRGB.initFromSource(cs_clean.c_str());
