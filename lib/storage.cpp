@@ -5,7 +5,7 @@
 
 class PointStorageImpl : public PointStorage
 {
-	struct pointp4
+	struct  RenderPoint
 	{
 		float  x, y, z, w;
 	};
@@ -112,14 +112,14 @@ public:
 			numPartitions++;
 
 			// shuffle points
-			pointp4 *pPt = (pointp4*)pTemp;
+			RenderPoint *pPt = (RenderPoint*)pTemp;
 			if (pDt->numPoints == 4096)
 			{
 				for (int n = 0; n < 4096; n++)
 				{
 					int k1 = pDt->first + (rand() & 4095);
 					int k2 = pDt->first + (rand() & 4095);
-					pointp4 ptTemp = pPt[k1];
+					RenderPoint ptTemp = pPt[k1];
 					pPt[k1] = pPt[k2];
 					pPt[k2] = ptTemp;
 				}
