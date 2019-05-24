@@ -3,13 +3,33 @@
 #include "..\shaders\ginclude.h"
 #include "..\pcloud\pcloud.h"
 
+template <typename T>
+struct BdBox {
+	T xMin, xMax, yMin, yMax,zMin,zMax;
+	bool isReset;
+	BdBox() 
+	{
+		Reset();
+	}
+	void Reset() { isReset = true; }
+	void Add(T x, T y, T z) 
+	{
+		if (isReset) {
+			xMin = x; xMax = x; yMin = y; yMax = y; zMin = z; zMax = z;
+		}
+		if (x < xMin) xMin = x;
+		if (y < yMin) yMin = y;
+		if (z < zMin) zMin = z;
+		if (x > xMax) xMax = x;
+		if (y > yMax) yMax = y;
+		if (z > zMax) zMax = z;
+		isReset = false;
+	}
+};
+
 class PointStorageImpl : public PointStorage
 {
-	struct pointp4
-	{
-		float  x, y, z, w;
-	};
-
+	
 public:
 	static const int sMaxBuffs = 32;
 	static const int sMaxAllocSize = 1024 * 1024 * 128;
@@ -18,6 +38,8 @@ public:
 	int numPartitionsInBuff[sMaxBuffs];
 	SSBBuffer bufferPoints[sMaxBuffs];
 	SSBBuffer bufferPartition[sMaxBuffs];
+	BdBox<float>  bdGlob;
+	BdBox<float>  bdBuff;
 	float bbXMin = FLT_MAX;
 	float bbXMax = FLT_MIN;
 	float bbYMin = FLT_MAX;
@@ -56,12 +78,14 @@ public:
 			bufferPoints[i].init();
 			bufferPartition[i].init();
 		}
+		bdBuff.Reset();
 		bbZMin = FLT_MAX;
 		bbZMax = FLT_MIN;
 	}
 
 	void SetPoint(float x, float y, float z, float w)
 	{
+		bdBuff.Add(x, y, z);;
 		int ptSize = sizeof(float) * 4;
 		if ((sizeInTemp) >= maxBuffSz)
 		{
@@ -79,6 +103,7 @@ public:
 		if (y > bbYMax) bbYMax = y;
 		if (z < bbZMin) bbZMin = z;
 		if (z > bbZMax) bbZMax = z;
+		bdGlob.Add(x, y, z);
 		numPointsInTemp++;
 		sizeInTemp += ptSize;
 	}
@@ -112,14 +137,14 @@ public:
 			numPartitions++;
 
 			// shuffle points
-			pointp4 *pPt = (pointp4*)pTemp;
+			RenderPoint *pPt = (RenderPoint*)pTemp;
 			if (pDt->numPoints == 4096)
 			{
 				for (int n = 0; n < 4096; n++)
 				{
 					int k1 = pDt->first + (rand() & 4095);
 					int k2 = pDt->first + (rand() & 4095);
-					pointp4 ptTemp = pPt[k1];
+					RenderPoint ptTemp = pPt[k1];
 					pPt[k1] = pPt[k2];
 					pPt[k2] = ptTemp;
 				}
@@ -128,6 +153,7 @@ public:
 
 		DoPartitionXYZW_Float(pTemp, numPointsInTemp, OnDonePartition);
 		std::cout << "done" << std::endl;
+		BuildNormals((RenderPoint *)pTemp, numPointsInTemp, bdBuff);
 
 		bufferPoints[numInUse].setData(pTemp, sizeInTemp);
 		bufferPartition[numInUse].setData(pPartitions, numPartitions * sizeof(Partition));
@@ -138,6 +164,43 @@ public:
 		sizeInTemp = 0;
 		numPointsInTemp = 0;
 		numPartitions = 0;
+		bdBuff.Reset();
+	}
+
+	uint CombineBits(uint x, uint y, uint z)
+	{
+		uint res = 0;
+		for (int i = 0,t = 0; i < 10; i++,t+=3) 
+		{
+			uint xb = x & 1;
+			uint yb = y & 1;
+			uint zb = z & 1;
+			uint tmp  = (xb) | (yb << 1) | (zb << 2);
+			res |= (tmp<<t);
+			x >>= 1;
+			y >>= 1;
+			z >>= 1;
+		}
+		return res;
+	}
+
+	void BuildNormals(RenderPoint *pPt,  int num, const BdBox<float>& Bd)
+	{
+		uint r = 20;
+		uint g = 20;
+		uint b = 0;
+		uint col = r | (g << 5) | (b << 10);
+		float sx = 1024.0f /(Bd.xMax - Bd.xMin);
+		float sy = 1024.0f / (Bd.yMax - Bd.yMin);
+		float sz = 1024.0f / (Bd.zMax - Bd.zMin);
+
+		for (int i = 0; i < num; i++) 
+		{
+			uint xi = (uint)((pPt[i].x - Bd.xMin) * sx);
+			uint yi = (uint)((pPt[i].y - Bd.yMin) * sy);
+			uint zi = (uint)((pPt[i].z - Bd.zMin) * sz);
+			pPt[i].w = CombineBits(xi, yi, zi)>>15;
+		} 
 	}
 
 	void Release()

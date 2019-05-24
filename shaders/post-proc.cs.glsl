@@ -44,7 +44,8 @@ R""(
 	    uint shift = xx +  ww* yy;
 		if(zMapIn[shift] !=  0xFFFFFF00)
 		{
-		    uint zi  = (zMapIn[shift]>>(32 - cZbuffBits)) & msk_z;
+		    uint color = zMapIn[shift] & msk_v;
+			uint zi  = (zMapIn[shift]>>(32 - cZbuffBits)) & msk_z;
 			float zf  =  (globs.zFar - globs.zNear )*float(zi)/float(msk_z);
 			float xf = (float(xx) - globs.screenX * 0.5) /globs.scrMin;
 			float yf = (float(yy) - globs.screenY * 0.5) /globs.scrMin;
@@ -53,10 +54,22 @@ R""(
 			vec4 dr =  vec4( View2World[2][0],View2World[2][1],View2World[2][2],1);
 			vec4 pos = vec4( View2World[3][0],View2World[3][1],View2World[3][2],1);
 			vec4 res = pos + ( rt * xf + up * yf + globs.zNear * dr) * (zf/ globs.zNear);
+			/*
 			uint colorX = uint(  255.0 * (res.x - globs.bbMinX)/(globs.bbMaxX - globs.bbMinX));
 			uint colorY = uint(  255.0 * (res.y - globs.bbMinY)/(globs.bbMaxY - globs.bbMinY));
 			uint colorZ = uint( 128  + 128.0 * (res.z - globs.bbMinZ)/(globs.bbMaxZ - globs.bbMinZ));
+
+			if( color==0xBEEF){
+				zMapOut[shift] =  200;
+			}else{
+				zMapOut[shift] =  colorX | (colorY<<8) | ( colorZ<<16);
+			}
+			*/
+			uint colorX = (color & 0x1F)<<3;
+			uint colorY = ((color>>5) & 0x1F)<<3;
+			uint colorZ = ((color>>10) & 0x1F)<<3;
 			zMapOut[shift] =  colorX | (colorY<<8) | ( colorZ<<16);
+
 		}else
 		{
 			zMapOut[shift] = 0x800000;
