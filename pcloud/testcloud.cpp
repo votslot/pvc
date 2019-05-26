@@ -202,6 +202,22 @@ static void GetAllPlaneNew()
 }
 
 
+static void GetWave(int w, int h)
+{
+	float sz = 10.0f;
+	for (int y = 0; y < h; y++)
+	{
+		for (int x = 0; x < w; x++)
+		{
+			float rx = (float)rand() / (float)(RAND_MAX);
+			float ry = (float)rand() / (float)(RAND_MAX);
+			float xx = (float)x * sz;
+			float yy = (float)y * sz;
+			float zz = 1000.0f *sin(40.0f *(float)x / (float(w)));
+			gpTestCloud->SetPointValue(xx+ rx, yy+ ry, zz, 0.0f);
+		}
+	}
+}
 
 
 
@@ -212,54 +228,10 @@ void* PCloudIn::InitTestCloud()
 	}
 	gpTestCloud->OnStart();
 
-	/*
-	for (int x = 0; x < 2; x++) 
-	{
-		for (int y = 0; y < 2; y++) 
-		{
-			GetRandomPlane(100.0f, 100.0f, 0.1f,  x*100.0f, y*100.0f, 0.0f, 1024 * 1024);
-		}
-	}
-	*/
-
-	//GetRandomPlane(100.0f, 100.0f, 0.1f, 100.0f, 100.0f, 0.0f, 4096);
-	GetSphere(100.0f, 0.0f, 0.0f, 0.0f, 1024 * 1024*4);
+	GetWave(1024, 1024);
 	
-	// GetRandomPlane(100.0f, 100.0f, 0.1f, 0.0f,   0.0f,     0.0f,   1024 * 1024 * 8);
-	//GetRandomPlane(100.0f, 100.0f, 0.1f, 0.0f,   100.0f,   0.0f,   1024 * 1024 * 8);
-	//GetRandomPlane(100.0f, 100.0f, 0.1f, 100.0f, 0.0f,     0.0f,   1024 * 1024 * 8);
-	//GetRandomPlane(100.0f, 100.0f, 0.1f, 100.0f, 100.0f,   0.0f,   1024 * 1024 * 8);
-
-	//GetRandomPlane(100.0f, 100.0f, 0.1f, 100.0f, 200.0f, 0.0f, 1024 * 1024 * 8);
-	//GetRandomPlane(100.0f, 100.0f, 0.1f, 0.0f, 200.0f, 0.0f, 1024 * 1024 );
-	//GetRandomPlane(100.0f, 100.0f, 0.1f, 100.0f, 200.0f, 0.0f, 1024 * 1024);
-
-	//GetPlane(0.0f, 0.0f, 1000.0f, 64,64, 10.0f, 10.0f, 0.0f);
+	//GetSphere(100.0f, 0.0f, 0.0f, 0.0f, 1024 * 1024*4);
 	
-	//GetPlane(0.0f, 0.0f, 0.0f, 1024, 1024, 0.9f, 0.9f, 0.0f);
-	/*
-	for (int y = 0; y < 2; y++) {
-		for (int x = 0; x < 2; x++) {
-			GetSphere(10, 35.0*(float)x, 35.0*(float)y,  0.0f, 1024 * 1024);
-		}
-	}
-	*/
-	
-	
-
-
-	pcv::vector3 A(0.0,  0.0,  0.0);
-	pcv::vector3 B(32.0,  20.0, 0.0);
-	pcv::vector3 C(10.0, 0.0, 0.0);
-	pcv::vector3 D(10.0, 10.0, 0.0);
-	//pcv::vector3 D(10.0,  0.0, 5.0);
-	//GetPlane3(A, B, C, 256 * 256);
-	//GetPlane3(B, C, D, 1024 * 1024);
-	//GetAllPlane(100, 100);
-	//GetAllPlaneNew();
-
-	//GetPlane(120.0f, 120.0f, 0.0f, 2048, 2048, 0.2f, 0.1f, 0.0f);
-	//GetPlane(120.0f, 240.0f, 5.0f, 2048, 2048, 0.1f, 0.1f, 0.0f);
 
 	gpTestCloud->OnDone();
 	return NULL;
