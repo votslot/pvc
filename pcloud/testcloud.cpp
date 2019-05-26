@@ -213,7 +213,7 @@ static void GetWave(int w, int h)
 			float ry = (float)rand() / (float)(RAND_MAX);
 			float xx = (float)x * sz;
 			float yy = (float)y * sz;
-			float zz = 1000.0f *sin(40.0f *(float)x / (float(w)));
+			float zz = 100.0f *sin(40.0f *(float)x / (float(w)));
 			gpTestCloud->SetPointValue(xx+ rx, yy+ ry, zz, 0.0f);
 		}
 	}

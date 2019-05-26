@@ -263,18 +263,37 @@ namespace pvc {
 				float nx, ny, nz;
 				if (GetN3(pPt[i - 1], pPt[i], pPt[i + 1], nx, ny, nz))
 				{
+					
 					uint vr = (uint)(fabs(nx) * 31.0f);
 					uint vg = (uint)(fabs(ny) * 31.0f);
 					uint vb = (uint)(fabs(nz) * 31.0f);
-					if ((vb > vr*2.0f) && (vb > vg*2.0)) 
+					if (vr > 31) vr = 31;
+					if (vg > 31) vg = 31;
+					if (vb > 31) vb = 31;
+					if (vb > 10) {
+						pPt[i].w = vb | (vb << 5) | (vb << 10);
+					}
+					else 
 					{
-						pPt[i].w = 30 | (30 << 5) | (30 << 10);
+						uint vbb = vb * 8;
+						if (vbb > 31) vbb = 31;
+						pPt[i].w = 5 | (vbb << 5) | (5 << 10);
 					}
-					else {
-						pPt[i].w = 0 | (30 << 5) | (0 << 10);
-						//pPt[i].w = vr | (vg << 5) | (vb << 10);
-					}
-					pPt[i].w = vb | (vb << 5) | (vb << 10);
+					
+					/*
+					float r1 = 0.0, g1 = 1.0f, b1 = 0.0f;
+					float r2 = 1.0, g2 = 1.0f, b2 = 1.0f;
+					float wt = fabs(nz);
+					float rr = r1 * (1.0f - wt) + r2 * wt;
+					float gg = g1 * (1.0f - wt) + g2 * wt;
+					float bb = b1 * (1.0f - wt) + b2 * wt;
+					float len = sqrtf(rr * rr + gg * gg + bb * bb);
+					uint ri = (uint)(31.0f * rr / len);
+					uint gi = (uint)(31.0f * gg / len);
+					uint bi = (uint)(31.0f * bb / len);
+					pPt[i].w = ri | (gi << 5) | (bi << 10);
+					*/
+
 				}
 			}
 
