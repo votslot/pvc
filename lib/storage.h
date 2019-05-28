@@ -3,6 +3,31 @@
 
 class SSBBuffer;
 
+
+template <typename T>
+struct BdBox {
+	T xMin, xMax, yMin, yMax, zMin, zMax;
+	bool isReset;
+	BdBox()
+	{
+		Reset();
+	}
+	void Reset() { isReset = true; }
+	void Add(T x, T y, T z)
+	{
+		if (isReset) {
+			xMin = x; xMax = x; yMin = y; yMax = y; zMin = z; zMax = z;
+		}
+		if (x < xMin) xMin = x;
+		if (y < yMin) yMin = y;
+		if (z < zMin) zMin = z;
+		if (x > xMax) xMax = x;
+		if (y > yMax) yMax = y;
+		if (z > zMax) zMax = z;
+		isReset = false;
+	}
+};
+
 class PointStorage 
 {
 public:

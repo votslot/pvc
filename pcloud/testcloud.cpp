@@ -205,6 +205,7 @@ static void GetAllPlaneNew()
 static void GetWave(int w, int h)
 {
 	float sz = 10.0f;
+	float tz = (float)w * sz;
 	for (int y = 0; y < h; y++)
 	{
 		for (int x = 0; x < w; x++)
@@ -213,7 +214,9 @@ static void GetWave(int w, int h)
 			float ry = (float)rand() / (float)(RAND_MAX);
 			float xx = (float)x * sz;
 			float yy = (float)y * sz;
-			float zz = 100.0f *sin(40.0f *(float)x / (float(w)));
+			//float zz = 0.2f * tz *sin(2.0f * 3.1415f* (float)(y) / (float(w)));
+			float zz = (y < h/ 2) ? y * sz : h*sz / 2;
+			//zz = y * sz;
 			gpTestCloud->SetPointValue(xx+ rx, yy+ ry, zz, 0.0f);
 		}
 	}
@@ -228,9 +231,9 @@ void* PCloudIn::InitTestCloud()
 	}
 	gpTestCloud->OnStart();
 
-	GetWave(1024, 1024);
+	//GetWave(1024, 1024);
 	
-	//GetSphere(100.0f, 0.0f, 0.0f, 0.0f, 1024 * 1024*4);
+	GetSphere(100.0f, 0.0f, 0.0f, 0.0f, 1024 * 1024);
 	
 
 	gpTestCloud->OnDone();
