@@ -19,6 +19,7 @@
 
 	
 extern void BuildNormals(RenderPoint *pPt, int num, const BdBox<float>& Bd);
+extern void BuildValues(float *pF, int num);
 
 namespace pvc {
 
@@ -158,9 +159,9 @@ namespace pvc {
 				
 			};
 			
-			BuildNormals((RenderPoint *)pTemp, numPointsInTemp, bdBuff);
-			DoPartitionXYZW_Float(pTemp, numPointsInTemp, OnDonePartition);
 			//BuildNormals((RenderPoint *)pTemp, numPointsInTemp, bdBuff);
+			BuildValues((float*)pTemp, numPointsInTemp);
+			DoPartitionXYZW_Float(pTemp, numPointsInTemp, OnDonePartition);
 			std::cout << "done" << std::endl;
 	
 			bufferPoints[numInUse].setData(pTemp, sizeInTemp);

@@ -48,6 +48,7 @@ struct PointDataXYZ
 	int x;
 	int y;
 	int z;
+	unsigned short val;
 };
 
 static void ReadLas(const std::string &path)
@@ -77,11 +78,16 @@ static void ReadLas(const std::string &path)
 	fs.seekg(0, fs.beg);
 	fs.seekp(lasH.pointOfst);
 	char *pPoinRecord = new char[lasH.poitDataRecordLength];
+	unsigned short minV = 0;
 	for (unsigned int k = 0; k < lasH.numOfPointRecords; k++)
 	{
 		fs.read(pPoinRecord, lasH.poitDataRecordLength);
 		PointDataXYZ *pXYZ = (PointDataXYZ *)pPoinRecord;
-		if (gpLasCloud) gpLasCloud->SetPointValue((float)pXYZ->x*float(lasH.xScale), (float)pXYZ->y*float(lasH.yScale), (float)pXYZ->z*float(lasH.zScale),0.0f);
+		if (pXYZ->val > minV)
+		{
+			minV = pXYZ->val;
+		}
+		if (gpLasCloud) gpLasCloud->SetPointValue((float)pXYZ->x*float(lasH.xScale), (float)pXYZ->y*float(lasH.yScale), (float)pXYZ->z*float(lasH.zScale),(float)pXYZ->val);
 	}
 	fs.close();
 	delete[]pPoinRecord;

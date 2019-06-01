@@ -2,6 +2,8 @@
 #include "cbuff.h"
 #include "..\shaders\ginclude.h"
 
+
+
 static bool GetN3(const RenderPoint &A, const RenderPoint &B, const RenderPoint &C, float &x, float &y, float &z)
 {
 	double dx1 = (double)(A.x) - (double)B.x;
@@ -29,125 +31,93 @@ static float Dist(RenderPoint &A, RenderPoint &B)
 	float dx = A.x - B.x;
 	float dy = A.y - B.y;
 	float dz = A.z - B.z;
-	return (dx*dx + dy * dy + dz * dz);
+	return sqrtf(dx*dx + dy * dy + dz * dz);
+}
+
+static void PintDist(uint64_t *pLocationMap, uint *pEnum, RenderPoint *pPt, int num)
+{
+	for (int i = 1; i < num - 1; i++)
+	{
+		int ia = pEnum[i-1];
+		int ib = pEnum[i];
+		float dd = Dist(pPt[ia], pPt[ib]);
+		printf("%f\n", dd);
+	}
 }
 
 void FindBestNormal(uint64_t *pLocationMap, uint *pEnum, RenderPoint *pPt, int num) 
 {
+	//PintDist(pLocationMap, pEnum, pPt, num);
+	
 	const int sww = 3;
 	const int nw = sww*2 + 1;
 	int num_eq = 0;
 	float nx, ny, nz;
-	RenderPoint pTmp[nw];
-	float pDist[nw];
-	for (int i = 0; i < nw; i++)
-	{
-		int ia = pEnum[i];
-		pTmp[i] = pPt[ia];
-	}
-	int tn = 0;
-    // 0-1-2  3  4-5-6
+   
+	RenderPoint D[4];
+	float dd[4];
 	for (int i = sww; i < num - sww; i++)
 	{
-		pTmp[tn] = pPt[pEnum[i + sww]];
-		tn++;
-		if (tn >= nw) tn = 0;
-
-		// Collect  dist
-		int  ia = pEnum[i];
-		int kk = 0, kMin[2] = { -1,-1 };
-		for (int k = 0; k < nw; k++)
+		int ia = pEnum[i];
+		RenderPoint T0 = pPt[pEnum[i]];
+		D[0] = pPt[pEnum[i - 2]];
+		D[1] = pPt[pEnum[i - 1]];
+		D[2] = pPt[pEnum[i + 1]];
+	    D[3] = pPt[pEnum[i + 2]];
+		for( int i = 0; i<4; i++) dd[i] = Dist(D[i], T0);
+		float d_min = FLT_MAX;
+		int k_min1,k_min2;
+		for (int i = 0; i < 4; i++)
 		{
-			pDist[k] = Dist(pTmp[k], pPt[ia]);
-			if ((pDist[k] > 0) && (kk<2) ) {
-				kMin[kk++] = k;
+			if (dd[i] < d_min) {
+				d_min = dd[i];
+				k_min1= i;
 			}
 		}
-		if ((kMin[0] == -1) && (kMin[1] == -1)) 
+		d_min = FLT_MAX;
+		for (int i = 0; i < 4; i++)
 		{
-			continue;
-		}
-
-		//find min
-		float dMin[2];
-		dMin[0] = pDist[kMin[0]]; dMin[1] = pDist[kMin[1]];
-		for (int k = 0; k < nw; k++) 
-		{
-			if ((k == kMin[0]) || (k==kMin[1]))
-			{
-				continue;
-			}
-			if (pDist[k] > 0.0f) {
-				if ((pDist[k] < dMin[0]) || (pDist[k] < dMin[1])) {
-					int l = (dMin[0] > dMin[1]) ? 0 : 1;
-					dMin[l] = pDist[k];
-					kMin[l] = k;
-				}
+			if (i == k_min1) continue;
+			if (dd[i] < d_min) {
+				d_min = dd[i];
+				k_min2 = i;
 			}
 		}
+		RenderPoint P0 = D[k_min1];
+		RenderPoint P1 = D[k_min2];
 
-		int v0 = kMin[0];
-		int v2 = kMin[1];
-		if (GetN3(pTmp[v0], pPt[ia], pTmp[v2], nx, ny, nz))
+		/*
+		RenderPoint S0 = pPt[pEnum[i - 2]];
+		RenderPoint P0 = pPt[pEnum[i - 1]];
+		RenderPoint P1 = pPt[pEnum[i + 1]];
+		RenderPoint P2 = pPt[pEnum[i + 2]];
+		float ds0 = Dist(S0, T0);
+		float df0 = Dist(P0, T0);
+		float df1 = Dist(P1, T0);
+		float df2 = Dist(P2, T0);
+		*/
+		float df0 = Dist(P0, T0);
+		float df1 = Dist(P1, T0);
+		float dfMax = (df0 > df1) ? df0 : df1;
+		if ((T0.y > 299.0f) &&(T0.y > 321.0f))
+		{
+			//printf("%f\n", dfMax);
+		}
+		
+
+
+		if (GetN3(P0, T0, P1, nx, ny, nz))
 		{
 			uint vr = (uint)(fabs(nx) * 31.0f);
 			uint vg = (uint)(fabs(ny) * 31.0f);
 			uint vb = (uint)(fabs(nz) * 31.0f);
-			if (vb < 10) vb = 10;
-			pPt[ia].w = vr | (vg << 5) | (vb << 10);
+			//pPt[ia].w =  vr | (vg << 5) | (vb << 10);
+			pPt[ia].w = vb | (vb << 5) | (vb << 10);
 		}
 		else {
 			pPt[ia].w = 31;
 		}
 
-#if 0
-		int ib = pEnum[i + 1];
-		if (pLocationMap[ia] == pLocationMap[ib]) {
-			RenderPoint eqa = pPt[ia];
-			RenderPoint eqb = pPt[ib];
-			num_eq++;
-		}
-	
-		
-		int k0 = pEnum[i - 1];
-		int k1 = pEnum[i - 0];
-		int k2 = pEnum[i + 1];
-		RenderPoint p0 = pPt[k0];
-		RenderPoint p1 = pPt[k1];
-		RenderPoint p2 = pPt[k2];
-		float d01 = Dist(p0, p1);
-		float d12 = Dist(p2, p1);
-		
-		//if ((d01 < 21.0f) && (d12 < 21.0f))
-		if(1)
-		{
-			if (GetN3(p0, p1, p2, nx, ny, nz))
-			{
-				uint vr = (uint)(fabs(nx) * 31.0f);
-				uint vg = (uint)(fabs(ny) * 31.0f);
-				uint vb = (uint)(fabs(nz) * 31.0f);
-				if (fabs(nz) > 0.9f)
-				{
-					pPt[k1].w = 31;
-				}
-				else {
-					pPt[k1].w = 31 << 5;
-				}
-				pPt[k1].w = vr | (vg << 5) | (vb << 10);
-			}
-			else {
-				pPt[k1].w = 31;
-			}
-		}
-		else {
-			pPt[k1].w = 0;
-		}
-		
-		if (i < 64) {
-			//printf("%llx (%d,%d) \n", pLocationMap[ia], (uint)pPt[ia].x, (uint)pPt[ia].y);
-		}
-		//std::cout << "(" << pPt[ia].x << "," << pPt[ia].y << ")" << std::endl;
-#endif
 	}
 	std::cout << "EQPINTS=" << num_eq << std::endl;
 
@@ -176,18 +146,26 @@ static uint64_t CombineBits(uint x_in, uint y_in, uint z_in, int nn)
 
 static void BuildLocationMap(RenderPoint *pPt, int num, const BdBox<float>& Bd, uint64_t *pLocationMap)
 {
-	double sx = double(0xFFFFFFFF) / ((double)Bd.xMax - (double)Bd.xMin);
-	double sy = double(0xFFFFFFFF) / ((double)Bd.yMax - (double)Bd.yMin);
-	double sz = double(0xFFFFFFFF) / ((double)Bd.zMax - (double)Bd.zMin);
+	double dxf = (double)Bd.xMax - (double)Bd.xMin;
+	double dyf = (double)Bd.yMax - (double)Bd.yMin;
+	double dzf = (double)Bd.zMax - (double)Bd.zMin;
+	double df_max = (dxf > dyf) ? dxf : dyf;
+	df_max = (dzf > df_max) ? dzf : df_max;
+	
+	double sx = double(0xFFFFFFFF) / df_max;
+	double sy = double(0xFFFFFFFF) / df_max;
+	double sz = double(0xFFFFFFFF) / df_max;
+
 	for (int i = 0; i < num; i++)
 	{
 		uint xi = (uint)(((double)pPt[i].x - (double)Bd.xMin) * sx);
 		uint yi = (uint)(((double)pPt[i].y - (double)Bd.yMin) * sy);
 		uint zi = (uint)(((double)pPt[i].z - (double)Bd.zMin) * sz);
-		pLocationMap[i] = CombineBits(xi, yi, zi, 20);
+		pLocationMap[i] = CombineBits(xi, yi, zi, 21);
 		pPt[i].w = 0;
 	}
 }
+
 
 void BuildNormals(RenderPoint *pPt, int num, const BdBox<float>& Bd)
 {
@@ -203,5 +181,47 @@ void BuildNormals(RenderPoint *pPt, int num, const BdBox<float>& Bd)
 
 	delete[] pLocationMap;
 	delete[] pEnum;
+
+}
+
+void BuildValues(float *pF,  int num)
+{
+	RenderPoint *pPoint = (RenderPoint*)pF;
+
+	unsigned int *pVals = new unsigned int[65536];
+	for (int i = 0; i < 65536; i++) pVals[i] = 0;
+	float minV = FLT_MAX;
+	float maxV = FLT_MIN;
+	for (int i = 0; i < num; i++)
+	{
+		float *ppF = (float*)(pPoint + i);
+		float vf = ppF[3];
+		if (vf > maxV) maxV = vf;
+		if (vf < minV) minV = vf;
+		int vi = (int)vf;
+		if (vi >= 65535) vi = 65535;
+		pVals[vi]++;
+	}
+
+	
+
+	unsigned int bestVal = 0;
+	unsigned int best_i = 0;
+	for (int i = 0; i < 65535; i++) 
+	{
+		if (pVals[i] > bestVal) {
+			bestVal = pVals[i];
+			best_i = i;
+		}
+	}
+
+	float sc = 30.0f / float(best_i);
+	for (int i = 0; i < num; i++)
+	{
+		float *ppF = (float*)(pPoint + i);
+		unsigned int vfi = (ppF[3] - minV)*sc;
+		if (vfi > 31) vfi = 31;
+		pPoint[i].w = vfi | (vfi << 5) | (vfi << 10);
+	}
 
 }
