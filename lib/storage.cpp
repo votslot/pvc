@@ -159,7 +159,7 @@ namespace pvc {
 				
 			};
 			
-			//BuildNormals((RenderPoint *)pTemp, numPointsInTemp, bdBuff);
+		   // BuildNormals((RenderPoint *)pTemp, numPointsInTemp, bdBuff);
 			BuildValues((float*)pTemp, numPointsInTemp);
 			DoPartitionXYZW_Float(pTemp, numPointsInTemp, OnDonePartition);
 			std::cout << "done" << std::endl;

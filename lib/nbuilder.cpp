@@ -203,19 +203,31 @@ void BuildValues(float *pF,  int num)
 		pVals[vi]++;
 	}
 
-	
-
-	unsigned int bestVal = 0;
-	unsigned int best_i = 0;
-	for (int i = 0; i < 65535; i++) 
+	int t90 = (int)((float)num * 0.9f);
+	int t_first = 0, t_last = 65535,total = num;
+	for(;;)
 	{
-		if (pVals[i] > bestVal) {
-			bestVal = pVals[i];
-			best_i = i;
+		if ( (total <= t90) || (t_first>= t_last))
+		{
+			break;
+		}
+		if (pVals[t_first] < pVals[t_last])
+		{
+			total -= pVals[t_first];
+			t_first++;
+		}
+		else
+		{
+			total -= pVals[t_last];
+			t_last--;
 		}
 	}
+	float sc = 1.0f;
+	int range = t_last - t_first;
+	if (range > 0) {
+		sc = 31.0f / (float)range;
+	}
 
-	float sc = 30.0f / float(best_i);
 	for (int i = 0; i < num; i++)
 	{
 		float *ppF = (float*)(pPoint + i);
