@@ -4,10 +4,12 @@
 #include <tuple>
 #include <vector>
 #include <algorithm>
-//#include "GL\\glew.h"
 
-#include "cpoints.h"
+
+//#include "cpoints.h"
+#if 0
 #include "cbuff.h"
+
 #include "camera.h"
 #include "storage.h"
 #include "colorize.h"
@@ -223,6 +225,9 @@ void Compute_DoneAddPoints()
 	ic->Init();
 	ic->DoColorize(PointStorage::GetInstatnce());
 };
+#endif
+
+
 
 
 
