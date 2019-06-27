@@ -224,6 +224,11 @@
     <None Include="..\shaders\vert-and-frag.glsl" />
     <None Include="..\shaders\wave-test.cs.glsl" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PcrLib\msbuild\PcrLib.vcxproj">
+      <Project>{d716781d-3932-4311-bad1-4f6a0ac5cf3f}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

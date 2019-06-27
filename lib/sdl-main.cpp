@@ -14,6 +14,9 @@
 #include "camera.h"
 #include "../winui/ui.h"
 #include "../pcloud/pcloud.h"
+#include "../PcrLib/pcrlib.h"
+
+
 
 #define SCREEN_WIDTH 512
 #define SCREEN_HEIGHT 512
@@ -241,6 +244,9 @@ int SdlEntryPoint()
 
 	GLuint texdest = ComputeInit(SCREEN_WIDTH, SCREEN_HEIGHT);
 	InitQuad(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	pcrlib::IPcrLib *pLib = pcrlib::IPcrLib::Init();
+	pLib->runTest();
 
 	int sw = SCREEN_WIDTH;
 	int sh = SCREEN_HEIGHT;

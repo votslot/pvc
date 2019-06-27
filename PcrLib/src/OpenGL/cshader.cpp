@@ -1,7 +1,10 @@
 
 
 #include "..\cshader.h"
+
+#ifdef _VSBUILD // visual studio build
 #include "GL/glew.h"
+#endif
 
 namespace pcrlib 
 {
@@ -70,6 +73,7 @@ namespace pcrlib
 			m_szy = localWorkGroupSize[1];
 			m_szz = localWorkGroupSize[2];
 		}
+
 		virtual int GetSX()
 		{
 			return m_szx;

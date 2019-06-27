@@ -7,19 +7,21 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\partition.cpp" />
-    <ClCompile Include="..\src\GL\cshader.cpp">
+    <ClCompile Include="..\src\pcrlib.cpp" />
+    <ClCompile Include="..\src\OpenGL\cshader.cpp">
       <Filter>GL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\partition.h" />
     <ClInclude Include="..\src\cshader.h" />
+    <ClInclude Include="..\pcrlib.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\GL\wave-test.cs.glsl">
+    <None Include="gl-config.props">
       <Filter>GL</Filter>
     </None>
-    <None Include="gl-config.props">
+    <None Include="..\src\OpenGL\wave-test.cs.glsl">
       <Filter>GL</Filter>
     </None>
   </ItemGroup>
