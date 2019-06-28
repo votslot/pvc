@@ -125,10 +125,7 @@ void ShowQuad()
         pWindow->setAnimating(true);
     }
 }
-//! [2]
 
-
-//! [3]
 static const char *vertexShaderSource =
     "attribute highp vec4 posAttr;\n"
     "attribute lowp vec4 colAttr;\n"
@@ -136,7 +133,8 @@ static const char *vertexShaderSource =
     "uniform highp mat4 matrix;\n"
     "void main() {\n"
     "   col = colAttr;\n"
-    "   gl_Position = matrix * posAttr;\n"
+    //"   gl_Position = matrix * posAttr;\n"
+     "   gl_Position = posAttr;\n"
     "}\n";
 
 static const char *fragmentShaderSource =
@@ -144,11 +142,10 @@ static const char *fragmentShaderSource =
     "void main() {\n"
     "   gl_FragColor = col;\n"
     "}\n";
-//! [3]
 
-//! [4]
 void TriangleWindow::initialize()
 {
+    //GLuint shaderProgram = glCreateProgram();
     m_program = new QOpenGLShaderProgram(this);
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
@@ -157,9 +154,7 @@ void TriangleWindow::initialize()
     m_colAttr = m_program->attributeLocation("colAttr");
     m_matrixUniform = m_program->uniformLocation("matrix");
 }
-//! [4]
 
-//! [5]
 void TriangleWindow::render()
 {
     const qreal retinaScale = devicePixelRatio();
@@ -169,12 +164,12 @@ void TriangleWindow::render()
 
     m_program->bind();
 
-    QMatrix4x4 matrix;
-    matrix.perspective(60.0f, 4.0f/3.0f, 0.1f, 100.0f);
-    matrix.translate(0, 0, -2);
-    matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
+    //QMatrix4x4 matrix;
+    //matrix.perspective(60.0f, 4.0f/3.0f, 0.1f, 100.0f);
+    //matrix.translate(0, 0, -2);
+    //matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
 
-    m_program->setUniformValue(m_matrixUniform, matrix);
+   // m_program->setUniformValue(m_matrixUniform, matrix);
 
     GLfloat vertices[] = {
         0.0f, 0.707f,

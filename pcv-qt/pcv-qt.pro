@@ -16,6 +16,7 @@ TEMPLATE = app
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
+DEFINES += QT_BUILD
 
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -23,15 +24,23 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 
+
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
      openglwindow.cpp \
-    quad.cpp
+    quad.cpp \
+    ../TexturedQuad/texturedquad.cpp \
+    ../PcrLib/src/pcrlib.cpp \
+    ../PcrLib/src/OpenGL/cshader.cpp
 
 HEADERS += \
         mainwindow.h \
-    openglwindow.h
+    openglwindow.h \
+    mainwindow.h \
+    openglwindow.h \
+    ../PcrLib/src/cshader.h \
+    ../PcrLib/pcrlib.h
 
 FORMS += \
         mainwindow.ui

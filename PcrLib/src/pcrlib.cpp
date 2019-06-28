@@ -1,10 +1,10 @@
 
 
 #include <stdio.h>
-#include "..\PcrLib.h"
+#include "../pcrlib.h"
 #include <string>
 #include "cshader.h"
-#include "OpenGL\wave-test.cs.glsl"
+#include "OpenGL/wave-test.cs.glsl"
 
 namespace pcrlib 
 {

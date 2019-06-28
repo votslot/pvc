@@ -2,7 +2,7 @@
 
 const std::string cs_wave_test = 
 R""(
- #version 450 core 
+ #version 430 core
  layout(local_size_x = 32,local_size_y =1) in;         
  layout(std430,binding = 0) buffer in0 {  float pdata[]; }; 
  layout(std430,binding = 1) buffer vv  {  mat4 View; };
