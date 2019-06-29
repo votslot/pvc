@@ -24,6 +24,16 @@ extern QOpenGLFunctions *pGLFunc ;
 
 namespace pcrlib 
 {
+
+	static void errCheck()
+	{
+		GLenum err;
+		while ((err = glGetError()) != GL_NO_ERROR)
+		{
+			printf("Buffer operation error %d %x \n", err, err);
+		}
+	}
+
 	class CShader : public ICShader
 	{
 		GLuint m_program;
@@ -88,33 +98,125 @@ namespace pcrlib
 			m_szx = localWorkGroupSize[0];
 			m_szy = localWorkGroupSize[1];
             m_szz = localWorkGroupSize[2];
+			errCheck();
 		}
 
-		virtual int GetSX()
+		int GetSX()
 		{
 			return m_szx;
 		}
-		virtual int GetSY() 
+		int GetSY() 
 		{
 			return m_szy;
 		}
-		virtual int GetSZ() 
+		int GetSZ() 
 		{
 			return m_szz;
 		}
 
-		virtual void execute(int x, int y, int z, std::initializer_list <ICBuffer*> inputs) 
+		void execute(int x, int y, int z, std::initializer_list <ICBuffer*> inputs) 
 		{
-		
+			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+			glMemoryBarrier(GL_ALL_BARRIER_BITS);
+			glUseProgram(m_program);
+			errCheck();
+
+			int i = 0;
+			for (ICBuffer* bf : inputs) 
+			{
+				bf->bind(i);
+				i++;
+			}
+
+			glDispatchCompute(x, y, z);
+			glMemoryBarrier(GL_ALL_BARRIER_BITS);
+			glUseProgram(0);
+			errCheck();
 		}
-	};
+	};// class CSShader
+
 
 	ICShader *ICShader::GetNew() 
 	{
 		return new CShader();
 	}
 
-}
+
+
+
+	class CSBuffer :public ICBuffer
+	{
+		GLuint m_buffer;
+	public:
+		CSBuffer()
+		{
+			m_buffer = 0;
+			init();
+		}
+
+		void init()
+		{
+			glGenBuffers(1, &m_buffer);
+			errCheck();
+		}
+
+		unsigned int getMaxSizeInBytes()
+		{
+			GLint size;
+			glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &size);
+			errCheck();
+			return size;
+		}
+
+		void setData(void *pD, unsigned int sizeInBytes)
+		{
+			glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
+			glBufferData(GL_SHADER_STORAGE_BUFFER, sizeInBytes, pD, GL_STATIC_READ);
+			errCheck();
+		}
+
+		void allocate(unsigned int sizeInBytes)
+		{
+			GLint maxtb = 0;
+			glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &maxtb);
+			glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
+			glBufferData(GL_SHADER_STORAGE_BUFFER, sizeInBytes, NULL, GL_DYNAMIC_COPY);
+			errCheck();
+		}
+
+		void bind(int n) 
+		{
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, n, m_buffer);
+			errCheck();
+		}
+	
+		void getData(unsigned int sizeInBytes, void *pOut)
+		{
+			glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
+			glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeInBytes, pOut);
+			errCheck();
+		}
+
+		void delBuffer()
+		{
+			glDeleteBuffers(1, &m_buffer);
+			errCheck();
+		}
+	};//class CSBuffer
+
+	ICBuffer *ICBuffer::GetNew()
+	{
+		return new CSBuffer();
+	}
+
+	void ICBuffer::release(ICBuffer **pBuff)
+	{
+		(*pBuff)->delBuffer();
+		delete *pBuff;
+		*pBuff = NULL;
+	}
+
+}//namespace pcrlib
 
 
 
