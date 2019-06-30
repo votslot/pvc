@@ -8,14 +8,17 @@
   <ItemGroup>
     <ClCompile Include="..\src\partition.cpp" />
     <ClCompile Include="..\src\pcrlib.cpp" />
-    <ClCompile Include="..\src\OpenGL\cshader.cpp">
+    <ClCompile Include="..\src\OpenGL\icompute-gl.cpp">
       <Filter>GL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\partition.h" />
-    <ClInclude Include="..\src\cshader.h" />
     <ClInclude Include="..\pcrlib.h" />
+    <ClInclude Include="..\src\icompute.h" />
+    <ClInclude Include="..\src\OpenGL\wrapper-gl.h">
+      <Filter>GL</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="gl-config.props">

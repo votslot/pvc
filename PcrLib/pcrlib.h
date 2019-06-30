@@ -9,7 +9,7 @@ namespace pcrlib
     class  IPcrLib
 	{
 	public:
-		virtual void runTest() = 0;
+		virtual int runTest() = 0;
 		static IPcrLib* Init();
 	};
 }

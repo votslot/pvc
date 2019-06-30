@@ -1,64 +1,55 @@
 
 
-#include "../cshader.h"
-
-#ifdef _VSBUILD // visual studio build
-#include "GL/glew.h"
-#elif QT_BUILD
-//#include <QtGui/QWindow>
-#include <QtGui/QOpenGLFunctions>
-extern QOpenGLFunctions *pGLFunc ;
-#define glCreateProgram()                  pGLFunc->glCreateProgram()
-#define glCreateShader(_var)               pGLFunc->glCreateShader(_var)
-#define glShaderSource(_a, _b, _c, _d)     pGLFunc->glShaderSource(_a, _b, _c, _d)
-#define glCompileShader(_a)                pGLFunc->glCompileShader(_a)
-#define glGetShaderiv(_a, _b, _c)          pGLFunc->glGetShaderiv(_a, _b, _c)
-#define glGetShaderInfoLog(_a, _b, _c, _d) pGLFunc->glGetShaderInfoLog(_a, _b, _c, _d)
-#define glDeleteShader(_a)                 pGLFunc->glDeleteShader(_a)
-#define glAttachShader(_a, _b)             pGLFunc->glAttachShader(_a, _b)
-#define glLinkProgram(_a)                  pGLFunc->glLinkProgram(_a)
-#define glGetProgramiv(_a, _b, _c)         pGLFunc->glGetProgramiv(_a, _b, _c)
-#endif
-
-
+#include "../icompute.h"
+#include "wrapper-gl.h"
+#include <string>
 
 namespace pcrlib 
 {
+	class CSBuffer;
+
+	// Error handling 
+	static ICErrorHandler spEerr = NULL;
+	ICErrorHandler setICErrorHandler(ICErrorHandler errh)
+	{
+		ICErrorHandler oldEh = spEerr;
+		spEerr = errh;
+		return oldEh;
+	}
 
 	static void errCheck()
 	{
 		GLenum err;
 		while ((err = glGetError()) != GL_NO_ERROR)
 		{
-			printf("Buffer operation error %d %x \n", err, err);
+			if (spEerr)
+			{
+				spEerr(std::string ("OpenGL operation error " + std::to_string(err)).c_str());
+			}
 		}
 	}
 
+	// Compute shader
 	class CShader : public ICShader
 	{
 		GLuint m_program;
+		GLuint m_shader;
 		int m_szx, m_szy, m_szz;
+
+		friend CSBuffer;
 
 		GLuint LoadShader(GLenum type, const GLchar *shaderSrc)
 		{
 			GLuint shader;
 			GLint compiled;
-			// Create the shader object
 			shader = glCreateShader(type);
 
 			if (shader == 0)
 			{
-				//std::cerr << "Could not create OpenGL shader " << std::endl;
 				return 0;
 			}
-
-			// Load the shader source
 			glShaderSource(shader, 1, &shaderSrc, NULL);
-
-			// Compile the shader
 			glCompileShader(shader);
-
-			// Check the compile status
 			glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
 
 			if (!compiled)
@@ -85,13 +76,18 @@ namespace pcrlib
 		{
 			m_szx = m_szy = m_szz = 0;
 			m_program = 0;
+			m_shader = 0;
+		}
+
+		~CShader()
+		{
 		}
 
 		void initFromSource(const char *pSrc) 
 		{
-			GLuint csShader = LoadShader(GL_COMPUTE_SHADER, pSrc);
+			m_shader = LoadShader(GL_COMPUTE_SHADER, pSrc);
 			m_program = glCreateProgram();                          
-			glAttachShader(m_program, csShader);                     
+			glAttachShader(m_program, m_shader);
 			glLinkProgram(m_program);                               
 			int localWorkGroupSize[3];
 			glGetProgramiv(m_program, GL_COMPUTE_WORK_GROUP_SIZE, localWorkGroupSize);
@@ -101,15 +97,15 @@ namespace pcrlib
 			errCheck();
 		}
 
-		int GetSX()
+		int getSX()
 		{
 			return m_szx;
 		}
-		int GetSY() 
+		int getSY() 
 		{
 			return m_szy;
 		}
-		int GetSZ() 
+		int getSZ() 
 		{
 			return m_szz;
 		}
@@ -133,25 +129,48 @@ namespace pcrlib
 			glUseProgram(0);
 			errCheck();
 		}
+
+		void delShader()
+		{
+			if(m_program != NULL)
+				glDeleteProgram(m_program);
+			if (m_shader != NULL)
+				glDeleteShader(m_shader);
+			errCheck();
+		}
+
 	};// class CSShader
 
-
-	ICShader *ICShader::GetNew() 
+	ICShader * createICShader()
 	{
 		return new CShader();
 	}
 
+	void releaseICShader(ICShader **ppShader) 
+	{
+		CShader *pS = static_cast<CShader*>(*ppShader);
+		pS->delShader();
+		delete pS;
+		*ppShader = NULL;
+	}
+	
 
-
-
+	// Compute buffer
 	class CSBuffer :public ICBuffer
 	{
 		GLuint m_buffer;
+		unsigned int m_size;
+		friend class CShader;
 	public:
 		CSBuffer()
 		{
 			m_buffer = 0;
+			m_size = 0;
 			init();
+		}
+
+		~CSBuffer() 
+		{
 		}
 
 		void init()
@@ -182,6 +201,7 @@ namespace pcrlib
 			glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
 			glBufferData(GL_SHADER_STORAGE_BUFFER, sizeInBytes, NULL, GL_DYNAMIC_COPY);
 			errCheck();
+			m_size = sizeInBytes;
 		}
 
 		void bind(int n) 
@@ -192,6 +212,10 @@ namespace pcrlib
 	
 		void getData(unsigned int sizeInBytes, void *pOut)
 		{
+			if (sizeInBytes > m_size)
+			{
+				if(spEerr) spEerr(std::string("Requested size is bigger than allocated.  Alloc size=" + std::to_string(m_size)).c_str());
+			}
 			glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
 			glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeInBytes, pOut);
 			errCheck();
@@ -204,16 +228,17 @@ namespace pcrlib
 		}
 	};//class CSBuffer
 
-	ICBuffer *ICBuffer::GetNew()
+	ICBuffer * createICBuffer() 
 	{
 		return new CSBuffer();
 	}
 
-	void ICBuffer::release(ICBuffer **pBuff)
+	void releaseICBuffer(ICBuffer **ppBuffer)
 	{
-		(*pBuff)->delBuffer();
-		delete *pBuff;
-		*pBuff = NULL;
+		CSBuffer *pB = static_cast<CSBuffer*>(*ppBuffer);
+		pB->delBuffer();
+		delete *ppBuffer;
+		*ppBuffer = NULL;
 	}
 
 }//namespace pcrlib

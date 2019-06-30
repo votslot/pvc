@@ -1,9 +1,9 @@
 
 
 #include <stdio.h>
+#include <iostream>
 #include "../pcrlib.h"
-#include <string>
-#include "cshader.h"
+#include "icompute.h"
 #include "OpenGL/wave-test.cs.glsl"
 
 namespace pcrlib 
@@ -11,7 +11,7 @@ namespace pcrlib
 
 	class ThePcrLib :public IPcrLib
 	{
-		void runTest();
+		int runTest();
 	};
 
 
@@ -22,18 +22,19 @@ namespace pcrlib
 	}
 
 	// Test
-	void ThePcrLib::runTest()
+	int ThePcrLib::runTest()
 	{
+	
 		const unsigned int bfz = 1024;
 		int *pDA = new int[bfz];
 		int *pDB = new int[bfz];
 		int *pDC = new int[bfz];
 
-		ICShader *pCsh = ICShader::GetNew();
+		ICShader *pCsh = createICShader();
 		pCsh->initFromSource(cs_wave_test.c_str());
-		ICBuffer *pBuffA = ICBuffer::GetNew();
-		ICBuffer *pBuffB = ICBuffer::GetNew();
-		ICBuffer *pBuffC = ICBuffer::GetNew();
+		ICBuffer *pBuffA = createICBuffer();
+		ICBuffer *pBuffB = createICBuffer();
+		ICBuffer *pBuffC = createICBuffer();
 		unsigned int dtsize = bfz * sizeof(unsigned int);
 		pBuffA->allocate(dtsize);
 		pBuffB->allocate(dtsize);
@@ -56,15 +57,18 @@ namespace pcrlib
 			if (pDC[i] != pDA[i] + pDB[i])
 			{
 				break;
+				return 1;
 			}
 		}
 
-		ICBuffer::release(&pBuffA);
-		ICBuffer::release(&pBuffB);
-		ICBuffer::release(&pBuffC);
+		releaseICShader(&pCsh);
+		releaseICBuffer(&pBuffA);
+		releaseICBuffer(&pBuffB);
+		releaseICBuffer(&pBuffC);
 		delete[] pDA;
 		delete[] pDB;
 		delete[] pDC;
+		return 0;
 	}
 	
 }

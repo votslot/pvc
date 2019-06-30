@@ -19,13 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\OpenGL\cshader.cpp" />
+    <ClCompile Include="..\src\OpenGL\icompute-gl.cpp" />
     <ClCompile Include="..\src\partition.cpp" />
     <ClCompile Include="..\src\pcrlib.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\pcrlib.h" />
-    <ClInclude Include="..\src\cshader.h" />
+    <ClInclude Include="..\src\icompute.h" />
+    <ClInclude Include="..\src\OpenGL\wrapper-gl.h" />
     <ClInclude Include="..\src\partition.h" />
   </ItemGroup>
   <ItemGroup>

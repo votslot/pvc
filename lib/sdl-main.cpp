@@ -246,7 +246,14 @@ int SdlEntryPoint()
 	InitQuad(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	pcrlib::IPcrLib *pLib = pcrlib::IPcrLib::Init();
-	pLib->runTest();
+	if (pLib->runTest() != 0) 
+	{
+		std::cout << "pcrlib initialization error" << std::endl;
+	}
+	else 
+	{
+		std::cout << "pcrlib initialization success" << std::endl;
+	}
 
 	int sw = SCREEN_WIDTH;
 	int sh = SCREEN_HEIGHT;
