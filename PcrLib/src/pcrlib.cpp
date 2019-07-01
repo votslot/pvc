@@ -24,7 +24,7 @@ namespace pcrlib
 	// Test
 	int ThePcrLib::runTest()
 	{
-	
+        int ret = 0;
 		const unsigned int bfz = 1024;
 		int *pDA = new int[bfz];
 		int *pDB = new int[bfz];
@@ -56,8 +56,8 @@ namespace pcrlib
 		{
 			if (pDC[i] != pDA[i] + pDB[i])
 			{
+                ret = 1;
 				break;
-				return 1;
 			}
 		}
 
@@ -68,7 +68,7 @@ namespace pcrlib
 		delete[] pDA;
 		delete[] pDB;
 		delete[] pDC;
-		return 0;
+        return ret;
 	}
 	
 }

@@ -57,8 +57,12 @@
 #include <QtGui/QPainter>
 #include <QKeyEvent>
 #include "../PcrLib/pcrlib.h"
+#include <QOpenGLFunctions_4_1_Core>
 
 QOpenGLFunctions *pGLFunc ;
+QOpenGLExtraFunctions *pGlExtra;
+QOpenGLFunctions_4_1_Core *pGl4;
+
  extern void TestMe();
 
 OpenGLWindow::OpenGLWindow(QWindow *parent)
@@ -156,11 +160,20 @@ void OpenGLWindow::renderNow()
     m_context->makeCurrent(this);
 
     if (needsInitialize) {
+
+        pGl4 =  new QOpenGLFunctions_4_1_Core();
+        pGl4->initializeOpenGLFunctions();
+
+        pGlExtra = new QOpenGLExtraFunctions();
+        pGlExtra->initializeOpenGLFunctions();
+
         initializeOpenGLFunctions();
         initialize();
         pGLFunc = this;
+
+        // init pcrlib
         pcrlib::IPcrLib* pL =  pcrlib::IPcrLib::Init();
-        pL->runTest();
+        Q_ASSERT(pL->runTest()==0);
      }
 
     render();

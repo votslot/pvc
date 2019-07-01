@@ -32,15 +32,16 @@ SOURCES += \
     quad.cpp \
     ../TexturedQuad/texturedquad.cpp \
     ../PcrLib/src/pcrlib.cpp \
-    ../PcrLib/src/OpenGL/cshader.cpp
+    ../PcrLib/src/OpenGL/icompute-gl.cpp
 
 HEADERS += \
         mainwindow.h \
     openglwindow.h \
     mainwindow.h \
     openglwindow.h \
-    ../PcrLib/src/cshader.h \
-    ../PcrLib/pcrlib.h
+    ../PcrLib/pcrlib.h \
+    ../PcrLib/src/icompute.h \
+    ../PcrLib/src/OpenGL/wrapper-gl.h
 
 FORMS += \
         mainwindow.ui

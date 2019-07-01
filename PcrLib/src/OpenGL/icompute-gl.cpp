@@ -112,7 +112,7 @@ namespace pcrlib
 
 		void execute(int x, int y, int z, std::initializer_list <ICBuffer*> inputs) 
 		{
-			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 			glMemoryBarrier(GL_ALL_BARRIER_BITS);
 			glUseProgram(m_program);
 			errCheck();
@@ -132,9 +132,9 @@ namespace pcrlib
 
 		void delShader()
 		{
-			if(m_program != NULL)
+            if(m_program != 0)
 				glDeleteProgram(m_program);
-			if (m_shader != NULL)
+            if (m_shader != 0)
 				glDeleteShader(m_shader);
 			errCheck();
 		}

@@ -50,6 +50,7 @@
 
 #include <QtGui/QWindow>
 #include <QtGui/QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
 
 QT_BEGIN_NAMESPACE
 class QPainter;
@@ -58,7 +59,7 @@ class QOpenGLPaintDevice;
 QT_END_NAMESPACE
 
 //! [1]
-class OpenGLWindow : public QWindow, protected QOpenGLFunctions
+class OpenGLWindow : public QWindow, protected QOpenGLExtraFunctions
 {
     Q_OBJECT
 public:
