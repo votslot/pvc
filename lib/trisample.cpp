@@ -5,7 +5,8 @@ static GLuint programObject;
 static GLuint vertexbuffer;
 static GLuint colorbuffer;
 static GLuint uvbuffer;
-//static GLuint textureID;
+static GLint  screenXLocation;
+static GLint  screenYLocation;
 
 #include "..\shaders\vert-and-frag.glsl"
 
@@ -51,46 +52,10 @@ static GLuint uvbuffer;
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
 }
 
-/*
-static void initQuadTextureu32(int width, int height)
-{
-	//unsigned int * data;
-	//data = new unsigned int[width*height];
-	//for (int i = 0; i < width*height; i++) data[i] = (i&1) ? 0: 0xFF80FF80;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//delete[]data;
-}
-*/
 
 static void initQuadTexturer32f(int width, int height)
 {
-	//textureID = ComputeGetDestText1(width, height);
-	//textureID = ComputeGetDestText();
 	return;
-	/*
-	float * data ;
-	data = new float[width*height];
-	int n = 0;
-	for (int y = 0; y < height; y++){  
-		for (int x = 0; x < width; x++) {
-			data[n++] = ((x >> 4) & 1) ? 128128.128f : 0.0f;
-		}
-	}
-	*/
-	/*
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, data);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//delete[]data;
-	*/
 }
 
 
@@ -166,14 +131,15 @@ GLuint InitQuad(int sw_, int sh_)
 		std::cerr << "Can not link " << std::endl;
 	}
 	initQuadVerts();
-
+	screenXLocation = glGetUniformLocation(programObject, "screenSizeX");
+	screenYLocation = glGetUniformLocation(programObject, "screenSizeY");
 	return 0;
 }
 
 
 extern GLuint GetSrcBuff();
 extern GLuint GetParamsBuff();
-extern GLuint GetClutData();
+//extern GLuint GetClutData();
 
 void Draw(GLint win_width, GLint win_height, GLuint texDest)
 {
@@ -193,10 +159,13 @@ void Draw(GLint win_width, GLint win_height, GLuint texDest)
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-	//glBindTexture(GL_TEXTURE_2D, texDest);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, GetSrcBuff());
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, GetParamsBuff());
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, GetClutData());
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, GetParamsBuff());
+	glUniform1i(screenXLocation, win_width);
+	glUniform1i(screenYLocation, win_height);
+
+
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, GetClutData());
 	//draw
 	glDrawArrays(GL_TRIANGLES, 0, 3*2); 
 	glDisableVertexAttribArray(0);
