@@ -11,6 +11,9 @@
     <ClCompile Include="..\src\OpenGL\icompute-gl.cpp">
       <Filter>GL</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\OpenGL\blit-gl.cpp">
+      <Filter>GL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\partition.h" />

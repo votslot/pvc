@@ -4,23 +4,35 @@
 #include <iostream>
 #include "../pcrlib.h"
 #include "icompute.h"
+
 #include "OpenGL/wave-test.cs.glsl"
+
 
 namespace pcrlib 
 {
+	extern int InitGLBlit();
 
 	class ThePcrLib :public IPcrLib
 	{
 		int runTest();
+
+		int render(const Camera &cam)
+		{
+			return 0;
+		}
+
+		int blitGL(int w, int h)
+		{
+			return 0;
+		}
 	};
-
-
 	
 	IPcrLib* IPcrLib::Init()
 	{
+		InitGLBlit();
 		return  new ThePcrLib();
 	}
-
+	
 	// Test
 	int ThePcrLib::runTest()
 	{

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\OpenGL\blit-gl.cpp" />
     <ClCompile Include="..\src\OpenGL\icompute-gl.cpp" />
     <ClCompile Include="..\src\partition.cpp" />
     <ClCompile Include="..\src\pcrlib.cpp" />
