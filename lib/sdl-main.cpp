@@ -245,8 +245,9 @@ int SdlEntryPoint()
 	GLuint texdest = ComputeInit(SCREEN_WIDTH, SCREEN_HEIGHT);
 	InitQuad(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	pcrlib::IPcrLib *pLib = pcrlib::IPcrLib::Init();
-	if (pLib->runTest() != 0) 
+	static   pcrlib::Camera theCam;
+	pcrlib::IPcrLib *pRLib = pcrlib::IPcrLib::Init();
+	if (pRLib->runTest() != 0) 
 	{
 		std::cout << "pcrlib initialization error" << std::endl;
 	}
@@ -298,10 +299,14 @@ int SdlEntryPoint()
 		if (sHasEvent)
 		{
 			OnStartLoop();
+#if 1
 			// render to buffer
 			ComputeRun(sw, sh);
 			// render to screen
 			Draw(sw, sh, texdest);
+#else
+			pRLib->render(theCam, sw, sh);
+#endif
 			// swap 
 			SDL_GL_SwapWindow(gWindow);
 			OnEndLoop();

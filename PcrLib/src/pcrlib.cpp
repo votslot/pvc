@@ -14,23 +14,58 @@ namespace pcrlib
 
 	class ThePcrLib :public IPcrLib
 	{
+		static const int sMaxW = 2048;
+		static const int sMaxH = 2048;
+		bool isInit = false;
+		// buffres
+		ICBuffer  *pbufferZMap = NULL;
+		ICBuffer  *pbufferParams = NULL;
+	public:
+		void initInternal()
+		{
+			if (isInit) 
+			{
+				return;
+			}
+			pbufferZMap = createICBuffer();
+			pbufferZMap->allocate(sMaxW*sMaxH * sizeof(int));
+
+			// Write something
+			int *pD = new int[sMaxW*sMaxH];
+			for (int i = 0; i < sMaxW*sMaxH; i++) pD[i] = 0x00800000;  //AABBGGRR
+			pbufferZMap->setData(pD, sMaxW*sMaxH * sizeof(int));
+			delete[]pD;
+			pD = NULL;
+
+			InitGLBlit();
+			isInit = true;
+		}
+
+		int render(const Camera &cam, int destWidth, int destHeight)
+		{
+			if (!isInit)
+			{
+				return 0;
+			}
+			pbufferZMap->blit(destWidth, destHeight);
+			return 0;
+		}
+
+		void releaseInternal()
+		{
+			if(pbufferZMap) releaseICBuffer(&pbufferZMap);
+			isInit = false;
+		}
+
 		int runTest();
-
-		int render(const Camera &cam)
-		{
-			return 0;
-		}
-
-		int blitGL(int w, int h)
-		{
-			return 0;
-		}
 	};
+
+	static ThePcrLib libInstance;
 	
 	IPcrLib* IPcrLib::Init()
 	{
-		InitGLBlit();
-		return  new ThePcrLib();
+		libInstance.initInternal();
+		return  &libInstance;
 	}
 	
 	// Test

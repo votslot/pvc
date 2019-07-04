@@ -16,7 +16,7 @@ namespace pcrlib
 		virtual unsigned int getMaxSizeInBytes() = 0;
 		virtual void setData(void *pD, unsigned int sizeInBytes) = 0;
 		virtual void getData(unsigned int sizeInBytes, void *pOut) = 0;
-		virtual void bind(int n) = 0;
+		virtual void blit(int destW, int destH) = 0;
 	};
 
 	ICBuffer * createICBuffer();

@@ -14,8 +14,7 @@ namespace pcrlib
 	{
 	public:
 		virtual int runTest() = 0;
-		virtual int render(const Camera &cam) = 0;
-		virtual int blitGL(int w, int h) = 0;
+		virtual int render(const Camera &cam, int destWidth, int destHeight) = 0;
 		static IPcrLib* Init();
 	};
 }

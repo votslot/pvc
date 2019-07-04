@@ -12,6 +12,7 @@ namespace pcrlib
 	static GLuint uvbuffer;
 	static GLint  screenXLocation;
 	static GLint  screenYLocation;
+	static bool sBlitIsInit = false;
 
 	const std::string vert_shader_source =
 	R""(
@@ -183,14 +184,19 @@ namespace pcrlib
 		initQuadVerts();
 		screenXLocation = glGetUniformLocation(programObject, "screenSizeX");
 		screenYLocation = glGetUniformLocation(programObject, "screenSizeY");
+		sBlitIsInit = true;
 		return 0;
 	}
 
 
 	extern GLuint GetSrcBuff();
 
-	void Draw(GLint win_width, GLint win_height, GLuint texDest)
+	void doGLBlit(GLint win_width, GLint win_height, GLuint destBuffer)
 	{
+		if (!sBlitIsInit)
+		{
+			return;
+		}
 		glClear(GL_COLOR_BUFFER_BIT);
 		glViewport(0, 0, win_width, win_height);
 		glUseProgram(programObject);
@@ -207,8 +213,7 @@ namespace pcrlib
 		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, GetSrcBuff());
-		//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, GetParamsBuff());
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, destBuffer);
 		glUniform1i(screenXLocation, win_width);
 		glUniform1i(screenYLocation, win_height);
 

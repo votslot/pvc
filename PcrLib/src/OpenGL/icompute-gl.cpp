@@ -4,8 +4,11 @@
 #include "wrapper-gl.h"
 #include <string>
 
+
 namespace pcrlib 
 {
+	extern void doGLBlit(GLint win_width, GLint win_height, GLuint destBuffer);
+
 	class CSBuffer;
 
 	// Error handling 
@@ -28,6 +31,28 @@ namespace pcrlib
 			}
 		}
 	}
+
+	class CSBuffer :public ICBuffer
+	{
+		GLuint m_buffer;
+		unsigned int m_size;
+		friend class CShader;
+	public:
+		CSBuffer() : m_buffer(0), m_size(0)
+		{
+			init();
+		}
+
+		~CSBuffer() {}
+		void bind(int n);
+		void init();
+		unsigned int getMaxSizeInBytes();
+		void setData(void *pD, unsigned int sizeInBytes);
+		void allocate(unsigned int sizeInBytes);
+		void getData(unsigned int sizeInBytes, void *pOut);
+		void delBuffer();
+		void blit(int destW, int destH);
+	};
 
 	// Compute shader
 	class CShader : public ICShader
@@ -120,7 +145,8 @@ namespace pcrlib
 			int i = 0;
 			for (ICBuffer* bf : inputs) 
 			{
-				bf->bind(i);
+				CSBuffer *pB = static_cast<CSBuffer*>(bf);
+				pB->bind(i);
 				i++;
 			}
 
@@ -155,78 +181,65 @@ namespace pcrlib
 	}
 	
 
-	// Compute buffer
-	class CSBuffer :public ICBuffer
+	// Compute buffer. OpenGL implementation.
+	void CSBuffer::init()
 	{
-		GLuint m_buffer;
-		unsigned int m_size;
-		friend class CShader;
-	public:
-		CSBuffer()
-		{
-			m_buffer = 0;
-			m_size = 0;
-			init();
-		}
+		glGenBuffers(1, &m_buffer);
+		errCheck();
+	}
 
-		~CSBuffer() 
-		{
-		}
+	unsigned int CSBuffer::getMaxSizeInBytes()
+	{
+		GLint size;
+		glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &size);
+		errCheck();
+		return size;
+	}
 
-		void init()
-		{
-			glGenBuffers(1, &m_buffer);
-			errCheck();
-		}
+	void CSBuffer::setData(void *pD, unsigned int sizeInBytes)
+	{
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeInBytes, pD, GL_STATIC_READ);
+		errCheck();
+	}
 
-		unsigned int getMaxSizeInBytes()
+	void CSBuffer::allocate(unsigned int sizeInBytes)
+	{
+		GLint maxtb = 0;
+		glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &maxtb);
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeInBytes, NULL, GL_DYNAMIC_COPY);
+		errCheck();
+		m_size = sizeInBytes;
+	}
+		
+	void CSBuffer::getData(unsigned int sizeInBytes, void *pOut)
+	{
+		if (sizeInBytes > m_size)
 		{
-			GLint size;
-			glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &size);
-			errCheck();
-			return size;
+			if(spEerr) spEerr(std::string("Requested size is bigger than allocated.  Alloc size=" + std::to_string(m_size)).c_str());
 		}
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
+		glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeInBytes, pOut);
+		errCheck();
+	}
 
-		void setData(void *pD, unsigned int sizeInBytes)
-		{
-			glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
-			glBufferData(GL_SHADER_STORAGE_BUFFER, sizeInBytes, pD, GL_STATIC_READ);
-			errCheck();
-		}
+	void CSBuffer::delBuffer()
+	{
+		glDeleteBuffers(1, &m_buffer);
+		errCheck();
+	}
 
-		void allocate(unsigned int sizeInBytes)
-		{
-			GLint maxtb = 0;
-			glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &maxtb);
-			glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
-			glBufferData(GL_SHADER_STORAGE_BUFFER, sizeInBytes, NULL, GL_DYNAMIC_COPY);
-			errCheck();
-			m_size = sizeInBytes;
-		}
+	void CSBuffer::bind(int n)
+	{
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, n, m_buffer);
+		errCheck();
+	}
 
-		void bind(int n) 
-		{
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, n, m_buffer);
-			errCheck();
-		}
-	
-		void getData(unsigned int sizeInBytes, void *pOut)
-		{
-			if (sizeInBytes > m_size)
-			{
-				if(spEerr) spEerr(std::string("Requested size is bigger than allocated.  Alloc size=" + std::to_string(m_size)).c_str());
-			}
-			glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
-			glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeInBytes, pOut);
-			errCheck();
-		}
-
-		void delBuffer()
-		{
-			glDeleteBuffers(1, &m_buffer);
-			errCheck();
-		}
-	};//class CSBuffer
+	void CSBuffer::blit(int destW, int destH)
+	{
+		doGLBlit(destW, destH, m_buffer);
+	}
 
 	ICBuffer * createICBuffer() 
 	{
