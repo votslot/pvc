@@ -56,7 +56,6 @@
 #include <QtGui/QOpenGLPaintDevice>
 #include <QtGui/QPainter>
 #include <QKeyEvent>
-#include "../PcrLib/pcrlib.h"
 #include <QOpenGLFunctions_4_1_Core>
 
 QOpenGLFunctions *pGLFunc ;
@@ -172,8 +171,8 @@ void OpenGLWindow::renderNow()
         pGLFunc = this;
 
         // init pcrlib
-        pcrlib::IPcrLib* pL =  pcrlib::IPcrLib::Init();
-        Q_ASSERT(pL->runTest()==0);
+       // pcrlib::IPcrLib* pL =  pcrlib::IPcrLib::Init();
+       // Q_ASSERT(pL->runTest()==0);
      }
 
     render();

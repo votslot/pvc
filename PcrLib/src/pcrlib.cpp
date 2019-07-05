@@ -10,7 +10,7 @@
 
 namespace pcrlib 
 {
-	extern int InitGLBlit();
+extern int InitGLBlit();
 
 	class ThePcrLib :public IPcrLib
 	{
@@ -37,7 +37,7 @@ namespace pcrlib
 			delete[]pD;
 			pD = NULL;
 
-			InitGLBlit();
+            InitGLBlit();
 			isInit = true;
 		}
 

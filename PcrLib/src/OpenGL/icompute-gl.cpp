@@ -7,8 +7,7 @@
 
 namespace pcrlib 
 {
-	extern void doGLBlit(GLint win_width, GLint win_height, GLuint destBuffer);
-
+    extern void doGLBlit(GLint win_width, GLint win_height, GLuint destBuffer);
 	class CSBuffer;
 
 	// Error handling 
@@ -32,6 +31,7 @@ namespace pcrlib
 		}
 	}
 
+    // CSBuffer declaration
 	class CSBuffer :public ICBuffer
 	{
 		GLuint m_buffer;

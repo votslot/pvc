@@ -4,6 +4,8 @@
 void SomeFunc() {
 }
 
+//#if (USE_GL_BLIT==1)
+#if 1
 namespace pcrlib
 {
 	static GLuint programObject;
@@ -60,7 +62,17 @@ namespace pcrlib
 		return 0;
 	}
 
-	void initQuadVerts()
+    static int err_check()
+    {
+            GLenum err;
+            while ((err = glGetError()) != GL_NO_ERROR)
+            {
+                 return 1;
+            }
+            return 0;
+    }
+
+    static void initQuadVerts()
 	{
 		static const GLfloat g_vertex_buffer_data[] = {
 			-1.0f, -1.0f, 0.0f,
@@ -89,20 +101,22 @@ namespace pcrlib
 			1.0f,  1.0f,
 		};
 
-		glGenBuffers(1, &vertexbuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+        glGenBuffers(1, &vertexbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
 		glGenBuffers(1, &colorbuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
 
 		glGenBuffers(1, &uvbuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	GLuint LoadShader(GLenum type, const GLchar *shaderSrc)
+    static GLuint LoadShader(GLenum type, const GLchar *shaderSrc)
 	{
 		GLuint shader;
 		GLint compiled;
@@ -181,8 +195,8 @@ namespace pcrlib
 		{
 			return 1;
 		}
-		initQuadVerts();
-		screenXLocation = glGetUniformLocation(programObject, "screenSizeX");
+        initQuadVerts();
+        screenXLocation = glGetUniformLocation(programObject, "screenSizeX");
 		screenYLocation = glGetUniformLocation(programObject, "screenSizeY");
 		sBlitIsInit = true;
 		return 0;
@@ -232,6 +246,7 @@ namespace pcrlib
 		}
 	}
 }//namespace pcrlib
+#endif
 
 
 

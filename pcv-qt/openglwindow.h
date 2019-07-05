@@ -58,7 +58,7 @@ class QOpenGLContext;
 class QOpenGLPaintDevice;
 QT_END_NAMESPACE
 
-//! [1]
+
 class OpenGLWindow : public QWindow, protected QOpenGLExtraFunctions
 {
     Q_OBJECT
@@ -88,5 +88,5 @@ private:
     QOpenGLContext *m_context;
     QOpenGLPaintDevice *m_device;
 };
-//! [1]
+
 

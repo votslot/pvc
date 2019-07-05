@@ -32,7 +32,8 @@ SOURCES += \
     quad.cpp \
     ../TexturedQuad/texturedquad.cpp \
     ../PcrLib/src/pcrlib.cpp \
-    ../PcrLib/src/OpenGL/icompute-gl.cpp
+    ../PcrLib/src/OpenGL/icompute-gl.cpp \
+    ../PcrLib/src/OpenGL/blit-gl.cpp
 
 HEADERS += \
         mainwindow.h \

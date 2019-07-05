@@ -54,37 +54,14 @@
 #include <QtGui/QMatrix4x4>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QScreen>
-
 #include <QtCore/qmath.h>
+#include "../PcrLib/pcrlib.h"
 
-//! [1]
-class TriangleWindow : public OpenGLWindow
-{
-public:
-    TriangleWindow();
 
-    void initialize() override;
-    void render() override;
 
-private:
-    GLuint m_posAttr;
-    GLuint m_colAttr;
-    GLuint m_matrixUniform;
 
-    QOpenGLShaderProgram *m_program;
-    int m_frame;
-};
 
-TriangleWindow::TriangleWindow()
-    : m_program(0)
-    , m_frame(0)
-{
-}
-
-static TriangleWindow *pWindow = NULL;
-//! [1]
-
-//! [2]
+#if 0
 int main123(int argc, char **argv)
 {
     //QGuiApplication app(argc, argv);
@@ -103,27 +80,27 @@ int main123(int argc, char **argv)
     return app.exec();
 }
 
-void RunQuad()
+class TriangleWindow : public OpenGLWindow
 {
-   // QApplication app(argc, NULL);
-    QSurfaceFormat format;
-    format.setSamples(16);
+public:
+    TriangleWindow();
+    void initialize() override;
+    void render() override;
+private:
+    GLuint m_posAttr;
+    GLuint m_colAttr;
+    GLuint m_matrixUniform;
 
-    pWindow = new TriangleWindow();
-    pWindow->setFormat(format);
-    pWindow->resize(640, 480);
-    //pWindow->show();
-    //pWindow->setAnimating(true);
-  //  app.exec();
- }
+    QOpenGLShaderProgram *m_program;
+    int m_frame;
+    pcrlib::IPcrLib* m_pcrLib;
+    pcrlib::Camera m_camera;
+};
 
-void ShowQuad()
+TriangleWindow::TriangleWindow()
+    : m_program(0)
+    , m_frame(0)
 {
-    if(pWindow)
-    {
-        pWindow->show();
-        pWindow->setAnimating(true);
-    }
 }
 
 static const char *vertexShaderSource =
@@ -145,6 +122,9 @@ static const char *fragmentShaderSource =
 
 void TriangleWindow::initialize()
 {
+    m_pcrLib = pcrlib::IPcrLib::Init();
+    Q_ASSERT(m_pcrLib->runTest()==0);
+
     //GLuint shaderProgram = glCreateProgram();
     m_program = new QOpenGLShaderProgram(this);
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
@@ -198,4 +178,61 @@ void TriangleWindow::render()
 
     ++m_frame;
 }
-//! [5]
+#endif
+
+class TriangleWindow : public OpenGLWindow
+{
+public:
+    TriangleWindow();
+    void initialize() override;
+    void render() override;
+private:
+    pcrlib::IPcrLib* m_pcrLib;
+    pcrlib::Camera m_camera;
+};
+
+TriangleWindow::TriangleWindow()
+    : m_pcrLib(NULL)
+{
+}
+static TriangleWindow *pWindow = NULL;
+
+
+
+void TriangleWindow::initialize()
+{
+    m_pcrLib = pcrlib::IPcrLib::Init();
+    Q_ASSERT(m_pcrLib->runTest()==0);
+}
+
+void TriangleWindow::render()
+{
+    const qreal retinaScale = devicePixelRatio();
+    int destWidth =  (int)(width() * retinaScale);
+    int destHeight = (int)(height() * retinaScale);
+    m_pcrLib->render(m_camera,destWidth,destHeight );
+}
+
+
+void RunQuad()
+{
+    QSurfaceFormat format;
+    format.setSamples(16);
+
+    pWindow = new TriangleWindow();
+    pWindow->setFormat(format);
+    pWindow->resize(640, 480);
+}
+
+void ShowQuad()
+{
+    if(pWindow)
+    {
+        pWindow->show();
+        pWindow->setAnimating(true);
+    }
+}
+
+
+
+
