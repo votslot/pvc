@@ -86,6 +86,7 @@ GLuint ComputeInit(int sw,int sh)
 	//
 	
 	//clut
+#if 0
 	for (int i = 0; i < 1024; i+=4) 
 	{
 		int nn = i ;
@@ -105,6 +106,8 @@ GLuint ComputeInit(int sw,int sh)
 	bufferClut.init();
 	void *pd = bufferClut.allocateVram(4 * 256 * sizeof(float));
 	memcpy(pd, clutData, 4 * 256 * sizeof(float));
+#endif
+
 	//bufferClut.setData(clutData, 4 * 256 * sizeof(float));
 
 	//Set debug data

@@ -203,6 +203,7 @@ void  CSShader::execute(int x, int y, int z, std::initializer_list <SSBBuffer*> 
 	glDispatchCompute(x, y, z);
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	glUseProgram(0);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
 

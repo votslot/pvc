@@ -86,7 +86,7 @@ namespace pcrlib
 				{
 					char* infoLog = (char*)malloc(sizeof(char) * infoLen);
 					glGetShaderInfoLog(shader, infoLen, NULL, infoLog);
-					printf("ERROR\n %s\n", infoLog);
+					if (spEerr) spEerr((std::string("Shader compilation\n") +std::string(infoLog) ).c_str());
 					free(infoLog);
 				}
 				glDeleteShader(shader);
@@ -153,6 +153,7 @@ namespace pcrlib
 			glDispatchCompute(x, y, z);
 			glMemoryBarrier(GL_ALL_BARRIER_BITS);
 			glUseProgram(0);
+			glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 			errCheck();
 		}
 
@@ -198,6 +199,10 @@ namespace pcrlib
 
 	void CSBuffer::setData(void *pD, unsigned int sizeInBytes)
 	{
+		if (sizeInBytes > m_size)
+		{
+			if (spEerr) spEerr(std::string("CSBuffer::setData () \n Requested size is bigger than allocated.  Alloc size=" + std::to_string(m_size)).c_str());
+		}
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeInBytes, pD, GL_STATIC_READ);
 		errCheck();

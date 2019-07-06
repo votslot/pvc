@@ -18,7 +18,7 @@
 
 
 
-#define SCREEN_WIDTH 512
+#define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 512
 SDL_Window* gWindow = NULL;
 SDL_GLContext gGlContext;
@@ -28,6 +28,12 @@ extern void Draw(GLint width, GLint height, GLuint texDest);
 extern void initQuadVerts();
 extern void AddUI(HWND hwnd);
 //static void InitBindings();
+
+static void ErrHnd(const char *pMsg) 
+{
+	MessageBoxA(NULL, pMsg, "Error", MB_OK);
+	exit(0);
+}
 
 void SetOpenGLVersion()
 {
@@ -246,6 +252,7 @@ int SdlEntryPoint()
 	InitQuad(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	static   pcrlib::Camera theCam;
+	pcrlib::IPcrLib::setErrHandler(ErrHnd);
 	pcrlib::IPcrLib *pRLib = pcrlib::IPcrLib::Init();
 	if (pRLib->runTest() != 0) 
 	{
@@ -296,6 +303,7 @@ int SdlEntryPoint()
 				break;
 			}
 		}
+		//ErrHnd("text");
 		if (sHasEvent)
 		{
 			OnStartLoop();

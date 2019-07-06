@@ -2,38 +2,73 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <assert.h>
 #include "../pcrlib.h"
 #include "icompute.h"
 
 #include "OpenGL/wave-test.cs.glsl"
-
+#include "OpenGL/shaders/render-points.cs.glsl"
+#include "OpenGL/shaders/post-proc.cs.glsl"
+#include "OpenGL/shaders/ginclude.h"
 
 namespace pcrlib 
 {
 extern int InitGLBlit();
 
+	
 	class ThePcrLib :public IPcrLib
 	{
+	public:
+
 		static const int sMaxW = 2048;
 		static const int sMaxH = 2048;
+		static PcrErrorHandler m_ErrFunc;
 		bool isInit = false;
+		GlobalParams m_Glob;
 		// buffres
-		ICBuffer  *pbufferZMap = NULL;
-		ICBuffer  *pbufferParams = NULL;
-	public:
+		ICBuffer  *m_bufferZMap = NULL;
+		ICBuffer  *m_bufferParams = NULL;
+		ICBuffer  *m_bufferZMapPost = NULL;
+		ICBuffer  *m_bufferMatrView4x4  = NULL;
+		ICBuffer  *m_bufferView2World = NULL;
+		//shaders
+		ICShader *m_csPointRender = NULL;
+		ICShader *m_csCleanRGB  = NULL;
+		ICShader *m_csPostProc  = NULL;
+
+		ThePcrLib() 
+		{
+			m_ErrFunc = defErrFunc;
+			setICErrorHandler(defErrFunc);
+		}
 		void initInternal()
 		{
 			if (isInit) 
 			{
 				return;
 			}
-			pbufferZMap = createICBuffer();
-			pbufferZMap->allocate(sMaxW*sMaxH * sizeof(int));
+
+			// shaders
+			m_csCleanRGB = createICShader();
+			m_csCleanRGB->initFromSource(cs_clean.c_str());
+			
+			m_csPointRender = createICShader();
+			m_csPointRender->initFromSource(cs_render_points.c_str());
+			
+			m_csPostProc = createICShader();;
+			m_csPostProc->initFromSource(cs_postproc_w.c_str());
+
+			// buffers
+			m_bufferParams = createICBuffer();
+			m_bufferParams->allocate(sizeof(GlobalParams));
+		
+			m_bufferZMap = createICBuffer();
+			m_bufferZMap->allocate(sMaxW*sMaxH * sizeof(int));
 
 			// Write something
 			int *pD = new int[sMaxW*sMaxH];
-			for (int i = 0; i < sMaxW*sMaxH; i++) pD[i] = 0x00800000;  //AABBGGRR
-			pbufferZMap->setData(pD, sMaxW*sMaxH * sizeof(int));
+			for (int i = 0; i < sMaxW*sMaxH; i++) pD[i] = 0x00000000;  //AABBGGRR
+			m_bufferZMap->setData(pD, sMaxW*sMaxH * sizeof(int));
 			delete[]pD;
 			pD = NULL;
 
@@ -47,18 +82,59 @@ extern int InitGLBlit();
 			{
 				return 0;
 			}
-			pbufferZMap->blit(destWidth, destHeight);
+			m_Glob.screenX = (float)destWidth;
+			m_Glob.screenY = (float)destHeight;
+			/*
+			pGlob.zNear = (float)pCam->m_zNear;
+			pGlob.zFar = (float)pCam->m_zFar;
+			pGlob.zRange = (float)(1 << 24); 
+			pGlob.maxDimension = (float)pCam->m_MaxDimension;
+			pGlob.wrkLoad = 64;
+			pGlob.px = pCam->m_P[0];
+			pGlob.py = pCam->m_P[1];
+			pGlob.pz = pCam->m_P[2];
+			pGlob.bbMinX = pst->GetXMin();
+			pGlob.bbMaxX = pst->GetXMax();
+			pGlob.bbMinY = pst->GetYMin();
+			pGlob.bbMaxY = pst->GetYMax();
+			pGlob.bbMinZ = pst->GetZMin();
+			pGlob.bbMaxZ = pst->GetZMax();
+			pGlob.scrMin = (pGlob.screenX < pGlob.screenY) ? pGlob.screenX : pGlob.screenY;
+			*/
+			m_bufferParams->setData((unsigned char*)(&m_Glob), sizeof(GlobalParams));
+
+			// clean dst zMap buffer
+			m_csCleanRGB->execute(sMaxW / 32, sMaxH / 32, 1, { m_bufferParams, m_bufferZMap });
+
+			m_bufferZMap->blit(destWidth, destHeight);
 			return 0;
 		}
 
 		void releaseInternal()
 		{
-			if(pbufferZMap) releaseICBuffer(&pbufferZMap);
+			if (m_bufferZMap)			releaseICBuffer(&m_bufferZMap);
+			if (m_bufferParams)			releaseICBuffer(&m_bufferParams);
+			if (m_bufferZMapPost)		releaseICBuffer(&m_bufferZMapPost);
+			if (m_bufferMatrView4x4)	releaseICBuffer(&m_bufferMatrView4x4);
+			if (m_bufferView2World)		releaseICBuffer(&m_bufferView2World);
+
+			if (m_csPointRender)  releaseICShader(&m_csPointRender);
+			if (m_csCleanRGB)	  releaseICShader(&m_csCleanRGB);
+			if (m_csPostProc)	  releaseICShader(&m_csPostProc);
+
 			isInit = false;
 		}
 
+
+		static void defErrFunc(const char *pMessage)
+		{
+			std::cout << "PcrLibError: " << pMessage << std::endl;
+			assert(false);
+		}
+
 		int runTest();
-	};
+	};//class ThePcrLib
+
 
 	static ThePcrLib libInstance;
 	
@@ -67,6 +143,15 @@ extern int InitGLBlit();
 		libInstance.initInternal();
 		return  &libInstance;
 	}
+
+	PcrErrorHandler ThePcrLib::m_ErrFunc = NULL;
+	PcrErrorHandler IPcrLib::setErrHandler(PcrErrorHandler errh)
+	{
+		ThePcrLib::m_ErrFunc = errh;
+		setICErrorHandler(errh);
+		return NULL;
+	}
+
 	
 	// Test
 	int ThePcrLib::runTest()
