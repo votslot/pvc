@@ -5,6 +5,7 @@
 #include <assert.h>
 #include "../pcrlib.h"
 #include "icompute.h"
+#include "storage.h"
 
 #include "OpenGL/wave-test.cs.glsl"
 #include "OpenGL/shaders/render-points.cs.glsl"
@@ -24,6 +25,7 @@ extern int InitGLBlit();
 		static const int sMaxH = 2048;
 		static PcrErrorHandler m_ErrFunc;
 		bool isInit = false;
+		PointStorage  * m_pst = NULL;
 		GlobalParams m_Glob;
 		// buffres
 		ICBuffer  *m_bufferZMap = NULL;
@@ -41,13 +43,16 @@ extern int InitGLBlit();
 			m_ErrFunc = defErrFunc;
 			setICErrorHandler(defErrFunc);
 		}
+
 		void initInternal()
 		{
 			if (isInit) 
 			{
 				return;
 			}
-
+			// init storage
+			m_pst = PointStorage::GetInstatnce();
+			m_pst->Init();
 			// shaders
 			m_csCleanRGB = createICShader();
 			m_csCleanRGB->initFromSource(cs_clean.c_str());

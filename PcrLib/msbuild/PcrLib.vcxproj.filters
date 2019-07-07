@@ -15,6 +15,7 @@
       <Filter>GL</Filter>
     </ClCompile>
     <ClCompile Include="..\src\matrix-utils.cpp" />
+    <ClCompile Include="..\src\storage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\partition.h" />
@@ -24,6 +25,7 @@
       <Filter>GL</Filter>
     </ClInclude>
     <ClInclude Include="..\src\matrix-utils.h" />
+    <ClInclude Include="..\src\storage.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="gl-config.props">

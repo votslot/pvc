@@ -189,7 +189,7 @@ namespace pcrlib
 		errCheck();
 	}
 
-	unsigned int CSBuffer::getMaxSizeInBytes()
+	unsigned int ICBuffer::getMaxSizeInBytes()
 	{
 		GLint size;
 		glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &size);

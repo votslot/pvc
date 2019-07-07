@@ -13,10 +13,10 @@ namespace pcrlib
 	{
 	public:
 		virtual void allocate(unsigned int sizeInBytes) = 0;
-		virtual unsigned int getMaxSizeInBytes() = 0;
 		virtual void setData(void *pD, unsigned int sizeInBytes) = 0;
 		virtual void getData(unsigned int sizeInBytes, void *pOut) = 0;
 		virtual void blit(int destW, int destH) = 0;
+		static unsigned int getMaxSizeInBytes();
 	};
 
 	ICBuffer * createICBuffer();

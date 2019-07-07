@@ -24,6 +24,7 @@
     <ClCompile Include="..\src\OpenGL\icompute-gl.cpp" />
     <ClCompile Include="..\src\partition.cpp" />
     <ClCompile Include="..\src\pcrlib.cpp" />
+    <ClCompile Include="..\src\storage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\pcrlib.h" />
@@ -31,6 +32,7 @@
     <ClInclude Include="..\src\matrix-utils.h" />
     <ClInclude Include="..\src\OpenGL\wrapper-gl.h" />
     <ClInclude Include="..\src\partition.h" />
+    <ClInclude Include="..\src\storage.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\OpenGL\wave-test.cs.glsl" />
