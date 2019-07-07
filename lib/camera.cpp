@@ -100,6 +100,7 @@ void Camera::RotateAroundPivot(float dx, float dy)
 	m_R = rotate(m_R, ZZ,  A0, dy);
 
 	Camera::vector3 A1(0.0f, 0.0f, 1.0f);
+	//Camera::vector3 A1(0.0f, 1.0f, 0.0f);
 	m_P = rotate(m_P, m_L, A1, dx);
 	m_D = rotate(m_D, ZZ,  A1, dx);
 	m_U = rotate(m_U, ZZ,  A1, dx);
@@ -142,6 +143,21 @@ void Camera::SetPivotCamera(float teta, float fi, float dist, float px, float py
 		m_R[2] = 0.0f;
 	}
 	m_U = m_D ^ m_R;
+}
+
+void Camera::BuildPcrCamera(pcrlib::Camera &res)
+{
+	res.pos[0] = m_P[0];
+	res.pos[1] = m_P[1];
+	res.pos[2] = m_P[2];
+	res.up[0] = m_U[0];
+	res.up[1] = m_U[1];
+	res.up[2] = m_U[2];
+	res.lookAt[0] = m_D[0];
+	res.lookAt[1] = m_D[1];
+	res.lookAt[2] = m_D[2];
+	res.zNear = m_zNear;
+	res.zFar = m_zFar;
 }
 
 void Camera::FromWorld(float *pWorldIn, float *pInCamOut) 

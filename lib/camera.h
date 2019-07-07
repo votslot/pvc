@@ -2,7 +2,8 @@
 #ifndef _CAMERA_H
 #define _CAMERA_H
 
-#include "..\lib\vec3d.h"
+//#include "..\lib\vec3d.h"
+#include "../PcrLib/pcrlib.h"
 
 class Camera {
 public:
@@ -23,6 +24,8 @@ public:
 	void RotateAroundPivot(float dx, float dy);
 	void MoveInPivotDir(float dd);
 	void ShiftPivot(float dx, float dy);
+	void BuildPcrCamera(pcrlib::Camera &res);
+
 	void ConvertTo4x4(float *pOut);
 	void GetProjectionMat4x4(float screenX, float screenY, float zNear, float zFar, float *pOut);
 	void GetVew2World4x4(float *pOut);

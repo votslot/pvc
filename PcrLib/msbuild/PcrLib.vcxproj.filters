@@ -14,6 +14,7 @@
     <ClCompile Include="..\src\OpenGL\blit-gl.cpp">
       <Filter>GL</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\matrix-utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\partition.h" />
@@ -22,6 +23,7 @@
     <ClInclude Include="..\src\OpenGL\wrapper-gl.h">
       <Filter>GL</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\matrix-utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="gl-config.props">

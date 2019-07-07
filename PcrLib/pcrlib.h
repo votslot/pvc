@@ -9,7 +9,13 @@ namespace pcrlib
 	typedef void(*PcrErrorHandler)(const char *pMessage);
 
 	struct Camera {
-		float posiionX, positionY, posiztionZ;
+		float pos[3];   //position x,y,z
+		float lookAt[3];
+		float up[3];
+		float zNear;
+		float zFar;
+		float fovInRadians;
+		bool isPerspective;
 	};
 
     class  IPcrLib

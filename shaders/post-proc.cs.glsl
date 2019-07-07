@@ -58,8 +58,8 @@ R""(
 			/*
 			uint colorX = uint(  255.0 * (res.x - globs.bbMinX)/(globs.bbMaxX - globs.bbMinX));
 			uint colorY = uint(  255.0 * (res.y - globs.bbMinY)/(globs.bbMaxY - globs.bbMinY));
-			uint colorZ = uint( 128  + 128.0 * (res.z - globs.bbMinZ)/(globs.bbMaxZ - globs.bbMinZ));
-			zMapOut[shift] =  colorZ | (colorZ<<8) | ( colorZ<<16);
+			uint colorZ = uint(  255.0 * (res.z - globs.bbMinZ)/(globs.bbMaxZ - globs.bbMinZ));
+			zMapOut[shift] =  colorX| (colorY<<8) | ( colorZ<<16);
 			*/
 			
 			

@@ -13,7 +13,8 @@
 #include "colorize.h"
 #include "..\pcloud\pcloud.h"
 #include "..\shaders\ginclude.h"
-
+#include "..\PcrLib\src\matrix-utils.h"
+#include "..\PcrLib\pcrlib.h"
 
 extern void WaveTest_Init();
 extern void WaveTest_Run();
@@ -138,21 +139,21 @@ GLuint GetClutData()
 }
 
 
-void ComputeRun(int sw__, int sh__)
+void ComputeRun(const pcrlib::Camera &pcrCam,int sw__, int sh__)
 {
 	static int n_call = 0;
 	PointStorage  * pst = PointStorage::GetInstatnce();
-	Camera *pCam = Camera::GetCamera();
-	pGlob.screenX   = (float)pCam->GetScreenX();
-	pGlob.screenY   = (float)pCam->GetScreenY();
-	pGlob.zNear     = (float)pCam->m_zNear;
-	pGlob.zFar      = (float)pCam->m_zFar;
-	pGlob.zRange = (float)(1 << 24); //16777215.0f;// / (pCam->m_zFar - pCam->m_zNear);
-	pGlob.maxDimension = (float)pCam->m_MaxDimension;
+	//Camera *pCam = Camera::GetCamera();
+	pGlob.screenX	= (float)sw__;// pCam->GetScreenX();
+	pGlob.screenY	= (float)sh__;// pCam->GetScreenY();
+	pGlob.zNear     = (float)pcrCam.zNear;
+	pGlob.zFar		= (float)pcrCam.zFar;
+	pGlob.zRange	= (float)(1 << 24); //16777215.0f;// / (pCam->m_zFar - pCam->m_zNear);
+	pGlob.maxDimension = 0.0f;// (float)pCam->m_MaxDimension;
 	pGlob.wrkLoad = 64;
-	pGlob.px = pCam->m_P[0];
-	pGlob.py = pCam->m_P[1];
-	pGlob.pz = pCam->m_P[2];
+	pGlob.px = pcrCam.pos[0];//pCam->m_P[0];
+	pGlob.py = pcrCam.pos[1];//pCam->m_P[1];
+	pGlob.pz = pcrCam.pos[2];//pCam->m_P[2];
 	pGlob.bbMinX = pst->GetXMin();
 	pGlob.bbMaxX = pst->GetXMax(); 
 	pGlob.bbMinY = pst->GetYMin();
@@ -163,7 +164,12 @@ void ComputeRun(int sw__, int sh__)
 	bufferParams.setData((unsigned char*)(&pGlob), sizeof(GlobalParams));
 	// camera
 	float matrView4x4[16];
-	pCam->GetProjectionMat4x4(pGlob.screenX, pGlob.screenY, pGlob.zNear, pGlob.zFar, matrView4x4);
+	pcrlib::GetProjectionMat4x4(
+		pGlob.screenX, pGlob.screenY, pGlob.zNear, pGlob.zFar,
+		pcrCam.up, pcrCam.lookAt, pcrCam.pos,
+		matrView4x4);
+
+	//pCam->GetProjectionMat4x4(pGlob.screenX, pGlob.screenY, pGlob.zNear, pGlob.zFar, matrView4x4);
 	bufferMatrView4x4.setData(matrView4x4, 16 * sizeof(float));
 	
 	// clean dst zMap buffer
@@ -185,7 +191,8 @@ void ComputeRun(int sw__, int sh__)
 	// post proc
 	{
 		float Vew2World4x4[16];
-		pCam->GetVew2World4x4(Vew2World4x4);
+		//pCam->GetVew2World4x4(Vew2World4x4);
+		pcrlib::GetVew2World4x4(pcrCam.up, pcrCam.lookAt, pcrCam.pos, Vew2World4x4);
 		bufferView2World.setData(Vew2World4x4, 16 * sizeof(float));
 		csPostProc.execute(sMaxW / 32, sMaxH / 32, 1, { &bufferParams ,&bufferZMap,&bufferZMapPost,&bufferView2World,&bufferDebug });
 	}

@@ -232,7 +232,7 @@ void* PCloudIn::InitTestCloud()
 	}
 	gpTestCloud->OnStart();
 
-	GetWave(64,64);
+	GetWave(1024,1024);
 	
 	//GetSphere(100.0f, 0.0f, 0.0f, 0.0f, 1024 * 1024);
 	

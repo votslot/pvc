@@ -14,7 +14,6 @@
 #include "camera.h"
 #include "../winui/ui.h"
 #include "../pcloud/pcloud.h"
-#include "../PcrLib/pcrlib.h"
 
 
 
@@ -251,7 +250,7 @@ int SdlEntryPoint()
 	GLuint texdest = ComputeInit(SCREEN_WIDTH, SCREEN_HEIGHT);
 	InitQuad(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	static   pcrlib::Camera theCam;
+	static   pcrlib::Camera pcrCam;
 	pcrlib::IPcrLib::setErrHandler(ErrHnd);
 	pcrlib::IPcrLib *pRLib = pcrlib::IPcrLib::Init();
 	if (pRLib->runTest() != 0) 
@@ -309,10 +308,12 @@ int SdlEntryPoint()
 			OnStartLoop();
 #if 1
 			// render to buffer
-			ComputeRun(sw, sh);
+			Camera::GetCamera()->BuildPcrCamera(pcrCam);
+			ComputeRun(pcrCam,sw, sh);
 			// render to screen
 			Draw(sw, sh, texdest);
 #else
+			Camera::GetCamera()->BuildPcrCamera(pcrCam);
 			pRLib->render(theCam, sw, sh);
 #endif
 			// swap 
