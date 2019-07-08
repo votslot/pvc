@@ -33,7 +33,10 @@ SOURCES += \
     ../TexturedQuad/texturedquad.cpp \
     ../PcrLib/src/pcrlib.cpp \
     ../PcrLib/src/OpenGL/icompute-gl.cpp \
-    ../PcrLib/src/OpenGL/blit-gl.cpp
+    ../PcrLib/src/OpenGL/blit-gl.cpp \
+    ../PcrLib/src/matrix-utils.cpp \
+    ../PcrLib/src/storage.cpp \
+    ../PcrLib/src/partition.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -42,7 +45,11 @@ HEADERS += \
     openglwindow.h \
     ../PcrLib/pcrlib.h \
     ../PcrLib/src/icompute.h \
-    ../PcrLib/src/OpenGL/wrapper-gl.h
+    ../PcrLib/src/OpenGL/wrapper-gl.h \
+    ../PcrLib/src/storage.h \
+    ../PcrLib/src/partition.h \
+    ../PcrLib/src/matrix-utils.h \
+    ../PcrLib/src/OpenGL/shaders/ginclude.h
 
 FORMS += \
         mainwindow.ui

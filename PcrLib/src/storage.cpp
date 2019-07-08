@@ -1,10 +1,11 @@
 
 #include <assert.h>
 #include <iostream>
+#include "float.h"
 #include "storage.h"
 #include "icompute.h"
 #include "partition.h"
-#include "OpenGL\shaders\ginclude.h"
+#include "OpenGL/shaders/ginclude.h"
 
 
 
@@ -30,7 +31,7 @@ namespace pcrlib
 			float bbXMin = FLT_MAX;
 			float bbXMax = FLT_MIN;
 			float bbYMin = FLT_MAX;
-			float bbYMax = FLT_MIN;
+            float bbYMax = FLT_MIN;
 			float bbZMin = FLT_MAX;
 			float bbZMax = FLT_MIN;
 

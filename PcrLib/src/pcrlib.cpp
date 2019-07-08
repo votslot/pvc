@@ -51,8 +51,8 @@ extern int InitGLBlit();
 				return;
 			}
 			// init storage
-			m_pst = PointStorage::GetInstatnce();
-			m_pst->Init();
+            m_pst = PointStorage::GetInstatnce();
+            m_pst->Init();
 			// shaders
 			m_csCleanRGB = createICShader();
 			m_csCleanRGB->initFromSource(cs_clean.c_str());
