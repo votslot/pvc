@@ -14,7 +14,7 @@ namespace pcrlib
 	static ICErrorHandler spEerr = NULL;
 	ICErrorHandler setICErrorHandler(ICErrorHandler errh)
 	{
-		ICErrorHandler oldEh = spEerr;
+        ICErrorHandler oldEh = spEerr;
 		spEerr = errh;
 		return oldEh;
 	}
