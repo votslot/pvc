@@ -25,7 +25,6 @@ DEFINES += QT_BUILD
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ../src/compute.cpp \
     ../src/partition.cpp \
     ../src/pcrlib.cpp \
     ../src/OpenGL/blit-gl.cpp \
@@ -41,7 +40,8 @@ HEADERS += \
     ../src/storage.h \
     ../src/matrix-utils.h
 unix {
-    target.path = /usr/lib
+#    target.path = /usr/lib
+    target.path = ./
     INSTALLS += target
 }
 

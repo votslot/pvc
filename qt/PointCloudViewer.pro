@@ -35,15 +35,16 @@ HEADERS += \
 FORMS += \
         mainwindow.ui
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../PcrLib/build-pcr-Unnamed-Debug/release/ -lpcr
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../PcrLib/build-pcr-Unnamed-Debug/debug/ -lpcr
-else:unix:!macx: LIBS += -L$$PWD/../PcrLib/build-pcr-Unnamed-Debug/ -lpcr
 
-INCLUDEPATH += $$PWD/../PcrLib/build-pcr-Unnamed-Debug
-DEPENDPATH += $$PWD/../PcrLib/build-pcr-Unnamed-Debug
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../PcrLib/qtbuild/release/ -lpcr
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../PcrLib/qtbuild/debug/ -lpcr
+else:unix: LIBS += -L$$PWD/../PcrLib/qtbuild/ -lpcr
 
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../PcrLib/build-pcr-Unnamed-Debug/release/libpcr.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../PcrLib/build-pcr-Unnamed-Debug/debug/libpcr.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../PcrLib/build-pcr-Unnamed-Debug/release/pcr.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../PcrLib/build-pcr-Unnamed-Debug/debug/pcr.lib
-else:unix:!macx: PRE_TARGETDEPS += $$PWD/../PcrLib/build-pcr-Unnamed-Debug/libpcr.a
+INCLUDEPATH += $$PWD/../PcrLib/qtbuild
+DEPENDPATH += $$PWD/../PcrLib/qtbuild
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../PcrLib/qtbuild/release/libpcr.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../PcrLib/qtbuild/debug/libpcr.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../PcrLib/qtbuild/release/pcr.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../PcrLib/qtbuild/debug/pcr.lib
+else:unix: PRE_TARGETDEPS += $$PWD/../PcrLib/qtbuild/libpcr.a

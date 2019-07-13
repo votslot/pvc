@@ -56,7 +56,7 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
-#include "../pcrlib.h"
+#include "../PcrLib/pcrlib.h"
 
 
 QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
