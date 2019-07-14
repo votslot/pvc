@@ -45,5 +45,7 @@ unix {
     INSTALLS += target
 }
 
+DESTDIR = $$PWD/LibOutput
+
 DISTFILES += \
     ../src/OpenGL/wave-test.cs.glsl
