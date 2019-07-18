@@ -159,8 +159,12 @@ namespace pcrlib
 				DoPartitionXYZW_Float(pTemp, numPointsInTemp, OnDonePartition);
 				std::cout << "done" << std::endl;
 
+				bufferPoints[numInUse]->allocate(sizeInTemp);
 				bufferPoints[numInUse]->setData(pTemp, sizeInTemp);
+
+				bufferPartition[numInUse]->allocate(numPartitions * sizeof(Partition));
 				bufferPartition[numInUse]->setData(pPartitions, numPartitions * sizeof(Partition));
+
 				numPointsInBuff[numInUse] = numPointsInTemp;
 				numPartitionsInBuff[numInUse] = numPartitions;
 				numInUse++;

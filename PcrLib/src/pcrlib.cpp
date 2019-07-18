@@ -81,6 +81,23 @@ extern int InitGLBlit();
 			isInit = true;
 		}
 
+		void startAddPoints()
+		{
+			
+		}
+
+		int addPoint(float x, float y, float z, float w) 
+		{
+			m_pst->SetPoint(x, y, z, w);
+			return 0;
+		}
+
+		void doneAddPoints()
+		{
+			m_pst->DoneAddPoints();
+		}
+
+
 		int render(const Camera &cam, int destWidth, int destHeight)
 		{
 			if (!isInit)
@@ -147,6 +164,11 @@ extern int InitGLBlit();
 	{
 		libInstance.initInternal();
 		return  &libInstance;
+	}
+
+	IPcrLib* IPcrLib::GetInstance()
+	{
+		return (libInstance.isInit) ? &libInstance:NULL;
 	}
 
 	PcrErrorHandler ThePcrLib::m_ErrFunc = NULL;

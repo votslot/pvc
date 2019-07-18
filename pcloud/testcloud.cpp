@@ -8,6 +8,8 @@
 #include "pcloud.h" 
 #include "..\lib\vec3d.h"
 #include <time.h>
+#include "..\PcrLib\pcrlib.h"
+using namespace pcrlib;
 
 PCloudIn *gpTestCloud = 0;
 
@@ -202,7 +204,7 @@ static void GetAllPlaneNew()
 }
 
 
-static void GetWave(int w, int h)
+static void GetWave(int w, int h, IPcrLib* pLib)
 {
 	float sz = 10.0f;
 	float tz = (float)w * sz;
@@ -218,13 +220,19 @@ static void GetWave(int w, int h)
 			//zz += 0.2f * tz *cos(2.0f * 3.1415f* (float)(x) / (float(w)));
 			//float zz = (y < h/ 2) ? y * sz : h*sz / 2;
 			//float zz = y * sz;
-			gpTestCloud->SetPointValue(xx, yy, zz, 0.0f);
+			if (pLib) 
+			{
+				pLib->addPoint(xx, yy, zz, 0.0f);
+			}
+			else {
+				gpTestCloud->SetPointValue(xx, yy, zz, 0.0f);
+			}
 		}
 	}
 }
 
 
-
+#if 1
 void* PCloudIn::InitTestCloud()
 {
 	if (!gpTestCloud) {
@@ -232,11 +240,19 @@ void* PCloudIn::InitTestCloud()
 	}
 	gpTestCloud->OnStart();
 
-	GetWave(1024,1024);
-	
-	//GetSphere(100.0f, 0.0f, 0.0f, 0.0f, 1024 * 1024);
-	
+	GetWave(1024,1024,NULL);
 
 	gpTestCloud->OnDone();
 	return NULL;
 }
+#else
+void* PCloudIn::InitTestCloud()
+{
+	IPcrLib* pLib = IPcrLib::GetInstance();
+	pLib->startAddPoints();
+	GetWave(1024, 1024, pLib);
+	pLib->doneAddPoints();
+	
+	return NULL;
+}
+#endif

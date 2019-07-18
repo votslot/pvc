@@ -21,11 +21,16 @@ namespace pcrlib
     class  IPcrLib
 	{
 	public:
-		virtual int runTest() = 0;
+
+		virtual void startAddPoints() = 0;
+		virtual int  addPoint(float x, float y, float z, float w) = 0;
+		virtual void doneAddPoints() = 0;
 		virtual int render(const Camera &cam, int destWidth, int destHeight) = 0;
 
-		static PcrErrorHandler setErrHandler(PcrErrorHandler errh) ;
+		virtual int runTest() = 0;
+		static PcrErrorHandler setErrHandler(PcrErrorHandler errh);
 		static IPcrLib* Init();
+		static IPcrLib* GetInstance();
 	};
 }
 

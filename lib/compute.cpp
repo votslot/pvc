@@ -229,9 +229,6 @@ void Compute_AddPoint(float x, float y, float z, float w)
 void Compute_DoneAddPoints()
 {
 	PointStorage::GetInstatnce()->DoneAddPoints();
-	IColorize* ic = IColorize::GetInstance();
-	ic->Init();
-	ic->DoColorize(PointStorage::GetInstatnce());
 };
 
 

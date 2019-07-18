@@ -14,6 +14,7 @@
 #include "camera.h"
 #include "../winui/ui.h"
 #include "../pcloud/pcloud.h"
+#include "../app/app-events.h"
 
 
 
@@ -65,58 +66,14 @@ void OnEndLoop()
 	
 }
 
-#if 0
-void OnKeyEvent(int key)
-{
-	static float  dist = 600.0f;
-	float step = 0.01f * 256.0f,sig =  0.0f;
-	Camera *pCam = Camera::GetCamera();
-	switch (key) 
-	{
-		case SDLK_RIGHT:
-			pCam->RotateUp(0.01f);
-		break;
-		case SDLK_LEFT:
-			pCam->RotateUp(-0.01f);
-		break;
-		case SDLK_DOWN:
-			pCam->RotateRight(0.01f);
-		break;
-		case SDLK_UP:
-			pCam->RotateRight(-0.01f);
-		break;
-		case SDLK_PAGEUP:
-			dist += step;
-			sig = 1.0f;
-		break;
-		case SDLK_PAGEDOWN:
-			dist -= step;
-			sig = -1.0f;
-		break;
-	}
-
-	float *pPos = pCam->GetPos();
-	float *pDir = pCam->GetDir();
-	
-	pPos[0] = -pDir[0] * dist;
-	pPos[1] = -pDir[1] * dist;
-	pPos[2] = -pDir[2] * dist;
-	
-	/*
-	pPos[0] += pDir[0] * step * sig;
-	pPos[1] += pDir[1] * step * sig;
-	pPos[2] += pDir[2] * step * sig;
-	*/
-	
-}
-#endif
-
 /*-----------------------------------------------------------------*/
 static int sMouseXDown = 0;
 static int sMouseYDown = 0;
 static bool sLeftMouseDown = false;
 static bool sRightMouseDown = false;
 static bool sHasEvent = true;
+static pcrlib::IPcrLib *pRLib = NULL;
+
 void OnMouseDownEvent(SDL_MouseButtonEvent *pMouseDown)
 {
 	sMouseXDown = pMouseDown->x;
@@ -232,6 +189,7 @@ int SdlEntryPoint()
 		printf("Error: %s\n", glewGetErrorString(err));
 	}
 	
+#if 0
 	GLint maxtb = 0;
 	glGetIntegerv(GL_MAJOR_VERSION, &maxtb);
 	glGetIntegerv(GL_MINOR_VERSION, &maxtb);
@@ -246,21 +204,15 @@ int SdlEntryPoint()
 	printf("GL_MAX_COMPUTE_WORK_GROUP_COUNT= %d\n", maxtb);
 	glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &maxtb);
 	printf("GL_MAX_TEXTURE_BUFFER_SIZE= %d\n", maxtb);
+#endif
 
 	GLuint texdest = ComputeInit(SCREEN_WIDTH, SCREEN_HEIGHT);
 	InitQuad(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	static   pcrlib::Camera pcrCam;
 	pcrlib::IPcrLib::setErrHandler(ErrHnd);
-	pcrlib::IPcrLib *pRLib = pcrlib::IPcrLib::Init();
-	if (pRLib->runTest() != 0) 
-	{
-		std::cout << "pcrlib initialization error" << std::endl;
-	}
-	else 
-	{
-		std::cout << "pcrlib initialization success" << std::endl;
-	}
+	pRLib = pcrlib::IPcrLib::Init();
+	
 
 	int sw = SCREEN_WIDTH;
 	int sh = SCREEN_HEIGHT;
@@ -314,7 +266,7 @@ int SdlEntryPoint()
 			Draw(sw, sh, texdest);
 #else
 			Camera::GetCamera()->BuildPcrCamera(pcrCam);
-			pRLib->render(theCam, sw, sh);
+			pRLib->render(pcrCam, sw, sh);
 #endif
 			// swap 
 			SDL_GL_SwapWindow(gWindow);

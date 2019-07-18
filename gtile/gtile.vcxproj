@@ -187,6 +187,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\app\app-events.h" />
     <ClInclude Include="..\lib\camera.h" />
     <ClInclude Include="..\lib\cbuff.h" />
     <ClInclude Include="..\lib\colorize.h" />
@@ -201,6 +202,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\app\app-events.cpp" />
     <ClCompile Include="..\lib\app.cpp" />
     <ClCompile Include="..\lib\camera.cpp" />
     <ClCompile Include="..\lib\cbuff.cpp" />
