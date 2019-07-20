@@ -258,7 +258,7 @@ int SdlEntryPoint()
 		if (sHasEvent)
 		{
 			OnStartLoop();
-#if 1
+#if 0
 			// render to buffer
 			Camera::GetCamera()->BuildPcrCamera(pcrCam);
 			ComputeRun(pcrCam,sw, sh);

@@ -5,6 +5,9 @@
 #include "../pcloud/pcloud.h"
 #include "camera.h"
 #include "compute.h"
+#include "..\PcrLib\pcrlib.h"
+
+
 
 
 class UIOutImpl :public UIOut
@@ -18,7 +21,7 @@ class UIOutImpl :public UIOut
 class CloudImpl : public  PCloudIn
 {
 public:
-
+	pcrlib::IPcrLib * m_pLib = NULL; // IPcrLib::GetInstance();
 	unsigned int numCurr;
 	unsigned int numP;
 	float minX, maxX, minY, maxY, minZ, maxZ;
@@ -54,6 +57,7 @@ void UIOutImpl::OnExit() {}
 //-------------------PCloud-----------------------------
 void CloudImpl::OnStart()
 {
+	m_pLib = pcrlib::IPcrLib::GetInstance();
 	minX = minY = minZ = FLT_MAX;
 	maxX = maxY = maxZ = FLT_MIN;
 	numCurr = 0;
@@ -73,7 +77,15 @@ void  CloudImpl::SetPointValue(float x, float y, float z,float w)
 	if (x > maxX) maxX = x;
 	if (y > maxY) maxY = y;
 	if (z > maxZ) maxZ = z;
-	Compute_AddPoint(x, y, z, w);
+	if (m_pLib != NULL) 
+	{
+		m_pLib->addPoint(x, y, z, w);
+	}
+	else 
+	{
+		Compute_AddPoint(x, y, z, w);
+	}
+	
 	numCurr++;
 }
 
@@ -87,8 +99,14 @@ void CloudImpl::OnDone()
 	float cx = (maxX + minX) *0.5f;
 	float cy = (maxY + minY) *0.5f;
 	float cz = (maxZ + minZ) *0.5f;
-
-	Compute_DoneAddPoints();
+	if (m_pLib != NULL) 
+	{
+		m_pLib->doneAddPoints();
+	}
+	else 
+	{
+		Compute_DoneAddPoints();
+	}
 	Camera *pCam = Camera::GetCamera();
 	pCam->SetPivotCamera(0.0f, 0.0f, maxD*2.0f, cx, cy, cz);
 	pCam->m_zFar = maxD * 4.0f;

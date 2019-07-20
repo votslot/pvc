@@ -149,7 +149,7 @@ void ComputeRun(const pcrlib::Camera &pcrCam,int sw__, int sh__)
 	pGlob.zNear     = (float)pcrCam.zNear;
 	pGlob.zFar		= (float)pcrCam.zFar;
 	pGlob.zRange	= (float)(1 << 24); //16777215.0f;// / (pCam->m_zFar - pCam->m_zNear);
-	pGlob.maxDimension = 0.0f;// (float)pCam->m_MaxDimension;
+	pGlob.maxDimension = 0.0f;
 	pGlob.wrkLoad = 64;
 	pGlob.px = pcrCam.pos[0];//pCam->m_P[0];
 	pGlob.py = pcrCam.pos[1];//pCam->m_P[1];

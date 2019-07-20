@@ -6,6 +6,7 @@
 #include "../pcrlib.h"
 #include "icompute.h"
 #include "storage.h"
+#include "matrix-utils.h"
 
 #include "OpenGL/wave-test.cs.glsl"
 #include "OpenGL/shaders/render-points.cs.glsl"
@@ -33,6 +34,7 @@ extern int InitGLBlit();
 		ICBuffer  *m_bufferZMapPost = NULL;
 		ICBuffer  *m_bufferMatrView4x4  = NULL;
 		ICBuffer  *m_bufferView2World = NULL;
+		ICBuffer  *m_bufferDebug = NULL;
 		//shaders
 		ICShader *m_csPointRender = NULL;
 		ICShader *m_csCleanRGB  = NULL;
@@ -70,6 +72,18 @@ extern int InitGLBlit();
 			m_bufferZMap = createICBuffer();
 			m_bufferZMap->allocate(sMaxW*sMaxH * sizeof(int));
 
+			m_bufferZMapPost = createICBuffer();
+			m_bufferZMapPost->allocate(sMaxW*sMaxH * sizeof(int));
+
+			m_bufferMatrView4x4 = createICBuffer();
+			m_bufferMatrView4x4->allocate(16 * sizeof(float));
+
+			m_bufferView2World = createICBuffer();
+			m_bufferView2World->allocate(16 * sizeof(float));
+
+			m_bufferDebug = createICBuffer();
+			m_bufferDebug->allocate(1024 * sizeof(float));
+
 			// Write something
 			int *pD = new int[sMaxW*sMaxH];
 			for (int i = 0; i < sMaxW*sMaxH; i++) pD[i] = 0x00000000;  //AABBGGRR
@@ -106,29 +120,56 @@ extern int InitGLBlit();
 			}
 			m_Glob.screenX = (float)destWidth;
 			m_Glob.screenY = (float)destHeight;
-			/*
-			pGlob.zNear = (float)pCam->m_zNear;
-			pGlob.zFar = (float)pCam->m_zFar;
-			pGlob.zRange = (float)(1 << 24); 
-			pGlob.maxDimension = (float)pCam->m_MaxDimension;
-			pGlob.wrkLoad = 64;
-			pGlob.px = pCam->m_P[0];
-			pGlob.py = pCam->m_P[1];
-			pGlob.pz = pCam->m_P[2];
-			pGlob.bbMinX = pst->GetXMin();
-			pGlob.bbMaxX = pst->GetXMax();
-			pGlob.bbMinY = pst->GetYMin();
-			pGlob.bbMaxY = pst->GetYMax();
-			pGlob.bbMinZ = pst->GetZMin();
-			pGlob.bbMaxZ = pst->GetZMax();
-			pGlob.scrMin = (pGlob.screenX < pGlob.screenY) ? pGlob.screenX : pGlob.screenY;
-			*/
+			m_Glob.zNear = (float)cam.zNear;
+			m_Glob.zFar = (float)cam.zFar;
+			m_Glob.zRange = (float)(1 << 24); //16777215.0f;// / (pCam->m_zFar - pCam->m_zNear);
+			m_Glob.maxDimension = 0.0f;// (float)pCam->m_MaxDimension;
+			m_Glob.wrkLoad = 64;
+			m_Glob.px = cam.pos[0];
+			m_Glob.py = cam.pos[1];
+			m_Glob.pz = cam.pos[2];
+			m_Glob.bbMinX = m_pst->GetXMin();
+			m_Glob.bbMaxX = m_pst->GetXMax();
+			m_Glob.bbMinY = m_pst->GetYMin();
+			m_Glob.bbMaxY = m_pst->GetYMax();
+			m_Glob.bbMinZ = m_pst->GetZMin();
+			m_Glob.bbMaxZ = m_pst->GetZMax();
+			m_Glob.scrMin = (m_Glob.screenX < m_Glob.screenY) ? m_Glob.screenX : m_Glob.screenY;
 			m_bufferParams->setData((unsigned char*)(&m_Glob), sizeof(GlobalParams));
+
+			// camera
+			float matrView4x4[16];
+			GetProjectionMat4x4(
+				m_Glob.screenX, m_Glob.screenY, m_Glob.zNear, m_Glob.zFar,
+				cam.up, cam.lookAt, cam.pos,
+				matrView4x4);
+			m_bufferMatrView4x4->setData(matrView4x4, 16 * sizeof(float));
 
 			// clean dst zMap buffer
 			m_csCleanRGB->execute(sMaxW / 32, sMaxH / 32, 1, { m_bufferParams, m_bufferZMap });
 
-			m_bufferZMap->blit(destWidth, destHeight);
+			// Render points
+			if (m_pst->IsReady())
+			{
+				for (int m = 0; m < m_pst->GetNumBuffersInUse(); m++)
+				{
+					ICBuffer *pPoints = m_pst->GetPointBuffer(m);
+					ICBuffer *pPartitions = m_pst->GetPartitionBuffer(m);
+				    uint num_groups_x = 1;
+					uint num_groups_y = (m_pst->GetNumPointsInBuffer(m) / m_csPointRender->getSX() / m_Glob.wrkLoad);
+					m_csPointRender->execute(num_groups_x, num_groups_y, 1, { m_bufferParams,m_bufferDebug,pPoints,m_bufferZMap,m_bufferMatrView4x4,pPartitions });
+				}
+			}
+
+			// post proc
+			{
+				float Vew2World4x4[16];
+				GetVew2World4x4(cam.up, cam.lookAt, cam.pos, Vew2World4x4);
+				m_bufferView2World->setData(Vew2World4x4, 16 * sizeof(float));
+				m_csPostProc->execute(sMaxW / 32, sMaxH / 32, 1, { m_bufferParams ,m_bufferZMap,m_bufferZMapPost,m_bufferView2World,m_bufferDebug });
+			}
+
+			m_bufferZMapPost->blit(destWidth, destHeight);
 			return 0;
 		}
 
@@ -139,6 +180,7 @@ extern int InitGLBlit();
 			if (m_bufferZMapPost)		releaseICBuffer(&m_bufferZMapPost);
 			if (m_bufferMatrView4x4)	releaseICBuffer(&m_bufferMatrView4x4);
 			if (m_bufferView2World)		releaseICBuffer(&m_bufferView2World);
+			if (m_bufferDebug)          releaseICBuffer(&m_bufferDebug);
 
 			if (m_csPointRender)  releaseICShader(&m_csPointRender);
 			if (m_csCleanRGB)	  releaseICShader(&m_csCleanRGB);
