@@ -18,6 +18,15 @@ namespace pcrlib
 		bool isPerspective;
 	};
 
+	struct BoundBox {
+		float xMin;
+		float xMax;
+		float yMin;
+		float yMax;
+		float zMin;
+		float zMax;
+	};
+
     class  IPcrLib
 	{
 	public:
@@ -25,6 +34,7 @@ namespace pcrlib
 		virtual void startAddPoints() = 0;
 		virtual int  addPoint(float x, float y, float z, float w) = 0;
 		virtual void doneAddPoints() = 0;
+		virtual BoundBox getBoundBox() = 0;
 		virtual int render(const Camera &cam, int destWidth, int destHeight) = 0;
 
 		virtual int runTest() = 0;

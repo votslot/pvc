@@ -14,30 +14,15 @@ public:
 		float& operator[] (int i) { return v[i]; }
 	};
 	vector3 m_P,m_D,m_U,m_R,m_L; // position, dir, up, right, look-at.
-	float m_screenX, m_screenY, m_devSize;
-	float m_zNear, m_zFar,m_Fov,m_MaxDimension;
+	float m_zNear, m_zFar, m_Fov;// m_MaxDimension;
 	Camera();
 	static Camera *GetCamera();	
-	void FromWorld(float *pWorldIn, float *pInCamOut);
-	void ToWorld(float *pCamIn, float *pWorldOut);
 	void SetPivotCamera(float teta, float fi, float dist, float px, float py, float pz);
 	void RotateAroundPivot(float dx, float dy);
 	void MoveInPivotDir(float dd);
 	void ShiftPivot(float dx, float dy);
 	void BuildPcrCamera(pcrlib::Camera &res);
-
-	void ConvertTo4x4(float *pOut);
-	void GetProjectionMat4x4(float screenX, float screenY, float zNear, float zFar, float *pOut);
-	void GetVew2World4x4(float *pOut);
-	void SetScreenPixSize(int sx, int sy);
-	float *GetUp();
-	float *GetRight();
-	float *GetDir();
-	float *GetPos();
 	float *GetPivot();
-	int GetScreenX();
-	int GetScreenY();
-	void Print4x4(float *pDat);
 };
 
 #endif

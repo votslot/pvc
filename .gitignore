@@ -24,6 +24,8 @@ Release
 ipch
 *sdf
 *.db
+*.db-shm
+*db-wal
 
 # Project
 *.opendb

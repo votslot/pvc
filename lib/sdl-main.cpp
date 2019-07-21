@@ -10,11 +10,12 @@
 #include <chrono>
 #include "CommCtrl.h"
 #include <SDL_syswm.h>
-#include "compute.h"
-#include "camera.h"
+//#include "compute.h"
+//#include "camera.h"
 #include "../winui/ui.h"
 #include "../pcloud/pcloud.h"
 #include "../app/app-events.h"
+#include "../app/app-camera.h"
 
 
 
@@ -22,6 +23,7 @@
 #define SCREEN_HEIGHT 512
 SDL_Window* gWindow = NULL;
 SDL_GLContext gGlContext;
+static pcrapp::IAppEvents *sApp = NULL;
 
 extern GLuint  InitQuad(int sw, int sh );
 extern void Draw(GLint width, GLint height, GLuint texDest);
@@ -76,6 +78,7 @@ static pcrlib::IPcrLib *pRLib = NULL;
 
 void OnMouseDownEvent(SDL_MouseButtonEvent *pMouseDown)
 {
+	/*
 	sMouseXDown = pMouseDown->x;
 	sMouseYDown = pMouseDown->y;
 	if (pMouseDown->button == 1) 
@@ -86,11 +89,18 @@ void OnMouseDownEvent(SDL_MouseButtonEvent *pMouseDown)
 	{
 		sRightMouseDown = true;
 	}
+	*/
+
+	if (sApp)
+	{
+		sApp->mouseDownEvent(pMouseDown->x, pMouseDown->y, pMouseDown->button == 1, pMouseDown->button == 3);
+	}
 	sHasEvent = true;
 }
 
 void OnMouseUpEvent(SDL_MouseButtonEvent *pMouseUp)
 {
+	/*
 	if (pMouseUp->button == 1)
 	{
 		sLeftMouseDown = false;
@@ -99,11 +109,17 @@ void OnMouseUpEvent(SDL_MouseButtonEvent *pMouseUp)
 	{
 		sRightMouseDown = false;
 	}
+	*/
+	if (sApp) 
+	{
+		sApp->mouseUpEvent(pMouseUp->button == 1, pMouseUp->button == 3);
+	}
 	sHasEvent = true;
 }
 
 void OnMouseMoveEvent(SDL_MouseMotionEvent *pMotion)
 {
+	/*
 	Camera *pCam = Camera::GetCamera();
 	float *pivot = pCam->GetPivot();
 	int dx = pMotion->x - sMouseXDown; 
@@ -118,11 +134,18 @@ void OnMouseMoveEvent(SDL_MouseMotionEvent *pMotion)
 	}
 	sMouseXDown = pMotion->x;
 	sMouseYDown = pMotion->y;
+	*/
+
+	if (sApp) 
+	{
+		sApp->mouseMoveEvent(pMotion->x, pMotion->y);
+	}
 	sHasEvent = true;
 }
 
 void OnMouseWhellEvevt(SDL_MouseWheelEvent *pWheel)
 {
+	/*
 	if (pWheel->y == 0) 
 	{
 		return;
@@ -131,6 +154,12 @@ void OnMouseWhellEvevt(SDL_MouseWheelEvent *pWheel)
 	float prd = 1.0f;
 	float shift = (pWheel->y > 0) ? prd : -prd;
 	pCam->MoveInPivotDir(shift);
+	*/
+
+	if (sApp)
+	{
+		sApp->mouseWhellEvevt(pWheel->y);
+	}
 	sHasEvent = true;
 }
 /*---------------------------------------------------------------------*/
@@ -206,20 +235,25 @@ int SdlEntryPoint()
 	printf("GL_MAX_TEXTURE_BUFFER_SIZE= %d\n", maxtb);
 #endif
 
-	GLuint texdest = ComputeInit(SCREEN_WIDTH, SCREEN_HEIGHT);
+	//GLuint texdest = ComputeInit(SCREEN_WIDTH, SCREEN_HEIGHT);
 	InitQuad(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	static   pcrlib::Camera pcrCam;
-	pcrlib::IPcrLib::setErrHandler(ErrHnd);
-	pRLib = pcrlib::IPcrLib::Init();
+	
+	
+	//static   pcrlib::Camera pcrCam;
+	//pcrlib::IPcrLib::setErrHandler(ErrHnd);
+	//pRLib = pcrlib::IPcrLib::Init();
+
+	sApp  = pcrapp::IAppEvents::getAppEvents();
+	sApp->init();
 	
 
 	int sw = SCREEN_WIDTH;
 	int sh = SCREEN_HEIGHT;
 	bool quit = false; 
 	SDL_Event sdlEvent;
-	Camera *pCam = Camera::GetCamera();
-	pCam->SetScreenPixSize(sw, sh);
+	//Camera *pCam = Camera::GetCamera();
+	//pCam->SetScreenPixSize(sw, sh);
 	while (!quit)
 	{
 		while (SDL_PollEvent(&sdlEvent) != 0)
@@ -246,7 +280,7 @@ int SdlEntryPoint()
 					if (sdlEvent.window.event == SDL_WINDOWEVENT_RESIZED) {
 						sw = sdlEvent.window.data1;
 						sh = sdlEvent.window.data2;
-						pCam->SetScreenPixSize(sw, sh);
+						//pCam->SetScreenPixSize(sw, sh);
 					}
 				break;
 				case SDL_QUIT:
@@ -265,8 +299,9 @@ int SdlEntryPoint()
 			// render to screen
 			Draw(sw, sh, texdest);
 #else
-			Camera::GetCamera()->BuildPcrCamera(pcrCam);
-			pRLib->render(pcrCam, sw, sh);
+			//Camera::GetCamera()->BuildPcrCamera(pcrCam);
+			//pRLib->render(pcrCam, sw, sh);
+			sApp->paintEvent(sw, sh);
 #endif
 			// swap 
 			SDL_GL_SwapWindow(gWindow);

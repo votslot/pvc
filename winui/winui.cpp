@@ -5,15 +5,16 @@
 #include <iostream>
 #include "windows.h"
 #include "ui.h"
+#include "..\app\app-events.h"
 
 #pragma warning( disable : 4311)
 #pragma warning( disable : 4302)
 
-static  UIOut *pTheUIOut = NULL;
+static pcrapp::IAppEvents *pAppEv = NULL;
 
 void UIOut::SetInstance(UIOut *pTheInst)
 {
-	pTheUIOut = pTheInst;
+	//pTheUIOut = pTheInst;
 }
 
 WNDPROC prevWndProc;
@@ -43,7 +44,7 @@ static void OpenFileDialog()
 		std::wstring ws(ofn.lpstrFile);
 		std::string str(ws.begin(), ws.end());
 		std::cout << str.c_str() << "\n";
-		if (pTheUIOut) pTheUIOut->OnFileOpen(str.c_str());
+		pcrapp::IAppEvents::getAppEvents()->openLasFile(str.c_str());
 	}
 }
 
@@ -61,7 +62,9 @@ LRESULT CALLBACK myNewWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 				OpenFileDialog();
 			break;
 			case RUN_TEST_ID:
-				if (pTheUIOut) pTheUIOut->OnTestRun();
+			{
+				pcrapp::IAppEvents::getAppEvents()->testCloud();
+			}
 			break;
 			case HELP_ID:
 				std::cout << "HELP!" << std::endl;

@@ -8,7 +8,7 @@
 #include "..\PcrLib\pcrlib.h"
 
 
-
+#if 0
 
 class UIOutImpl :public UIOut
 {
@@ -91,9 +91,17 @@ void  CloudImpl::SetPointValue(float x, float y, float z,float w)
 
 void CloudImpl::OnDone()
 {
+	pcrlib::BoundBox bd = m_pLib->getBoundBox();
+	/*
 	float ddx = (maxX - minX);
 	float ddy = (maxY - minY);
 	float ddz = (maxZ - minZ);
+	*/
+	float ddx = (bd.xMax - bd.xMin);
+	float ddy = (bd.yMax - bd.yMin);
+	float ddz = (bd.zMax - bd.zMin);
+
+
 	float maxD = (ddx > ddy) ? ddx : ddy;
 	maxD = (maxD > ddz) ? maxD : ddz;
 	float cx = (maxX + minX) *0.5f;
@@ -110,7 +118,7 @@ void CloudImpl::OnDone()
 	Camera *pCam = Camera::GetCamera();
 	pCam->SetPivotCamera(0.0f, 0.0f, maxD*2.0f, cx, cy, cz);
 	pCam->m_zFar = maxD * 4.0f;
-	pCam->m_MaxDimension = maxD;
+	//pCam->m_MaxDimension = maxD;
 }
 
 void CloudImpl::OnErr(const char *pMsg)
@@ -134,3 +142,4 @@ public:
 	}
 };
 static InitBindings initB;
+#endif

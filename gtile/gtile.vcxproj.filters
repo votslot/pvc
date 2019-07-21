@@ -65,6 +65,15 @@
     <ClInclude Include="..\app\app-events.h">
       <Filter>app</Filter>
     </ClInclude>
+    <ClInclude Include="..\app\app-camera.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\app\app-testcloud.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\app\app-las.h">
+      <Filter>app</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gtile.cpp">
@@ -113,6 +122,15 @@
       <Filter>lib</Filter>
     </ClCompile>
     <ClCompile Include="..\app\app-events.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\app\app-camera.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\app\app-testcloud.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\app\app-las.cpp">
       <Filter>app</Filter>
     </ClCompile>
   </ItemGroup>

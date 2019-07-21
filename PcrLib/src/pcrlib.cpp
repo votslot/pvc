@@ -111,6 +111,17 @@ extern int InitGLBlit();
 			m_pst->DoneAddPoints();
 		}
 
+		BoundBox getBoundBox()
+		{
+			BoundBox ret;
+			ret.xMax = m_pst->GetXMax();
+			ret.xMin = m_pst->GetXMin();
+			ret.yMax = m_pst->GetYMax();
+			ret.yMin = m_pst->GetYMin();
+			ret.zMax = m_pst->GetZMax();
+			ret.zMin = m_pst->GetZMin();
+			return ret;
+		}
 
 		int render(const Camera &cam, int destWidth, int destHeight)
 		{
