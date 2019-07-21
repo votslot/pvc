@@ -4,18 +4,10 @@
 #include "stdio.h"
 #include <iostream>
 #include "windows.h"
-#include "ui.h"
-#include "..\app\app-events.h"
+#include "..\..\app\app-events.h"
 
 #pragma warning( disable : 4311)
 #pragma warning( disable : 4302)
-
-static pcrapp::IAppEvents *pAppEv = NULL;
-
-void UIOut::SetInstance(UIOut *pTheInst)
-{
-	//pTheUIOut = pTheInst;
-}
 
 WNDPROC prevWndProc;
 enum {
@@ -115,7 +107,3 @@ void AddUI(HWND hwnd)
 	prevWndProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)&myNewWndProc); 
 }
 
-void  UIOut::DispalyError(const char *pMsg) 
-{
-	std::cout << "ERROR:" << pMsg << "std::endl";
-}

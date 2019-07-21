@@ -40,6 +40,7 @@ namespace pcrlib
 		virtual int runTest() = 0;
 		static PcrErrorHandler setErrHandler(PcrErrorHandler errh);
 		static IPcrLib* Init();
+		static void release(IPcrLib **ppLib);
 		static IPcrLib* GetInstance();
 	};
 }

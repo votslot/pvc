@@ -9,20 +9,11 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="lib">
-      <UniqueIdentifier>{c873e700-eb4e-42c9-b49b-487f07f0b8a7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="winui">
-      <UniqueIdentifier>{d66d4ec1-56da-4ba7-98ce-3dde85b0f543}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="pcloud">
-      <UniqueIdentifier>{9c08c7b8-5a85-4aa2-9de3-40ad7e0e19b0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="pcloud\shaders">
-      <UniqueIdentifier>{079664b3-2497-4583-8128-46f13fdfb91a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="app">
       <UniqueIdentifier>{e021572d-b0ed-46f2-bbcc-ac0ea8290550}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="win">
+      <UniqueIdentifier>{f74d101e-8a51-4b9b-909f-a68892a68a6a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -31,36 +22,6 @@
     </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\lib\compute.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\lib\cbuff.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\lib\camera.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\winui\ui.h">
-      <Filter>winui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\lib\vec3d.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\shaders\ginclude.h">
-      <Filter>pcloud\shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\lib\storage.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\lib\colorize.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\shaders\ginclude-shared.h">
-      <Filter>pcloud\shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\pcloud\pcloud.h">
-      <Filter>pcloud\shaders</Filter>
     </ClInclude>
     <ClInclude Include="..\app\app-events.h">
       <Filter>app</Filter>
@@ -79,48 +40,6 @@
     <ClCompile Include="gtile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\lib\trisample.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\lib\compute.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\lib\cbuff.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\lib\camera.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\winui\winui.cpp">
-      <Filter>winui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\pcloud\las.cpp">
-      <Filter>pcloud</Filter>
-    </ClCompile>
-    <ClCompile Include="..\pcloud\testcloud.cpp">
-      <Filter>pcloud</Filter>
-    </ClCompile>
-    <ClCompile Include="..\lib\app.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\lib\wave-test.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\lib\sdl-main.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\pcloud\partition.cpp">
-      <Filter>pcloud</Filter>
-    </ClCompile>
-    <ClCompile Include="..\lib\storage.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\lib\colorize.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\lib\nbuilder.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
     <ClCompile Include="..\app\app-events.cpp">
       <Filter>app</Filter>
     </ClCompile>
@@ -133,22 +52,11 @@
     <ClCompile Include="..\app\app-las.cpp">
       <Filter>app</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\shaders\test.cs.glsl">
-      <Filter>pcloud\shaders</Filter>
-    </None>
-    <None Include="..\shaders\vert-and-frag.glsl">
-      <Filter>pcloud\shaders</Filter>
-    </None>
-    <None Include="..\shaders\wave-test.cs.glsl">
-      <Filter>pcloud\shaders</Filter>
-    </None>
-    <None Include="..\shaders\post-proc.cs.glsl">
-      <Filter>pcloud\shaders</Filter>
-    </None>
-    <None Include="..\shaders\ginclude.glsl">
-      <Filter>pcloud\shaders</Filter>
-    </None>
+    <ClCompile Include="..\win\sdl-main.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\win\winui\winui.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

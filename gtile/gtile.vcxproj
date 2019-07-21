@@ -191,16 +191,6 @@
     <ClInclude Include="..\app\app-events.h" />
     <ClInclude Include="..\app\app-las.h" />
     <ClInclude Include="..\app\app-testcloud.h" />
-    <ClInclude Include="..\lib\camera.h" />
-    <ClInclude Include="..\lib\cbuff.h" />
-    <ClInclude Include="..\lib\colorize.h" />
-    <ClInclude Include="..\lib\compute.h" />
-    <ClInclude Include="..\lib\storage.h" />
-    <ClInclude Include="..\lib\vec3d.h" />
-    <ClInclude Include="..\pcloud\pcloud.h" />
-    <ClInclude Include="..\shaders\ginclude-shared.h" />
-    <ClInclude Include="..\shaders\ginclude.h" />
-    <ClInclude Include="..\winui\ui.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -209,28 +199,9 @@
     <ClCompile Include="..\app\app-events.cpp" />
     <ClCompile Include="..\app\app-las.cpp" />
     <ClCompile Include="..\app\app-testcloud.cpp" />
-    <ClCompile Include="..\lib\app.cpp" />
-    <ClCompile Include="..\lib\camera.cpp" />
-    <ClCompile Include="..\lib\cbuff.cpp" />
-    <ClCompile Include="..\lib\colorize.cpp" />
-    <ClCompile Include="..\lib\compute.cpp" />
-    <ClCompile Include="..\lib\nbuilder.cpp" />
-    <ClCompile Include="..\lib\sdl-main.cpp" />
-    <ClCompile Include="..\lib\storage.cpp" />
-    <ClCompile Include="..\lib\trisample.cpp" />
-    <ClCompile Include="..\lib\wave-test.cpp" />
-    <ClCompile Include="..\pcloud\las.cpp" />
-    <ClCompile Include="..\pcloud\partition.cpp" />
-    <ClCompile Include="..\pcloud\testcloud.cpp" />
-    <ClCompile Include="..\winui\winui.cpp" />
+    <ClCompile Include="..\win\sdl-main.cpp" />
+    <ClCompile Include="..\win\winui\winui.cpp" />
     <ClCompile Include="gtile.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\shaders\ginclude.glsl" />
-    <None Include="..\shaders\post-proc.cs.glsl" />
-    <None Include="..\shaders\test.cs.glsl" />
-    <None Include="..\shaders\vert-and-frag.glsl" />
-    <None Include="..\shaders\wave-test.cs.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PcrLib\msbuild\PcrLib.vcxproj">

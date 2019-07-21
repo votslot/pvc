@@ -219,6 +219,11 @@ extern int InitGLBlit();
 		return  &libInstance;
 	}
 
+	void IPcrLib::release(IPcrLib** ppLib)
+	{
+		//pLib->releaseInternal();
+	}
+
 	IPcrLib* IPcrLib::GetInstance()
 	{
 		return (libInstance.isInit) ? &libInstance:NULL;

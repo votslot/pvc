@@ -24,6 +24,7 @@ namespace pcrapp
 		void mouseMoveEvent(int x, int y);
 		void mouseWhellEvevt(int val);
 		void paintEvent(int sw, int sh);
+		void exitEvent();
 		void openLasFile(const char *filePath);
 		void testCloud();;
 		//
@@ -108,6 +109,14 @@ namespace pcrapp
 			pcrlib::Camera pcrCam;
 			m_camera.BuildPcrCamera(pcrCam);
 			m_pRLib->render(pcrCam, sw, sh);
+		}
+	}
+
+	void AppEventsImpl::exitEvent()
+	{
+		if (m_pRLib)
+		{
+			pcrlib::IPcrLib::release(&m_pRLib);
 		}
 	}
 
