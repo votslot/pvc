@@ -11,20 +11,28 @@
 #include "CommCtrl.h"
 #include <SDL_syswm.h>
 #include "../app/app-events.h"
-#include "../app/app-camera.h"
+#include "../PcrLib/pcrlib.h"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 512
-SDL_Window* gWindow = NULL;
 SDL_GLContext gGlContext;
 static pcrapp::IAppEvents *sApp = NULL;
+extern void AddUI(HWND hwnd, pcrapp::IAppEvents *pApp);
 
-extern void AddUI(HWND hwnd);
-static void ErrHnd(const char *pMsg) 
+
+struct LibCallbackUsr : public  pcrlib::LibCallback
 {
-	MessageBoxA(NULL, pMsg, "Error", MB_OK);
-	exit(0);
-}
+	void error(const char *pMsg)
+	{
+		MessageBoxA(NULL, pMsg, "Error", MB_OK);
+		exit(0);
+	}
+	
+	 void message(const char *pMsg)
+	{
+		std::cout << pMsg ;
+	}
+};
 
 void SetOpenGLVersion()
 {
@@ -40,7 +48,6 @@ static int sleepTime = 0;
 void OnStartLoop() 
 {
 	sStartTime = std::chrono::high_resolution_clock::now();
-  // Sleep(16);
 }
 
 void OnEndLoop() 
@@ -59,51 +66,41 @@ void OnEndLoop()
 
 static bool sHasEvent = true;
 
-void OnMouseDownEvent(SDL_MouseButtonEvent *pMouseDown)
+static void OnMouseDownEvent(SDL_MouseButtonEvent *pMouseDown)
 {
-	if (sApp)
-	{
-		sApp->mouseDownEvent(pMouseDown->x, pMouseDown->y, pMouseDown->button == 1, pMouseDown->button == 3);
-	}
+	sApp->mouseDownEvent(pMouseDown->x, pMouseDown->y, pMouseDown->button == 1, pMouseDown->button == 3);
 	sHasEvent = true;
 }
 
-void OnMouseUpEvent(SDL_MouseButtonEvent *pMouseUp)
+static void OnMouseUpEvent(SDL_MouseButtonEvent *pMouseUp)
 {
-	if (sApp) 
-	{
-		sApp->mouseUpEvent(pMouseUp->button == 1, pMouseUp->button == 3);
-	}
+	sApp->mouseUpEvent(pMouseUp->button == 1, pMouseUp->button == 3);
 	sHasEvent = true;
 }
 
-void OnMouseMoveEvent(SDL_MouseMotionEvent *pMotion)
+static void OnMouseMoveEvent(SDL_MouseMotionEvent *pMotion)
 {
-	if (sApp) 
-	{
-		sApp->mouseMoveEvent(pMotion->x, pMotion->y);
-	}
+	sApp->mouseMoveEvent(pMotion->x, pMotion->y);
 	sHasEvent = true;
 }
 
-void OnMouseWhellEvevt(SDL_MouseWheelEvent *pWheel)
+static void OnMouseWhellEvent(SDL_MouseWheelEvent *pWheel)
 {
-	if (sApp)
-	{
-		sApp->mouseWhellEvevt(pWheel->y);
-	}
+	sApp->mouseWhellEvent(pWheel->y);
 	sHasEvent = true;
 }
 
-void close()
+static void close(SDL_Window *gWindow, pcrapp::IAppEvents *pApp)
 {
+	pApp->exitEvent();
 	SDL_DestroyWindow(gWindow);
-	gWindow = NULL;
 	SDL_Quit();
 }
 
 int SdlEntryPoint()
 {
+	SDL_Window* gWindow = NULL;
+
 	// initialize sdl
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
@@ -136,12 +133,7 @@ int SdlEntryPoint()
 		std::cout << "Cannot create OpenGL context with error " << SDL_GetError() << std::endl;
 		return -1;
 	}
-
-	SDL_SysWMinfo wmInfo;
-	SDL_VERSION(&wmInfo.version);
-	SDL_GetWindowWMInfo(gWindow, &wmInfo);
-	AddUI(wmInfo.info.win.window);
-	 
+		 
 	// Init Glew
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
@@ -149,8 +141,15 @@ int SdlEntryPoint()
 		printf("Error: %s\n", glewGetErrorString(err));
 	}
 
-	sApp  = pcrapp::IAppEvents::getAppEvents();
-	sApp->init();
+	// Init App
+	sApp = pcrapp::IAppEvents::getAppEvents();
+	sApp->init(new LibCallbackUsr());
+
+	// Add UI
+	SDL_SysWMinfo wmInfo;
+	SDL_VERSION(&wmInfo.version);
+	SDL_GetWindowWMInfo(gWindow, &wmInfo);
+	AddUI(wmInfo.info.win.window, sApp);
 
 	int sw = SCREEN_WIDTH;
 	int sh = SCREEN_HEIGHT;
@@ -176,7 +175,7 @@ int SdlEntryPoint()
 					OnMouseMoveEvent(&sdlEvent.motion);
 				break;
 				case SDL_MOUSEWHEEL:
-					OnMouseWhellEvevt(&sdlEvent.wheel);
+					OnMouseWhellEvent(&sdlEvent.wheel);
 				break;
 				case SDL_WINDOWEVENT:
 					if (sdlEvent.window.event == SDL_WINDOWEVENT_RESIZED) {
@@ -189,7 +188,7 @@ int SdlEntryPoint()
 				break;
 			}
 		}
-		if (sHasEvent)
+		//if (sHasEvent)
 		{
 			OnStartLoop();
 			sApp->paintEvent(sw, sh);
@@ -198,10 +197,8 @@ int SdlEntryPoint()
 			sHasEvent = false;
 		}
 	}
-	int t = GL_SYNC_GPU_COMMANDS_COMPLETE;
 	// clear resource
-	if(sApp) sApp->exitEvent();
-	close();
+	close(gWindow,sApp);
 	return 0;
 }
 

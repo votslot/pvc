@@ -1,51 +1,58 @@
 #include "stdio.h"
+#include <iostream>
 #include "app-events.h"
 #include "app-camera.h"
 #include "app-testcloud.h"
 #include "app-las.h"
 
+using namespace pcrlib;
+
 namespace pcrapp
 {
-	class AppEventsImpl : public IAppEvents
+	class AppEventsImpl :public IAppEvents
 	{
 	public:
-		pcrlib::IPcrLib *m_pRLib;
+		pcrlib::IPcrLib *m_pRLib; 
+		pcrlib::LibCallback *m_cb;
 		AppCamera m_camera;
 		float m_maxSize;
 		int m_mouseXDown = 0;
 		int m_mouseYDown = 0;
 		bool m_leftMouseDown = false;
 		bool m_rightMouseDown = false;
-		AppEventsImpl();
-		void init();
 
+		AppEventsImpl();
+		void init(pcrlib::LibCallback *pCb );
 		void mouseDownEvent(int x, int y, bool isLeft, bool isRight);
 		void mouseUpEvent(bool isLeft, bool isRight);
 		void mouseMoveEvent(int x, int y);
-		void mouseWhellEvevt(int val);
+		void mouseWhellEvent(int val);
 		void paintEvent(int sw, int sh);
 		void exitEvent();
 		void openLasFile(const char *filePath);
-		void testCloud();;
+		void testCloud();
 		//
 		void setDefCamera();
 	};
-
-	static AppEventsImpl theAppEvents;
-	IAppEvents * IAppEvents::getAppEvents() 
-	{
-		return &theAppEvents;
-	}
+	
 
 	AppEventsImpl::AppEventsImpl()
 	{
 		m_pRLib = NULL;
+		m_cb = NULL;
 		m_maxSize = 1.0f;
 	}
 
-	void AppEventsImpl::init()
+	IAppEvents * IAppEvents::getAppEvents()
 	{
-		m_pRLib = pcrlib::IPcrLib::Init();
+		return new AppEventsImpl();
+	}
+
+	void AppEventsImpl::init(pcrlib::LibCallback *pCb)
+	{
+		m_cb = pCb;
+		m_pRLib = pcrlib::IPcrLib::init(pCb);
+		m_pRLib->verify();
 	}
 
 	void AppEventsImpl::mouseDownEvent(int x, int y, bool isLeft, bool isRight)
@@ -91,7 +98,7 @@ namespace pcrapp
 		m_mouseYDown = y;
 	}
 
-	void AppEventsImpl::mouseWhellEvevt(int val) 
+	void AppEventsImpl::mouseWhellEvent(int val) 
 	{
 		if (val == 0)
 		{
@@ -126,7 +133,7 @@ namespace pcrapp
 		if (m_pRLib)
 		{
 			m_pRLib->startAddPoints();
-			readLasFile(filePath, m_pRLib);
+			readLasFile(filePath, m_pRLib, m_cb);
 			m_pRLib->doneAddPoints();
 			setDefCamera();
 		}
@@ -161,5 +168,8 @@ namespace pcrapp
 			m_maxSize = maxD;
 		}
 	}
+
+
+
 
 }// namespace pcrapp

@@ -6,8 +6,10 @@
 
 namespace pcrlib 
 {
-	typedef void (*ICErrorHandler)(const char *pMessage);
-	ICErrorHandler setICErrorHandler(ICErrorHandler errh);
+	struct ICErrorCallBack
+	{
+		virtual void error(const char *pMsg) {}
+	};
 
 	class ICBuffer 
 	{
@@ -22,9 +24,11 @@ namespace pcrlib
 	ICBuffer * createICBuffer();
 	void releaseICBuffer(ICBuffer **ppBuffer);
 
-	class ICShader 
+	class ICShader
 	{
 	public:
+		static  ICErrorCallBack *m_err;
+
 		virtual void initFromSource(const char *pSrc) = 0;
 		virtual int getSX() = 0;
 		virtual int getSY() = 0;
@@ -34,7 +38,6 @@ namespace pcrlib
 
 	ICShader * createICShader();
 	void releaseICShader(ICShader **ppShader);
-
 	
 }
 

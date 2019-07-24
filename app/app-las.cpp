@@ -1,6 +1,7 @@
 #include "stdio.h"
 #include <iostream>
 #include <fstream>  
+#include "app-events.h"
 #include "app-las.h"
 
 
@@ -52,13 +53,13 @@ namespace pcrapp
 		unsigned short val;
 	};
 
-	static void ReadLas(const std::string &path, pcrlib::IPcrLib *pLib)
+	static void ReadLas(const std::string &path, pcrlib::IPcrLib *pLib, pcrlib::LibCallback *pCb)
 	{
 		std::fstream fs;
 		fs.open(path.c_str(), std::fstream::in | std::fstream::binary);
 		if (fs.fail())
 		{
-			//if (gpLasCloud) gpLasCloud->OnErr("Can not open las file");
+			if (pCb) pCb->error("Failed to open las file");
 			return;
 		}
 		fs.seekg(0, fs.end);
@@ -96,9 +97,10 @@ namespace pcrapp
 
 
 
-	void readLasFile(const char *pPath, pcrlib::IPcrLib *pLib)
+	void readLasFile(const char *pPath, pcrlib::IPcrLib *pLib, pcrlib::LibCallback *pCb)
 	{
 		std::string str(pPath);
-		ReadLas(str,pLib);
+		if (pCb) pCb->message((std::string("Opening las file  ") + str +"\n").c_str() );
+		ReadLas(str,pLib, pCb);
 	}
 }//namespace pcrapp

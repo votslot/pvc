@@ -4,6 +4,9 @@
     <Filter Include="GL">
       <UniqueIdentifier>{cdedb12e-f12a-482e-a474-a4cb99edb9c9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GLShaders">
+      <UniqueIdentifier>{1574a54e-d650-4510-81c1-fac616a150a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\partition.cpp" />
@@ -33,6 +36,12 @@
     </None>
     <None Include="..\src\OpenGL\wave-test.cs.glsl">
       <Filter>GL</Filter>
+    </None>
+    <None Include="..\src\OpenGL\shaders\post-proc.cs.glsl">
+      <Filter>GLShaders</Filter>
+    </None>
+    <None Include="..\src\OpenGL\shaders\render-points.cs.glsl">
+      <Filter>GLShaders</Filter>
     </None>
   </ItemGroup>
 </Project>

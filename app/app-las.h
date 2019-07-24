@@ -5,7 +5,8 @@
 #include "../PcrLib/pcrlib.h"
 namespace pcrapp
 {
-	void readLasFile(const char *pPath, pcrlib::IPcrLib *pLib);
+	struct   LibCallback;
+	void readLasFile(const char *pPath, pcrlib::IPcrLib *pLib, pcrlib::LibCallback *pCb);
 }
 
 #endif

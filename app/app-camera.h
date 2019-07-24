@@ -2,7 +2,6 @@
 #ifndef _APP_CAMERA_H
 #define _APP_CAMERA_H
 
-//#include "..\lib\vec3d.h"
 #include "../PcrLib/pcrlib.h"
 namespace pcrapp
 {

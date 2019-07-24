@@ -9,6 +9,7 @@
 #pragma warning( disable : 4311)
 #pragma warning( disable : 4302)
 
+static pcrapp::IAppEvents *psApp = NULL;
 WNDPROC prevWndProc;
 enum {
 	OPEN_DIALOG_ID = 124,
@@ -36,7 +37,7 @@ static void OpenFileDialog()
 		std::wstring ws(ofn.lpstrFile);
 		std::string str(ws.begin(), ws.end());
 		std::cout << str.c_str() << "\n";
-		pcrapp::IAppEvents::getAppEvents()->openLasFile(str.c_str());
+		if(psApp) psApp->openLasFile(str.c_str());
 	}
 }
 
@@ -55,7 +56,7 @@ LRESULT CALLBACK myNewWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 			break;
 			case RUN_TEST_ID:
 			{
-				pcrapp::IAppEvents::getAppEvents()->testCloud();
+				if( psApp) psApp->testCloud();
 			}
 			break;
 			case HELP_ID:
@@ -77,8 +78,9 @@ LRESULT CALLBACK myNewWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 	return CallWindowProc(prevWndProc, hwnd, uMsg, wParam, lParam);
 }
 
-void AddUI(HWND hwnd)
+void AddUI(HWND hwnd, pcrapp::IAppEvents *pApp)
 {
+	psApp = pApp;
 	HMENU hMenu = CreateMenu();
 	{
 		HMENU hSubMenu = CreatePopupMenu();

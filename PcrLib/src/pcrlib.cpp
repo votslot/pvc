@@ -18,13 +18,13 @@ namespace pcrlib
 extern int InitGLBlit();
 
 	
-	class ThePcrLib :public IPcrLib
+	class ThePcrLib :public IPcrLib, ICErrorCallBack
 	{
 	public:
 
 		static const int sMaxW = 2048;
 		static const int sMaxH = 2048;
-		static PcrErrorHandler m_ErrFunc;
+		LibCallback *m_pcallback;
 		bool isInit = false;
 		PointStorage  * m_pst = NULL;
 		GlobalParams m_Glob;
@@ -42,8 +42,7 @@ extern int InitGLBlit();
 
 		ThePcrLib() 
 		{
-			m_ErrFunc = defErrFunc;
-			setICErrorHandler(defErrFunc);
+			m_pcallback = new LibCallback();
 		}
 
 		void initInternal()
@@ -52,8 +51,10 @@ extern int InitGLBlit();
 			{
 				return;
 			}
+			ICShader::m_err = this;
+
 			// init storage
-            m_pst = PointStorage::GetInstatnce();
+            m_pst = PointStorage::GetInstatnce(m_pcallback);
             m_pst->Init();
 			// shaders
 			m_csCleanRGB = createICShader();
@@ -62,7 +63,7 @@ extern int InitGLBlit();
 			m_csPointRender = createICShader();
 			m_csPointRender->initFromSource(cs_render_points.c_str());
 			
-			m_csPostProc = createICShader();;
+			m_csPostProc = createICShader();
 			m_csPostProc->initFromSource(cs_postproc_w.c_str());
 
 			// buffers
@@ -84,20 +85,16 @@ extern int InitGLBlit();
 			m_bufferDebug = createICBuffer();
 			m_bufferDebug->allocate(1024 * sizeof(float));
 
-			// Write something
-			int *pD = new int[sMaxW*sMaxH];
-			for (int i = 0; i < sMaxW*sMaxH; i++) pD[i] = 0x00000000;  //AABBGGRR
-			m_bufferZMap->setData(pD, sMaxW*sMaxH * sizeof(int));
-			delete[]pD;
-			pD = NULL;
-
-            InitGLBlit();
+			if (InitGLBlit() != 0)
+			{
+				m_pcallback->error("OpenGL blit initialization failed");
+			}
 			isInit = true;
 		}
 
+	
 		void startAddPoints()
 		{
-			
 		}
 
 		int addPoint(float x, float y, float z, float w) 
@@ -133,8 +130,8 @@ extern int InitGLBlit();
 			m_Glob.screenY = (float)destHeight;
 			m_Glob.zNear = (float)cam.zNear;
 			m_Glob.zFar = (float)cam.zFar;
-			m_Glob.zRange = (float)(1 << 24); //16777215.0f;// / (pCam->m_zFar - pCam->m_zNear);
-			m_Glob.maxDimension = 0.0f;// (float)pCam->m_MaxDimension;
+			m_Glob.zRange = (float)(1 << 24); 
+			m_Glob.maxDimension = 0.0f;
 			m_Glob.wrkLoad = 64;
 			m_Glob.px = cam.pos[0];
 			m_Glob.py = cam.pos[1];
@@ -200,47 +197,35 @@ extern int InitGLBlit();
 			isInit = false;
 		}
 
+		int verify();
 
-		static void defErrFunc(const char *pMessage)
+		//from ICErrorCallBack
+		void error(const char *pMsg) 
 		{
-			std::cout << "PcrLibError: " << pMessage << std::endl;
-			assert(false);
+			m_pcallback->error(pMsg);
 		}
 
-		int runTest();
 	};//class ThePcrLib
 
-
-	static ThePcrLib libInstance;
-	
-	IPcrLib* IPcrLib::Init()
+	IPcrLib* IPcrLib::init(LibCallback *pCb)
 	{
-		libInstance.initInternal();
-		return  &libInstance;
+		ThePcrLib *pInst = new ThePcrLib();
+		if (pCb) pInst->m_pcallback = pCb;
+		pInst->initInternal();
+		return  pInst;
 	}
 
 	void IPcrLib::release(IPcrLib** ppLib)
 	{
-		//pLib->releaseInternal();
-	}
-
-	IPcrLib* IPcrLib::GetInstance()
-	{
-		return (libInstance.isInit) ? &libInstance:NULL;
-	}
-
-	PcrErrorHandler ThePcrLib::m_ErrFunc = NULL;
-	PcrErrorHandler IPcrLib::setErrHandler(PcrErrorHandler errh)
-	{
-		ThePcrLib::m_ErrFunc = errh;
-		setICErrorHandler(errh);
-		return NULL;
+		ThePcrLib *pInst = static_cast<ThePcrLib*>(*ppLib);
+		pInst->releaseInternal();
 	}
 
 	
 	// Test
-	int ThePcrLib::runTest()
+	int ThePcrLib::verify()
 	{
+		m_pcallback->message("Run verification test...\n");
         int ret = 0;
 		const unsigned int bfz = 1024;
 		int *pDA = new int[bfz];
@@ -274,6 +259,7 @@ extern int InitGLBlit();
 			if (pDC[i] != pDA[i] + pDB[i])
 			{
                 ret = 1;
+				m_pcallback->message("Verification test failed\n");
 				break;
 			}
 		}
@@ -285,8 +271,29 @@ extern int InitGLBlit();
 		delete[] pDA;
 		delete[] pDB;
 		delete[] pDC;
+		m_pcallback->message("Verification test success\n");
         return ret;
 	}
 	
+	void  LibCallback::error(const char *pMsg) 
+	{
+		std::cout <<"Error: "<< pMsg;
+	}
+
+	void  LibCallback::message(const char *pMsg) 
+	{ 
+		std::cout << pMsg ;
+	}
+
+	void* LibCallback::memAlloc(size_t sz) 
+	{ 
+		return malloc(sz);
+	}
+	void  LibCallback::memFree(void *ptr) 
+	{
+		if (ptr) free(ptr);
+	}
+	
+
 }
 

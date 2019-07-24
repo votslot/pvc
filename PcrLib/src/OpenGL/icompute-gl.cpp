@@ -10,32 +10,22 @@ namespace pcrlib
     extern void doGLBlit(GLint win_width, GLint win_height, GLuint destBuffer);
 	class CSBuffer;
 
-	// Error handling 
-	static ICErrorHandler spEerr = NULL;
-	ICErrorHandler setICErrorHandler(ICErrorHandler errh)
-	{
-        ICErrorHandler oldEh = spEerr;
-		spEerr = errh;
-		return oldEh;
-	}
-
-	static void errCheck()
+	static void errCheck(ICErrorCallBack *cb)
 	{
 		GLenum err;
 		while ((err = glGetError()) != GL_NO_ERROR)
 		{
-			if (spEerr)
-			{
-				spEerr(std::string ("OpenGL operation error " + std::to_string(err)).c_str());
-			}
+			cb->error(std::string("OpenGL operation error " + std::to_string(err) + "\n").c_str());
 		}
 	}
 
     // CSBuffer declaration
-	class CSBuffer :public ICBuffer
+	class CSBuffer :public ICBuffer, ICErrorCallBack
 	{
 		GLuint m_buffer;
 		unsigned int m_size;
+		ICErrorCallBack *m_err;
+
 		friend class CShader;
 	public:
 		CSBuffer() : m_buffer(0), m_size(0)
@@ -44,6 +34,7 @@ namespace pcrlib
 		}
 
 		~CSBuffer() {}
+		void error(const char *pMsg) { if (m_err) m_err->error(pMsg); }
 		void bind(int n);
 		void init();
 		unsigned int getMaxSizeInBytes();
@@ -55,6 +46,7 @@ namespace pcrlib
 	};
 
 	// Compute shader
+	ICErrorCallBack*  ICShader::m_err = NULL;
 	class CShader : public ICShader
 	{
 		GLuint m_program;
@@ -62,7 +54,6 @@ namespace pcrlib
 		int m_szx, m_szy, m_szz;
 
 		friend CSBuffer;
-
 		GLuint LoadShader(GLenum type, const GLchar *shaderSrc)
 		{
 			GLuint shader;
@@ -86,7 +77,7 @@ namespace pcrlib
 				{
 					char* infoLog = (char*)malloc(sizeof(char) * infoLen);
 					glGetShaderInfoLog(shader, infoLen, NULL, infoLog);
-					if (spEerr) spEerr((std::string("Shader compilation\n") +std::string(infoLog) ).c_str());
+					if (m_err) m_err->error((std::string("Shader compilation\n") +std::string(infoLog) ).c_str());
 					free(infoLog);
 				}
 				glDeleteShader(shader);
@@ -119,7 +110,7 @@ namespace pcrlib
 			m_szx = localWorkGroupSize[0];
 			m_szy = localWorkGroupSize[1];
             m_szz = localWorkGroupSize[2];
-			errCheck();
+			errCheck(m_err);
 		}
 
 		int getSX()
@@ -140,7 +131,7 @@ namespace pcrlib
             glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 			glMemoryBarrier(GL_ALL_BARRIER_BITS);
 			glUseProgram(m_program);
-			errCheck();
+			errCheck(m_err);
 
 			int i = 0;
 			for (ICBuffer* bf : inputs) 
@@ -154,7 +145,7 @@ namespace pcrlib
 			glMemoryBarrier(GL_ALL_BARRIER_BITS);
 			glUseProgram(0);
 			glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-			errCheck();
+			errCheck(m_err);
 		}
 
 		void delShader()
@@ -163,9 +154,8 @@ namespace pcrlib
 				glDeleteProgram(m_program);
             if (m_shader != 0)
 				glDeleteShader(m_shader);
-			errCheck();
+			errCheck(m_err);
 		}
-
 	};// class CSShader
 
 	ICShader * createICShader()
@@ -186,14 +176,13 @@ namespace pcrlib
 	void CSBuffer::init()
 	{
 		glGenBuffers(1, &m_buffer);
-		errCheck();
+		errCheck(this);
 	}
 
 	unsigned int ICBuffer::getMaxSizeInBytes()
 	{
 		GLint size;
 		glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &size);
-		errCheck();
 		return size;
 	}
 
@@ -201,20 +190,24 @@ namespace pcrlib
 	{
 		if (sizeInBytes > m_size)
 		{
-			if (spEerr) spEerr(std::string("CSBuffer::setData () \n Requested size is bigger than allocated.  Alloc size=" + std::to_string(m_size)).c_str());
+			if (m_err) m_err->error(std::string("CSBuffer::setData () \n Requested size is bigger than allocated.  Alloc size=" + std::to_string(m_size)).c_str());
 		}
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeInBytes, pD, GL_STATIC_READ);
-		errCheck();
+		errCheck(this);
 	}
 
 	void CSBuffer::allocate(unsigned int sizeInBytes)
 	{
 		GLint maxtb = 0;
 		glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &maxtb);
+		if (sizeInBytes > maxtb)
+		{
+			if (m_err) m_err->error(std::string("Requested size is bigger than allocated.  Alloc size=" + std::to_string(m_size)).c_str());
+		}
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeInBytes, NULL, GL_DYNAMIC_COPY);
-		errCheck();
+		errCheck(this);
 		m_size = sizeInBytes;
 	}
 		
@@ -222,23 +215,23 @@ namespace pcrlib
 	{
 		if (sizeInBytes > m_size)
 		{
-			if(spEerr) spEerr(std::string("Requested size is bigger than allocated.  Alloc size=" + std::to_string(m_size)).c_str());
+			if(m_err) m_err->error(std::string("Requested size is bigger than allocated.  Alloc size=" + std::to_string(m_size)).c_str());
 		}
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
 		glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeInBytes, pOut);
-		errCheck();
+		errCheck(this);
 	}
 
 	void CSBuffer::delBuffer()
 	{
 		glDeleteBuffers(1, &m_buffer);
-		errCheck();
+		errCheck(this);
 	}
 
 	void CSBuffer::bind(int n)
 	{
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, n, m_buffer);
-		errCheck();
+		errCheck(this);
 	}
 
 	void CSBuffer::blit(int destW, int destH)
@@ -246,7 +239,7 @@ namespace pcrlib
 		doGLBlit(destW, destH, m_buffer);
 	}
 
-	ICBuffer * createICBuffer() 
+	ICBuffer * createICBuffer()
 	{
 		return new CSBuffer();
 	}

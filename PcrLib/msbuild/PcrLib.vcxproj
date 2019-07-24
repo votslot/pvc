@@ -35,6 +35,8 @@
     <ClInclude Include="..\src\storage.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\src\OpenGL\shaders\post-proc.cs.glsl" />
+    <None Include="..\src\OpenGL\shaders\render-points.cs.glsl" />
     <None Include="..\src\OpenGL\wave-test.cs.glsl" />
     <None Include="gl-config.props">
       <SubType>Designer</SubType>

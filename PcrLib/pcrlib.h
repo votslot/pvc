@@ -2,12 +2,19 @@
 #ifndef _PCRLIB_H_
 #define _PCRLIB_H_
 
-
-
 namespace pcrlib 
 {
 	typedef void(*PcrErrorHandler)(const char *pMessage);
 
+	struct LibCallback
+	{
+		static LibCallback *m_cb;
+		virtual void error(const char *pMsh);
+		virtual void message(const char *pMsh);
+		virtual void *memAlloc(size_t sz);
+		virtual void memFree(void *ptr);
+	};
+	
 	struct Camera {
 		float pos[3];   //position x,y,z
 		float lookAt[3];
@@ -27,7 +34,7 @@ namespace pcrlib
 		float zMax;
 	};
 
-    class  IPcrLib
+    class  IPcrLib 
 	{
 	public:
 
@@ -36,12 +43,10 @@ namespace pcrlib
 		virtual void doneAddPoints() = 0;
 		virtual BoundBox getBoundBox() = 0;
 		virtual int render(const Camera &cam, int destWidth, int destHeight) = 0;
+		virtual int verify() = 0;
 
-		virtual int runTest() = 0;
-		static PcrErrorHandler setErrHandler(PcrErrorHandler errh);
-		static IPcrLib* Init();
+		static IPcrLib* init(LibCallback *pCb = NULL);
 		static void release(IPcrLib **ppLib);
-		static IPcrLib* GetInstance();
 	};
 }
 

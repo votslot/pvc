@@ -1,6 +1,8 @@
 #ifndef _STORAGE_H_
 #define  _STORAGE_H_
 
+#include "../pcrlib.h"
+
 namespace pcrlib
 {
 	class ICBuffer;
@@ -30,7 +32,7 @@ namespace pcrlib
 		}
 	};
 
-	class PointStorage
+	class PointStorage 
 	{
 	public:
 		virtual void Init() = 0;
@@ -49,7 +51,7 @@ namespace pcrlib
 		virtual float GetXMax() = 0;
 		virtual float GetYMax() = 0;
 		virtual float GetZMax() = 0;
-		static PointStorage  * GetInstatnce();
+		static PointStorage  * GetInstatnce(LibCallback *pCB = NULL);
 	};
 }
 

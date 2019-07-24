@@ -21,6 +21,7 @@ namespace pcrlib
 		public:
 			static const int sMaxBuffs = 32;
 			static const int sMaxAllocSize = 1024 * 1024 * 128;
+			LibCallback *m_cb = new LibCallback();
 			int maxPointsInBuff = 0;
 			int numPointsInBuff[sMaxBuffs];
 			int numPartitionsInBuff[sMaxBuffs];
@@ -74,8 +75,6 @@ namespace pcrlib
 				{
 					numPointsInBuff[i] = NULL;
 					numPartitionsInBuff[i] = NULL;
-					//bufferPoints[i].init();
-					//bufferPartition[i].init();
 					bufferPoints[i]    = createICBuffer();
 					bufferPartition[i] = createICBuffer();
 				}
@@ -134,7 +133,7 @@ namespace pcrlib
 					pPartitions[numPartitions].cz = (pDt->maxZ + pDt->minZ) *0.5f;
 					pPartitions[numPartitions].sz = dMax;
 					pPartitions[numPartitions].ndx = numPartitions;
-					if ((numPartitions & 31) == 0) std::cout << ".";
+					if ((numPartitions & 31) == 0) m_cb->message(".");
 					numPartitions++;
 
 					// shuffle points
@@ -157,7 +156,7 @@ namespace pcrlib
 				// BuildNormals((RenderPoint *)pTemp, numPointsInTemp, bdBuff);
 				BuildValues((float*)pTemp, numPointsInTemp);
 				DoPartitionXYZW_Float(pTemp, numPointsInTemp, OnDonePartition);
-				std::cout << "done" << std::endl;
+				m_cb->message("done\n");
 
 				bufferPoints[numInUse]->allocate(sizeInTemp);
 				bufferPoints[numInUse]->setData(pTemp, sizeInTemp);
@@ -236,7 +235,7 @@ namespace pcrlib
 			float vf = ppF[3];
 			if (vf > maxV) maxV = vf;
 			if (vf < minV) minV = vf;
-			int vi = (int)vf;
+			unsigned int vi = (unsigned int)vf;
 			if (vi >= 65535) vi = 65535;
 			pVals[vi]++;
 		}
@@ -278,8 +277,9 @@ namespace pcrlib
 
 
 	static  pvc::PointStorageImpl theStorage;
-	PointStorage  * PointStorage::GetInstatnce()
+	PointStorage  * PointStorage::GetInstatnce(LibCallback *pCB)
 	{
+		theStorage.m_cb = pCB;
 		return  &theStorage;
 	}
 }//namespace pcrlib
