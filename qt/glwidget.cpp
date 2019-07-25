@@ -58,6 +58,7 @@
 #include <QOpenGLFunctions_4_1_Core>
 #include <QInputDialog>
 #include <math.h>
+#include "../app/app-events.h"
 
 bool GLWidget::m_transparent = false;
 QOpenGLExtraFunctions *pGlExtra = NULL;
@@ -68,9 +69,25 @@ static void ErrMessageBox(const char *pMsg)
     QInputDialog::getText(nullptr,"Title","text");
 }
 
+struct LibCallbackQt :public pcrlib::LibCallback
+{
+    void error(const char *pMsg)
+    {
+        static QTextStream ts( stdout );
+        ts<<pMsg;
+        ts.flush();
+    }
+    void message(const char *pMsg)
+    {
+        static QTextStream ts( stdout );
+        ts<<pMsg;
+        ts.flush();
+    }
+};
+
 GLWidget::GLWidget(QWidget *parent)
     : QOpenGLWidget(parent),
-      m_pcrLib(NULL),
+      m_pApp(NULL),
       m_xRot(0),
       m_yRot(0),
       m_zRot(0)
@@ -175,15 +192,14 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 
 void GLWidget::initializeGL()
 {
+
     pGl4 =  new QOpenGLFunctions_4_1_Core();
     pGl4->initializeOpenGLFunctions();
 
     pGlExtra = new QOpenGLExtraFunctions();
     pGlExtra->initializeOpenGLFunctions();
-
-    m_pcrLib = pcrlib::IPcrLib::Init();
-    Q_ASSERT(m_pcrLib->runTest()==0);
-    //ErrMessageBox("AAAA");
+    m_pApp = pcrapp::IAppEvents::getAppEvents();
+    m_pApp->init(new LibCallbackQt());
 }
 
 void GLWidget::resizeGL(int w, int h)
@@ -192,11 +208,8 @@ void GLWidget::resizeGL(int w, int h)
 }
 void GLWidget::paintGL()
 {
+
   int h = height();
   int w = width();
-  if( m_pcrLib != NULL)
-  {
-      m_pcrLib->render(pcrCam,w,h);
-  }
-
+  if(m_pApp) m_pApp->paintEvent(w, h);
 }

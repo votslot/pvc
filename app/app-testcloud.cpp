@@ -1,6 +1,6 @@
 #include "math.h"
 #include "stdlib.h"
-#include "..\PcrLib\pcrlib.h"
+#include "../PcrLib/pcrlib.h"
 
 namespace pcrapp
 {

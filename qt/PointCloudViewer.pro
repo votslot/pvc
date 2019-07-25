@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
+CONFIG += console
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -26,11 +27,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    glwidget.cpp
+    glwidget.cpp \
+    ../app/app-camera.cpp \
+    ../app/app-testcloud.cpp \
+    ../app/app-las.cpp \
+    ../app/app-events.cpp
 
 HEADERS += \
         mainwindow.h \
-    glwidget.h
+    glwidget.h \
+    ../app/app-testcloud.h \
+    ../app/app-las.h \
+    ../app/app-events.h \
+    ../app/app-camera.h
 
 FORMS += \
         mainwindow.ui

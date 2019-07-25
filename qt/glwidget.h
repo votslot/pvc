@@ -57,6 +57,7 @@
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
 #include "../PcrLib/pcrlib.h"
+#include "../app/app-events.h"
 
 
 QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
@@ -95,13 +96,12 @@ protected:
 
 private:
     void setupVertexAttribs();
-    pcrlib::IPcrLib* m_pcrLib;
-    pcrlib::Camera pcrCam;
     bool m_core;
     int m_xRot;
     int m_yRot;
     int m_zRot;
     QPoint m_lastPos;
+    pcrapp::IAppEvents *m_pApp;
   #if 0
     QOpenGLVertexArrayObject m_vao;
     QOpenGLBuffer m_logoVbo;
