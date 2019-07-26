@@ -20,7 +20,7 @@ namespace pcrapp
 				//zz += 0.2f * tz *cos(2.0f * 3.1415f* (float)(x) / (float(w)));
 				//float zz = (y < h/ 2) ? y * sz : h*sz / 2;
 				//float zz = y * sz;
-				pLib->addPoint(xx, yy, zz, zz*100.0f);
+                pLib->addPoint(xx, yy, zz, zz*10.0f);
 				
 			}
 		}

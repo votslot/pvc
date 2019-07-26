@@ -165,39 +165,52 @@ void GLWidget::cleanup()
     doneCurrent();
 }
 
-
-
-
 void GLWidget::mousePressEvent(QMouseEvent *event)
 {
-    m_lastPos = event->pos();
+    if(!m_pApp)  return;
+    bool isLeft  = event->buttons() & Qt::LeftButton;
+    bool isRight = event->buttons() & Qt::RightButton;
+    m_pApp->mouseDownEvent(event->x(), event->y(), isLeft, isRight);
+    update();
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    int dx = event->x() - m_lastPos.x();
-    int dy = event->y() - m_lastPos.y();
-
-    if (event->buttons() & Qt::LeftButton) {
-        setXRotation(m_xRot + 8 * dy);
-        setYRotation(m_yRot + 8 * dx);
-    } else if (event->buttons() & Qt::RightButton) {
-        setXRotation(m_xRot + 8 * dy);
-        setZRotation(m_zRot + 8 * dx);
-    }
-    m_lastPos = event->pos();
+     if(!m_pApp)  return;
+     m_pApp->mouseMoveEvent(event->x(), event->y());
+     update();
 }
 
+void GLWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    if(!m_pApp)  return;
+    bool isLeft  = event->buttons() & Qt::LeftButton;
+    bool isRight = event->buttons() & Qt::RightButton;
+    m_pApp->mouseUpEvent(isLeft, isRight);
+    update();
+}
 
+void GLWidget::wheelEvent(QWheelEvent *event)
+{
+    if(!m_pApp)  return;
+    int delta = (event->angleDelta().y()>0.0f) ? 1:-1;
+    m_pApp->mouseWhellEvent(delta);
+    update();
+}
+
+void GLWidget::runtest()
+{
+    if(m_pApp) m_pApp->testCloud();
+    update();
+}
 
 void GLWidget::initializeGL()
 {
-
     pGl4 =  new QOpenGLFunctions_4_1_Core();
     pGl4->initializeOpenGLFunctions();
-
     pGlExtra = new QOpenGLExtraFunctions();
     pGlExtra->initializeOpenGLFunctions();
+
     m_pApp = pcrapp::IAppEvents::getAppEvents();
     m_pApp->init(new LibCallbackQt());
 }
@@ -208,7 +221,6 @@ void GLWidget::resizeGL(int w, int h)
 }
 void GLWidget::paintGL()
 {
-
   int h = height();
   int w = width();
   if(m_pApp) m_pApp->paintEvent(w, h);

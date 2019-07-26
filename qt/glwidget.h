@@ -81,6 +81,7 @@ public slots:
     void setYRotation(int angle);
     void setZRotation(int angle);
     void cleanup();
+    void runtest();
 
 signals:
     void xRotationChanged(int angle);
@@ -93,6 +94,8 @@ protected:
     void resizeGL(int width, int height) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 
 private:
     void setupVertexAttribs();
@@ -102,18 +105,6 @@ private:
     int m_zRot;
     QPoint m_lastPos;
     pcrapp::IAppEvents *m_pApp;
-  #if 0
-    QOpenGLVertexArrayObject m_vao;
-    QOpenGLBuffer m_logoVbo;
-    QOpenGLShaderProgram *m_program;
-    int m_projMatrixLoc;
-    int m_mvMatrixLoc;
-    int m_normalMatrixLoc;
-    int m_lightPosLoc;
-    QMatrix4x4 m_proj;
-    QMatrix4x4 m_camera;
-    QMatrix4x4 m_world;
-#endif
     static bool m_transparent;
 };
 

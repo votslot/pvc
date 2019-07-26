@@ -92,7 +92,7 @@ namespace pcrapp
 		}
 		else if (m_rightMouseDown)
 		{
-			m_camera.ShiftPivot((float)dx, (float)dy);
+            m_camera.ShiftPivot((float)dx, (float)dy);
 		}
 		m_mouseXDown = x;
 		m_mouseYDown = y;

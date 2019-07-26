@@ -43,9 +43,27 @@
     <property name="title">
      <string>Fi&amp;le</string>
     </property>
+    <addaction name="actiontest123"/>
+    <addaction name="actiontest567"/>
+   </widget>
+   <widget class="QMenu" name="menuTest">
+    <property name="title">
+     <string>Test</string>
+    </property>
    </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuTest"/>
   </widget>
+  <action name="actiontest123">
+   <property name="text">
+    <string>test123</string>
+   </property>
+  </action>
+  <action name="actiontest567">
+   <property name="text">
+    <string>test567</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -53,8 +71,29 @@
    <class>GLWidget</class>
    <extends>QOpenGLWidget</extends>
    <header location="global">glwidget.h</header>
+   <slots>
+    <slot>runtest()</slot>
+    <slot>slot2()</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actiontest567</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>runtest()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>332</x>
+     <y>205</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

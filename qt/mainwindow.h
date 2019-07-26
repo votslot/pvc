@@ -15,6 +15,18 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private slots:
+    void on_actionTest_1M_3_triggered();
+
+    void on_actionLoadLas_triggered();
+
+    void on_actiontestme_triggered();
+
+    void on_actiontest123_triggered();
+
+signals:
+    void test_run_signal();
+
 private:
     Ui::MainWindow *ui;
 };
