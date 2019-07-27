@@ -84,7 +84,6 @@ namespace pcrapp
 		m_R = rotate(m_R, ZZ, A0, dy);
 
 		AppCamera::vector3 A1(0.0f, 0.0f, 1.0f);
-		//Camera::vector3 A1(0.0f, 1.0f, 0.0f);
 		m_P = rotate(m_P, m_L, A1, dx);
 		m_D = rotate(m_D, ZZ, A1, dx);
 		m_U = rotate(m_U, ZZ, A1, dx);
