@@ -54,19 +54,19 @@ R""(
 			vec4 pos = vec4( View2World[3][0],View2World[3][1],View2World[3][2],1);
 			vec4 res = pos + ( rt * xf + up * yf + globs.zNear * dr) * (zf/ globs.zNear);
 			
-			/*
+			
 			uint colorX = uint(  255.0 * (res.x - globs.bbMinX)/(globs.bbMaxX - globs.bbMinX));
 			uint colorY = uint(  255.0 * (res.y - globs.bbMinY)/(globs.bbMaxY - globs.bbMinY));
 			uint colorZ = uint(  255.0 * (res.z - globs.bbMinZ)/(globs.bbMaxZ - globs.bbMinZ));
 			zMapOut[shift] =  colorX | (colorY<<8) | ( colorZ<<16);
-			*/
 			
 			
+			/*
 			uint colorX = (color & 0x1F)<<3;
 			uint colorY = ((color>>5) & 0x1F)<<3;
 			uint colorZ = ((color>>10) & 0x1F)<<3;
 			zMapOut[shift] =  colorX | (colorY<<8) | ( colorZ<<16);
-			
+			*/
 			
 
 		}else

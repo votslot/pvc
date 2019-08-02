@@ -43,10 +43,11 @@ R""(
  	float dz = globs.pz -  part.cz;
 	float dd = sqrt( dx*dx + dy*dy +dz*dz);
 	float szs = 128.0/(  globs.screenX * part.sz * globs.zNear/( dd + 0.000001) );
-	int steps  = clamp( int(szs), 1, 32);
+        int steps  = 64;//clamp( int(szs), 1, 32);
 	//int steps = 1;
   	uint offset = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * gl_WorkGroupSize.x * globs.wrkLoad;
-	for( int loc = 0; loc < globs.wrkLoad; loc+=steps, offset += gl_WorkGroupSize.x*steps)
+        //for( int loc = 0; loc < globs.wrkLoad; loc+=steps, offset += gl_WorkGroupSize.x)
+    for( int loc = 0; loc < globs.wrkLoad; loc++, offset += gl_WorkGroupSize.x)
 	{
 		RenderPoint pt = inputPoints[offset] ;
 		uint color = pt.w;

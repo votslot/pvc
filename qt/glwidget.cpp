@@ -57,6 +57,7 @@
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLFunctions_4_1_Core>
 #include <QInputDialog>
+#include<qfiledialog.h>
 #include <math.h>
 #include "../app/app-events.h"
 
@@ -87,10 +88,7 @@ struct LibCallbackQt :public pcrlib::LibCallback
 
 GLWidget::GLWidget(QWidget *parent)
     : QOpenGLWidget(parent),
-      m_pApp(NULL),
-      m_xRot(0),
-      m_yRot(0),
-      m_zRot(0)
+      m_pApp(NULL)
 {
     m_core = QSurfaceFormat::defaultFormat().profile() == QSurfaceFormat::CoreProfile;
     // --transparent causes the clear color to be transparent. Therefore, on systems that
@@ -100,14 +98,15 @@ GLWidget::GLWidget(QWidget *parent)
         fmt.setAlphaBufferSize(8);
         setFormat(fmt);
     }
-   // QTimer *timer = new QTimer(this);
-  //  connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-  //  timer->start(10);
+    //QTimer *timer = new QTimer(this);
+    //connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+    //timer->start(10);
 
 }
 
 GLWidget::~GLWidget()
 {
+    if( m_pApp) m_pApp->exitEvent();
     cleanup();
 }
 
@@ -119,44 +118,6 @@ QSize GLWidget::minimumSizeHint() const
 QSize GLWidget::sizeHint() const
 {
     return QSize(400, 400);
-}
-
-static void qNormalizeAngle(int &angle)
-{
-    while (angle < 0)
-        angle += 360 * 16;
-    while (angle > 360 * 16)
-        angle -= 360 * 16;
-}
-
-void GLWidget::setXRotation(int angle)
-{
-    qNormalizeAngle(angle);
-    if (angle != m_xRot) {
-        m_xRot = angle;
-        emit xRotationChanged(angle);
-        update();
-    }
-}
-
-void GLWidget::setYRotation(int angle)
-{
-    qNormalizeAngle(angle);
-    if (angle != m_yRot) {
-        m_yRot = angle;
-        emit yRotationChanged(angle);
-        update();
-    }
-}
-
-void GLWidget::setZRotation(int angle)
-{
-    qNormalizeAngle(angle);
-    if (angle != m_zRot) {
-        m_zRot = angle;
-        emit zRotationChanged(angle);
-        update();
-    }
 }
 
 void GLWidget::cleanup()
@@ -186,7 +147,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event)
     if(!m_pApp)  return;
     bool isLeft  = event->buttons() & Qt::LeftButton;
     bool isRight = event->buttons() & Qt::RightButton;
-    m_pApp->mouseUpEvent(isLeft, isRight);
+    m_pApp->mouseUpEvent(true, true);
     update();
 }
 
@@ -198,11 +159,21 @@ void GLWidget::wheelEvent(QWheelEvent *event)
     update();
 }
 
-void GLWidget::runtest()
+void GLWidget::runtest() //slot
 {
     if(m_pApp) m_pApp->testCloud();
     update();
 }
+
+ void  GLWidget::las_open() // slot
+ {
+     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "/home",tr("Files (*.las *.xyz)"));
+     if( !fileName.isEmpty())
+     {
+        if(m_pApp) m_pApp->openLasFile(fileName.toStdString().c_str());
+     }
+     update();
+ }
 
 void GLWidget::initializeGL()
 {
@@ -215,9 +186,11 @@ void GLWidget::initializeGL()
     m_pApp->init(new LibCallbackQt());
 }
 
-void GLWidget::resizeGL(int w, int h)
+
+
+void GLWidget::resizeGL(int , int )//w, h
 {
-    //ErrMessageBox("AAAA");
+
 }
 void GLWidget::paintGL()
 {

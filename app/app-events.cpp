@@ -59,6 +59,7 @@ namespace pcrapp
 	{
 		m_mouseXDown = x;
 		m_mouseYDown = y;
+
 		if (isLeft )
 		{
 			m_leftMouseDown = true;
@@ -71,6 +72,7 @@ namespace pcrapp
 
 	void AppEventsImpl::mouseUpEvent(bool isLeft, bool isRight) 
 	{
+
 		if (isLeft)
 		{
 			m_leftMouseDown = false;
@@ -79,6 +81,7 @@ namespace pcrapp
 		{
 			m_rightMouseDown = false;
 		}
+
 	}
 
 	void AppEventsImpl::mouseMoveEvent(int x, int y)
@@ -113,6 +116,7 @@ namespace pcrapp
 	{
 		if (m_pRLib)
 		{
+            //m_camera.RotateAroundPivot(0.001f, 0.0f);
 			pcrlib::Camera pcrCam;
 			m_camera.BuildPcrCamera(pcrCam);
 			m_pRLib->render(pcrCam, sw, sh);
@@ -144,7 +148,7 @@ namespace pcrapp
 		if (m_pRLib)
 		{
 			m_pRLib->startAddPoints();
-			generateWave(1024, 1024, m_pRLib);
+            generateWave(512, 512, m_pRLib);
 			m_pRLib->doneAddPoints();
 			setDefCamera();
 		}
@@ -164,7 +168,7 @@ namespace pcrapp
 			float cy = (bd.yMax + bd.yMin) *0.5f;
 			float cz = (bd.zMax + bd.zMin) *0.5f;
 			m_camera.SetPivotCamera(0.0f, 0.0f, maxD*2.0f, cx, cy, cz);
-			m_camera.m_zFar = maxD * 4.0f;
+            m_camera.m_zFar = maxD * 10.0f;
 			m_maxSize = maxD;
 		}
 	}
