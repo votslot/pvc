@@ -3,6 +3,7 @@
 #include <fstream>  
 #include "app-events.h"
 #include "app-las.h"
+#include <string>
 
 
 namespace pcrapp
@@ -53,6 +54,24 @@ namespace pcrapp
 		unsigned short val;
 	};
 
+#pragma pack (1)
+	struct PointFromat3
+	{
+		int x;
+		int y;
+		int z;
+		unsigned short val;
+		unsigned char  rets;
+		unsigned char Classification;
+		unsigned char scanAngle;
+		unsigned char userData;
+		unsigned short  pointSourceID;
+		double gpsTime;
+		unsigned short red;
+		unsigned short green;
+		unsigned short blue;
+	};
+
 	static void ReadLas(const std::string &path, pcrlib::IPcrLib *pLib, pcrlib::LibCallback *pCb)
 	{
 		std::fstream fs;
@@ -72,11 +91,14 @@ namespace pcrapp
 
 		int pointArea = fileLength - lasH.pointOfst;
 		int calcSize = lasH.poitDataRecordLength * lasH.numOfPointRecords;
+		if (pCb) 
+		{
+			pCb->message(std::string("Las version:" + std::to_string(lasH.verMajor) + std::to_string(lasH.verMinor)+ "\n").c_str());
+			pCb->message(std::string("Las point format:" + std::to_string(lasH.pointDataFormatId) + "\n").c_str());
+		}
+		std::cout << "yofst=" << lasH.yOffset << std::endl;
 
 		//Sanity check :  we expect calcSize == pointArea
-		//if (gpLasCloud) gpLasCloud->OnStart();
-		//if (gpLasCloud) gpLasCloud->SetNumPoints(lasH.numOfPointRecords);
-
 		fs.seekg(0, fs.beg);
 		fs.seekp(lasH.pointOfst);
 		char *pPoinRecord = new char[lasH.poitDataRecordLength];
@@ -84,12 +106,17 @@ namespace pcrapp
 		for (unsigned int k = 0; k < lasH.numOfPointRecords; k++)
 		{
 			fs.read(pPoinRecord, lasH.poitDataRecordLength);
-			PointDataXYZ *pXYZ = (PointDataXYZ *)pPoinRecord;
-			if (pXYZ->val > minV)
-			{
-				minV = pXYZ->val;
-			}
-			pLib->addPoint((float)pXYZ->x*float(lasH.xScale), (float)pXYZ->y*float(lasH.yScale), (float)pXYZ->z*float(lasH.zScale), (float)pXYZ->val);
+			PointFromat3 *pXYZ = (PointFromat3 *)pPoinRecord;
+			unsigned int rr = pXYZ->red >> 11;
+			unsigned int gg = pXYZ->green >> 11;
+			unsigned int bb = pXYZ->blue >> 11;
+			unsigned int cc = rr | (gg << 5) | (bb << 10);
+	
+			float xf = (float)(pXYZ->x )*float(lasH.xScale) + lasH.xOffset;
+			float yf = (float)(pXYZ->y )*float(lasH.yScale) + lasH.yOffset;
+			float zf = (float)(pXYZ->z )*float(lasH.zScale) + lasH.zOffset;
+			pLib->addPoint(xf, yf, zf, cc);
+			//pLib->addPoint((float)pXYZ->x, (float)pXYZ->y, (float)pXYZ->z, cc);
 		}
 		fs.close();
 		delete[]pPoinRecord;

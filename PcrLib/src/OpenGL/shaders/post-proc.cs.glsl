@@ -22,8 +22,11 @@ R""(
 )"";
 
 
-const std::string cs_postproc_w = cs_glversion + cs_const_val + cs_structs +
+//const std::string cs_postproc_w = cs_glversion + cs_const_val + cs_structs +
+const std::string cs_postproc_src=
 R""(
+ //#define XYZ_AS_COLOR
+ //#define DATA_INTENSITY_AS_COLOR
  layout(local_size_x = 32,local_size_y =32) in; 
  layout(std430,binding = 0) buffer in1  {  GlobalParams globs; };
  layout(std430,binding = 1) buffer zmi  {  uint zMapIn[]; }; 
@@ -54,20 +57,24 @@ R""(
 			vec4 pos = vec4( View2World[3][0],View2World[3][1],View2World[3][2],1);
 			vec4 res = pos + ( rt * xf + up * yf + globs.zNear * dr) * (zf/ globs.zNear);
 			
-			
+			#ifdef  XYZ_AS_COLOR
 			uint colorX = uint(  255.0 * (res.x - globs.bbMinX)/(globs.bbMaxX - globs.bbMinX));
 			uint colorY = uint(  255.0 * (res.y - globs.bbMinY)/(globs.bbMaxY - globs.bbMinY));
 			uint colorZ = uint(  255.0 * (res.z - globs.bbMinZ)/(globs.bbMaxZ - globs.bbMinZ));
 			zMapOut[shift] =  colorX | (colorY<<8) | ( colorZ<<16);
+			#endif
 			
-			
-			/*
+			#ifdef  DATA_INTENSITY_AS_COLOR
+			uint colorI = color & 0xFF;
+			zMapOut[shift] =  colorI | (colorI<<8) | ( colorI<<16);
+			#endif
+
+		    #ifdef  DATA_RGBA_AS_COLOR
 			uint colorX = (color & 0x1F)<<3;
 			uint colorY = ((color>>5) & 0x1F)<<3;
 			uint colorZ = ((color>>10) & 0x1F)<<3;
 			zMapOut[shift] =  colorX | (colorY<<8) | ( colorZ<<16);
-			*/
-			
+			#endif
 
 		}else
 		{
@@ -76,5 +83,11 @@ R""(
 	}
  }  
 )"";
+
+const std::string cs_postproc_xyz = cs_glversion + " \n#define XYZ_AS_COLOR\n " + cs_const_val + cs_structs + cs_postproc_src;
+
+const std::string cs_postproc_int = cs_glversion + " \n#define DATA_INTENSITY_AS_COLOR\n " + cs_const_val + cs_structs + cs_postproc_src;
+
+const std::string cs_postproc_rgb = cs_glversion + " \n#define DATA_RGBA_AS_COLOR\n " + cs_const_val + cs_structs + cs_postproc_src;
 
 

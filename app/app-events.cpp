@@ -15,6 +15,7 @@ namespace pcrapp
 		pcrlib::IPcrLib *m_pRLib; 
 		pcrlib::LibCallback *m_cb;
 		AppCamera m_camera;
+		RenderParams m_renderParam;
 		float m_maxSize;
 		int m_mouseXDown = 0;
 		int m_mouseYDown = 0;
@@ -28,6 +29,7 @@ namespace pcrapp
 		void mouseMoveEvent(int x, int y);
 		void mouseWhellEvent(int val);
 		void paintEvent(int sw, int sh);
+		void viewModeEvent(int val);
 		void exitEvent();
 		void openLasFile(const char *filePath);
 		void testCloud();
@@ -41,6 +43,7 @@ namespace pcrapp
 		m_pRLib = NULL;
 		m_cb = NULL;
 		m_maxSize = 1.0f;
+		m_renderParam.cm = pcrlib::Color_model_xyz;
 	}
 
 	IAppEvents * IAppEvents::getAppEvents()
@@ -95,7 +98,8 @@ namespace pcrapp
 		}
 		else if (m_rightMouseDown)
 		{
-            m_camera.ShiftPivot((float)dx, (float)dy);
+			float prd = m_maxSize *0.001f;
+            m_camera.ShiftPivot((float)dx*prd, (float)dy*prd);
 		}
 		m_mouseXDown = x;
 		m_mouseYDown = y;
@@ -107,7 +111,7 @@ namespace pcrapp
 		{
 			return;
 		}
-		float prd = 1.0f;
+		float prd = 0.02f;
 		float shift = (val > 0) ? prd : -prd;
 		m_camera.MoveInPivotDir(shift*m_maxSize);
 	}
@@ -116,10 +120,19 @@ namespace pcrapp
 	{
 		if (m_pRLib)
 		{
-            //m_camera.RotateAroundPivot(0.001f, 0.0f);
-			pcrlib::Camera pcrCam;
+ 			pcrlib::Camera pcrCam;
 			m_camera.BuildPcrCamera(pcrCam);
-			m_pRLib->render(pcrCam, sw, sh);
+			m_pRLib->render(pcrCam, sw, sh, m_renderParam);
+		}
+	}
+
+	void  AppEventsImpl::viewModeEvent(int val) 
+	{
+		switch (val)
+		{
+		case 0: m_renderParam.cm = pcrlib::Color_model_xyz; break;
+		case 1: m_renderParam.cm = pcrlib::Colos_model_rgb; break;
+		case 2: m_renderParam.cm = pcrlib::Color_model_intencity; break;
 		}
 	}
 
@@ -140,6 +153,7 @@ namespace pcrapp
 			readLasFile(filePath, m_pRLib, m_cb);
 			m_pRLib->doneAddPoints();
 			setDefCamera();
+			m_renderParam.cm = pcrlib::Color_model_intencity;
 		}
 	}
 
@@ -148,9 +162,10 @@ namespace pcrapp
 		if (m_pRLib)
 		{
 			m_pRLib->startAddPoints();
-            generateWave(512, 512, m_pRLib);
+            generateWave(1024, 1024, m_pRLib);
 			m_pRLib->doneAddPoints();
 			setDefCamera();
+			m_renderParam.cm = pcrlib::Color_model_intencity;
 		}
 	}
 

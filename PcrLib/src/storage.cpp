@@ -39,7 +39,8 @@ namespace pcrlib
 			int numInUse;
 			bool hasPoints;
 
-			char *pTemp = NULL;
+			//char *pTemp = NULL;
+			RenderPoint *pTemp = NULL;
 			int numPointsInTemp = 0;
 
 			Partition *pPartitions = NULL;
@@ -68,7 +69,10 @@ namespace pcrlib
 				unsigned int maxSSB = ICBuffer::getMaxSizeInBytes();
 				maxBuffSz = (sMaxAllocSize < maxSSB) ? sMaxAllocSize : maxSSB;
 				maxPointsInBuff = maxBuffSz / (4 * sizeof(float));
-				pTemp = new char[maxBuffSz];
+
+				char *pTemp8 = new char[maxBuffSz];
+				pTemp = (RenderPoint*)pTemp8;
+
 				pPartitions = new Partition[maxPointsInBuff];
 
 				for (int i = 0; i < sMaxBuffs; i++)
@@ -83,7 +87,7 @@ namespace pcrlib
 				bbZMax = FLT_MIN;
 			}
 
-			void SetPoint(float x, float y, float z, float w)
+			void SetPoint(float x, float y, float z, unsigned int w)
 			{
 				bdBuff.Add(x, y, z);
 				int ptSize = sizeof(float) * 4;
@@ -91,12 +95,12 @@ namespace pcrlib
 				{
 					AddNewBuffer();
 				}
-				float *pDest = (float*)pTemp;
-				pDest += numPointsInTemp * 4;
-				pDest[0] = x;
-				pDest[1] = y;
-				pDest[2] = z;
-				pDest[3] = w;
+	
+				pTemp[numPointsInTemp].x = x;
+				pTemp[numPointsInTemp].y = y;
+				pTemp[numPointsInTemp].z = z;
+				pTemp[numPointsInTemp].w = w;
+
 				if (x < bbXMin) bbXMin = x;
 				if (x > bbXMax) bbXMax = x;
 				if (y < bbYMin) bbYMin = y;
@@ -137,7 +141,6 @@ namespace pcrlib
 					numPartitions++;
 
 					// shuffle points
-
 					RenderPoint *pPt = (RenderPoint*)pTemp;
 					if (pDt->numPoints == 4096)
 					{
@@ -154,7 +157,7 @@ namespace pcrlib
 				};
 
 				// BuildNormals((RenderPoint *)pTemp, numPointsInTemp, bdBuff);
-				BuildValues((float*)pTemp, numPointsInTemp);
+				// BuildValues((float*)pTemp, numPointsInTemp);
 				DoPartitionXYZW_Float(pTemp, numPointsInTemp, OnDonePartition);
 				m_cb->message("done\n");
 

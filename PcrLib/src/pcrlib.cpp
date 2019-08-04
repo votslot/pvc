@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <vector>
 #include <assert.h>
 #include "../pcrlib.h"
 #include "icompute.h"
@@ -29,6 +30,7 @@ extern int InitGLBlit();
 		PointStorage  * m_pst = NULL;
 		GlobalParams m_Glob;
 		// buffres
+		std::vector<ICBuffer*> m_bufferList;
 		ICBuffer  *m_bufferZMap = NULL;
 		ICBuffer  *m_bufferParams = NULL;
 		ICBuffer  *m_bufferZMapPost = NULL;
@@ -36,13 +38,36 @@ extern int InitGLBlit();
 		ICBuffer  *m_bufferView2World = NULL;
 		ICBuffer  *m_bufferDebug = NULL;
 		//shaders
+		std::vector<ICShader*> m_shaderList;
 		ICShader *m_csPointRender = NULL;
 		ICShader *m_csCleanRGB  = NULL;
-		ICShader *m_csPostProc  = NULL;
+		ICShader *m_csPostProcRgb = NULL;
+		ICShader *m_csPostProcXyz = NULL;
+		ICShader *m_csPostProcInt = NULL;
 
 		ThePcrLib() 
 		{
 			m_pcallback = new LibCallback();
+		}
+
+		ICShader *initShaderInternal(const char *pSrc) 
+		{
+			ICShader *pRet = createICShader();
+			pRet->initFromSource(pSrc);
+			m_shaderList.push_back(pRet);
+			return pRet;
+		}
+
+		ICShader * getPostProcShaderInternal(const RenderParams &rp)
+		{
+			switch(rp.cm)
+			{
+			case ColorModel::Color_model_intencity: return m_csPostProcInt;
+			case ColorModel::Color_model_xyz:       return m_csPostProcXyz;
+			case ColorModel::Colos_model_rgb:       return m_csPostProcRgb;
+			default: m_pcallback->error("Unknown color mode\n");
+			}
+			return NULL;
 		}
 
 		void initInternal()
@@ -57,14 +82,11 @@ extern int InitGLBlit();
             m_pst = PointStorage::GetInstatnce(m_pcallback);
             m_pst->Init();
 			// shaders
-			m_csCleanRGB = createICShader();
-			m_csCleanRGB->initFromSource(cs_clean.c_str());
-			
-			m_csPointRender = createICShader();
-			m_csPointRender->initFromSource(cs_render_points.c_str());
-			
-			m_csPostProc = createICShader();
-			m_csPostProc->initFromSource(cs_postproc_w.c_str());
+			m_csCleanRGB    =  initShaderInternal(cs_clean.c_str());
+			m_csPointRender =  initShaderInternal(cs_render_points.c_str());
+			m_csPostProcXyz = initShaderInternal(cs_postproc_xyz.c_str());
+			m_csPostProcInt = initShaderInternal(cs_postproc_int.c_str());
+			m_csPostProcRgb = initShaderInternal(cs_postproc_rgb.c_str());
 
 			// buffers
 			m_bufferParams = createICBuffer();
@@ -97,7 +119,7 @@ extern int InitGLBlit();
 		{
 		}
 
-		int addPoint(float x, float y, float z, float w) 
+		int addPoint(float x, float y, float z, unsigned int w)
 		{
 			m_pst->SetPoint(x, y, z, w);
 			return 0;
@@ -120,7 +142,7 @@ extern int InitGLBlit();
 			return ret;
 		}
 
-		int render(const Camera &cam, int destWidth, int destHeight)
+		int render(const Camera &cam, int destWidth, int destHeight, const RenderParams &rp)
 		{
 			if (!isInit)
 			{
@@ -165,7 +187,9 @@ extern int InitGLBlit();
 					ICBuffer *pPartitions = m_pst->GetPartitionBuffer(m);
 				    uint num_groups_x = 1;
 					uint num_groups_y = (m_pst->GetNumPointsInBuffer(m) / m_csPointRender->getSX() / m_Glob.wrkLoad);
-					m_csPointRender->execute(num_groups_x, num_groups_y, 1, { m_bufferParams,m_bufferDebug,pPoints,m_bufferZMap,m_bufferMatrView4x4,pPartitions });
+					m_csPointRender->execute(
+						num_groups_x, num_groups_y, 1,
+						{ m_bufferParams,m_bufferDebug,pPoints,m_bufferZMap,m_bufferMatrView4x4,pPartitions });
 				}
 			}
 
@@ -174,7 +198,9 @@ extern int InitGLBlit();
 				float Vew2World4x4[16];
 				GetVew2World4x4(cam.up, cam.lookAt, cam.pos, Vew2World4x4);
 				m_bufferView2World->setData(Vew2World4x4, 16 * sizeof(float));
-				m_csPostProc->execute(sMaxW / 32, sMaxH / 32, 1, { m_bufferParams ,m_bufferZMap,m_bufferZMapPost,m_bufferView2World,m_bufferDebug });
+
+				ICShader *pPostProc = getPostProcShaderInternal(rp);
+				pPostProc->execute(sMaxW / 32, sMaxH / 32, 1, { m_bufferParams ,m_bufferZMap,m_bufferZMapPost,m_bufferView2World,m_bufferDebug });
 			}
 
 			m_bufferZMapPost->blit(destWidth, destHeight);
@@ -190,10 +216,13 @@ extern int InitGLBlit();
 			if (m_bufferView2World)		releaseICBuffer(&m_bufferView2World);
 			if (m_bufferDebug)          releaseICBuffer(&m_bufferDebug);
 
-			if (m_csPointRender)  releaseICShader(&m_csPointRender);
-			if (m_csCleanRGB)	  releaseICShader(&m_csCleanRGB);
-			if (m_csPostProc)	  releaseICShader(&m_csPostProc);
-
+			for (std::vector<ICShader*>::iterator it = m_shaderList.begin(); it != m_shaderList.end(); ++it)
+			{
+				ICShader* ps = *it;
+				if(ps) releaseICShader(&ps);
+			}
+			m_shaderList.clear();
+	
 			isInit = false;
 		}
 

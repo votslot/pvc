@@ -14,10 +14,12 @@ WNDPROC prevWndProc;
 enum {
 	OPEN_DIALOG_ID = 124,
 	HELP_ID = 125,
-	VIEW_ID = 126,
+	VIEW_ID_RGB = 126,
 	RUN_TEST_ID = 127,
 	CAMERA_PIVOT = 128,
-	CAMERA_FIRST_PERSON = 128
+	CAMERA_FIRST_PERSON = 128,
+	VIEW_ID_XYZ = 129,
+	VIEW_ID_INT = 130
 };
 
 static void OpenFileDialog()
@@ -56,9 +58,28 @@ LRESULT CALLBACK myNewWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 			break;
 			case RUN_TEST_ID:
 			{
-				if( psApp) psApp->testCloud();
+				if (psApp) psApp->testCloud();
 			}
 			break;
+
+			case VIEW_ID_XYZ:
+			{
+				if (psApp) psApp->viewModeEvent(0);
+			}
+			break;
+
+			case VIEW_ID_RGB:
+			{
+				if (psApp) psApp->viewModeEvent(1);
+			}
+			break;
+
+			case VIEW_ID_INT:
+			{
+				if (psApp) psApp->viewModeEvent(2);
+			}
+			break;
+
 			case HELP_ID:
 				std::cout << "HELP!" << std::endl;
 			break;
@@ -95,7 +116,9 @@ void AddUI(HWND hwnd, pcrapp::IAppEvents *pApp)
 	}
 	{
 		HMENU hSubMenu = CreatePopupMenu();
-		AppendMenu(hSubMenu, MF_STRING, VIEW_ID, L"&Rgb");
+		AppendMenu(hSubMenu, MF_STRING, VIEW_ID_RGB, L"&Point Rgb");
+		AppendMenu(hSubMenu, MF_STRING, VIEW_ID_XYZ, L"&Xyz As Colors");
+		AppendMenu(hSubMenu, MF_STRING, VIEW_ID_INT, L"&Point Intencity");
 		AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, L"&View");
 	}
 	{

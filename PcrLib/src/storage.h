@@ -37,7 +37,7 @@ namespace pcrlib
 	public:
 		virtual void Init() = 0;
 		virtual void Release() = 0;
-		virtual void SetPoint(float x, float y, float z, float w) = 0;
+		virtual void SetPoint(float x, float y, float z, unsigned int w) = 0;
 		virtual void DoneAddPoints() = 0;
 		virtual int getNumAvailableBuffers() = 0;
 		virtual int GetNumBuffersInUse() = 0;

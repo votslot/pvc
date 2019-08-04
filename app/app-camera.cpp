@@ -92,16 +92,15 @@ namespace pcrapp
 
 	void AppCamera::MoveInPivotDir(float dd)
 	{
-		m_P = m_P + (m_D * dd)*0.02f;
+		m_P = m_P + (m_D * dd);
 	}
 
 	void AppCamera::ShiftPivot(float dx, float dy)
 	{
-		float prd = 1.0f;
 		AppCamera::vector3 SH;
-		SH[0] = (m_R[0] * dx + m_U[0] * dy) * prd;
-		SH[1] = (m_R[1] * dx + m_U[1] * dy) * prd;
-		SH[2] = (m_R[2] * dx + m_U[2] * dy) * prd;
+		SH[0] = (m_R[0] * dx + m_U[0] * dy) ;
+		SH[1] = (m_R[1] * dx + m_U[1] * dy) ;
+		SH[2] = (m_R[2] * dx + m_U[2] * dy) ;
 		m_P = m_P + SH;
 		m_L = m_L + SH;
 	}
