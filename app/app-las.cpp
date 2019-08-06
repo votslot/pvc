@@ -46,7 +46,7 @@ namespace pcrapp
 		double minZ;
 	};
 
-	struct PointDataXYZ
+	struct PointFromat1
 	{
 		int x;
 		int y;
@@ -72,14 +72,14 @@ namespace pcrapp
 		unsigned short blue;
 	};
 
-	static void ReadLas(const std::string &path, pcrlib::IPcrLib *pLib, pcrlib::LibCallback *pCb)
+	static int ReadLas(const std::string &path, pcrlib::IPcrLib *pLib, pcrlib::LibCallback *pCb)
 	{
 		std::fstream fs;
 		fs.open(path.c_str(), std::fstream::in | std::fstream::binary);
 		if (fs.fail())
 		{
 			if (pCb) pCb->error("Failed to open las file");
-			return;
+			return -1;
 		}
 		fs.seekg(0, fs.end);
 		int fileLength = (int)fs.tellg();
@@ -106,28 +106,39 @@ namespace pcrapp
 		for (unsigned int k = 0; k < lasH.numOfPointRecords; k++)
 		{
 			fs.read(pPoinRecord, lasH.poitDataRecordLength);
-			PointFromat3 *pXYZ = (PointFromat3 *)pPoinRecord;
-			unsigned int rr = pXYZ->red >> 11;
-			unsigned int gg = pXYZ->green >> 11;
-			unsigned int bb = pXYZ->blue >> 11;
-			unsigned int cc = rr | (gg << 5) | (bb << 10);
+			unsigned int rr,gg,bb, cc;
+
+			PointFromat1 *pXYZ1 = (PointFromat1*)pPoinRecord;
+
+			if (lasH.pointDataFormatId ==3)
+			{
+				PointFromat3 *pXYZ3 = (PointFromat3 *)pPoinRecord;
+				rr = pXYZ3->red >> 11;
+				gg = pXYZ3->green >> 11;
+				bb = pXYZ3->blue >> 11;
+				cc = rr | (gg << 5) | (bb << 10);
+			}
+			else 
+			{
+				cc = pXYZ1->val;
+			}
 	
-			float xf = (float)(pXYZ->x )*float(lasH.xScale) + lasH.xOffset;
-			float yf = (float)(pXYZ->y )*float(lasH.yScale) + lasH.yOffset;
-			float zf = (float)(pXYZ->z )*float(lasH.zScale) + lasH.zOffset;
+			float xf = (float)(pXYZ1->x )*float(lasH.xScale) + lasH.xOffset;
+			float yf = (float)(pXYZ1->y )*float(lasH.yScale) + lasH.yOffset;
+			float zf = (float)(pXYZ1->z )*float(lasH.zScale) + lasH.zOffset;
 			pLib->addPoint(xf, yf, zf, cc);
-			//pLib->addPoint((float)pXYZ->x, (float)pXYZ->y, (float)pXYZ->z, cc);
 		}
 		fs.close();
 		delete[]pPoinRecord;
+		return lasH.pointDataFormatId;
 	}
 
 
 
-	void readLasFile(const char *pPath, pcrlib::IPcrLib *pLib, pcrlib::LibCallback *pCb)
+	int readLasFile(const char *pPath, pcrlib::IPcrLib *pLib, pcrlib::LibCallback *pCb)
 	{
 		std::string str(pPath);
 		if (pCb) pCb->message((std::string("Opening las file  ") + str +"\n").c_str() );
-		ReadLas(str,pLib, pCb);
+		return ReadLas(str,pLib, pCb);
 	}
 }//namespace pcrapp

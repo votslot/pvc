@@ -34,6 +34,7 @@ static void OpenFileDialog()
 	ofn.nMaxFile = MAX_PATH;
 	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
 	ofn.lpstrDefExt = L"txt";
+	//ofn.lpfnHook
 	if (GetOpenFileName(&ofn))
 	{
 		std::wstring ws(ofn.lpstrFile);

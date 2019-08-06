@@ -149,11 +149,12 @@ namespace pcrapp
 	{
 		if (m_pRLib)
 		{
+			int ret;
 			m_pRLib->startAddPoints();
-			readLasFile(filePath, m_pRLib, m_cb);
+			ret = readLasFile(filePath, m_pRLib, m_cb);
 			m_pRLib->doneAddPoints();
-			setDefCamera();
-			m_renderParam.cm = pcrlib::Color_model_intencity;
+			setDefCamera(); 
+			m_renderParam.cm = (ret==1)?pcrlib::Color_model_intencity : pcrlib::Colos_model_rgb;
 		}
 	}
 

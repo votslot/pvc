@@ -6,7 +6,7 @@
 namespace pcrapp
 {
 	struct   LibCallback;
-	void readLasFile(const char *pPath, pcrlib::IPcrLib *pLib, pcrlib::LibCallback *pCb);
+	int readLasFile(const char *pPath, pcrlib::IPcrLib *pLib, pcrlib::LibCallback *pCb);
 }
 
 #endif
