@@ -36,24 +36,25 @@ R""(
  {  
 	const uint msk_z = (1 << cZbuffBits) - 1;
 	const uint msk_v = (1 << (32 - cZbuffBits)) -1 ;
-    Partition part = partitions[gl_GlobalInvocationID.y];
-	uint partColor = 8;//(part.ndx & 7) + 1;
+        Partition part = partitions[gl_GlobalInvocationID.y];
+
+        /*
 	float dx = globs.px -  part.cx;
  	float dy = globs.py -  part.cy;
  	float dz = globs.pz -  part.cz;
 	float dd = sqrt( dx*dx + dy*dy +dz*dz);
-	float szs = 128.0/(  globs.screenX * part.sz * globs.zNear/( dd + 0.000001) );
-        int steps  = 64;//clamp( int(szs), 1, 32);
-	//int steps = 1;
+        float szs = ( 4.0* float(globs.wrkLoad) * part.sz)  /( dd + 0.000001) ;
+        int steps  = clamp( int(szs), 16, int(globs.wrkLoad));
+        */
+
   	uint offset = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * gl_WorkGroupSize.x * globs.wrkLoad;
-        //for( int loc = 0; loc < globs.wrkLoad; loc+=steps, offset += gl_WorkGroupSize.x)
-    for( int loc = 0; loc < globs.wrkLoad; loc++, offset += gl_WorkGroupSize.x)
+        for( int loc = 0; loc < globs.wrkLoad; loc++, offset += gl_WorkGroupSize.x)
 	{
-		RenderPoint pt = inputPoints[offset] ;
+                RenderPoint pt = inputPoints[offset] ;
 		uint color = pt.w;
 		vec4 vf =    World2View  * vec4(pt.x, pt.y, pt.z, 1.0) ;
 
-		if( (vf.z > 0.0) && (vf.z < 1.0) && ( vf.x < globs.screenX *vf.w ) && ( vf.y < globs.screenY * vf.w) &&(vf.x>0.0) &&(vf.y>0.0)  )
+                if( (vf.z > 0.0) && (vf.z < 1.0) && ( vf.x < globs.screenX *vf.w ) && ( vf.y < globs.screenY * vf.w) &&(vf.x>0.0) &&(vf.y>0.0)  )
 		{
 			uint xx = uint(vf.x/vf.w);
 			uint yy = uint(vf.y/vf.w);

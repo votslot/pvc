@@ -55,6 +55,23 @@ namespace pcrapp
 	};
 
 #pragma pack (1)
+    struct PointFromat2
+    {
+        int x;
+        int y;
+        int z;
+        unsigned short val;
+        unsigned char  rets;
+        unsigned char Classification;
+        unsigned char scanAngle;
+        unsigned char userData;
+        unsigned short  pointSourceID;
+        unsigned short red;
+        unsigned short green;
+        unsigned short blue;
+    };
+
+#pragma pack (1)
 	struct PointFromat3
 	{
 		int x;
@@ -91,19 +108,25 @@ namespace pcrapp
 
 		int pointArea = fileLength - lasH.pointOfst;
 		int calcSize = lasH.poitDataRecordLength * lasH.numOfPointRecords;
+
+        if(pointArea != calcSize ){
+            pCb->error("Las reading error ");
+            return 1;
+        }
+
 		if (pCb) 
 		{
 			pCb->message(std::string("Las version:" + std::to_string(lasH.verMajor) + std::to_string(lasH.verMinor)+ "\n").c_str());
 			pCb->message(std::string("Las point format:" + std::to_string(lasH.pointDataFormatId) + "\n").c_str());
 		}
-		std::cout << "yofst=" << lasH.yOffset << std::endl;
+        //std::cout << "yofst=" << lasH.yOffset << std::endl;
 
-		//Sanity check :  we expect calcSize == pointArea
 		fs.seekg(0, fs.beg);
 		fs.seekp(lasH.pointOfst);
 		char *pPoinRecord = new char[lasH.poitDataRecordLength];
-		unsigned short minV = 0;
-		for (unsigned int k = 0; k < lasH.numOfPointRecords; k++)
+        unsigned short minV = 65535;
+        unsigned short maxV = 0;
+        for (unsigned int k = 0; k < lasH.numOfPointRecords; k++)
 		{
 			fs.read(pPoinRecord, lasH.poitDataRecordLength);
 			unsigned int rr,gg,bb, cc;
@@ -116,12 +139,20 @@ namespace pcrapp
 				rr = pXYZ3->red >> 11;
 				gg = pXYZ3->green >> 11;
 				bb = pXYZ3->blue >> 11;
-				cc = rr | (gg << 5) | (bb << 10);
-			}
+                cc = rr | (gg << 5) | (bb << 10);
+            } else if( lasH.pointDataFormatId ==2){
+                 PointFromat2 *pXYZ2 = (PointFromat2 *)pPoinRecord;
+                rr = pXYZ2->red >> 11;
+                gg = pXYZ2->green >> 11;
+                bb = pXYZ2->blue >> 11;
+                cc = rr | (gg << 5) | (bb << 10);
+            }
 			else 
 			{
 				cc = pXYZ1->val;
-			}
+                if( pXYZ1->val > maxV) maxV = pXYZ1->val ;
+                if( pXYZ1->val < minV) minV = pXYZ1->val ;
+            }
 	
 			float xf = (float)(pXYZ1->x )*float(lasH.xScale) + lasH.xOffset;
 			float yf = (float)(pXYZ1->y )*float(lasH.yScale) + lasH.yOffset;
@@ -130,6 +161,9 @@ namespace pcrapp
 		}
 		fs.close();
 		delete[]pPoinRecord;
+
+        pCb->message(std::string("value range" + std::to_string(minV ) + ":" +  std::to_string(maxV)+ "\n").c_str());
+
 		return lasH.pointDataFormatId;
 	}
 

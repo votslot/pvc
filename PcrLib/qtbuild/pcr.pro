@@ -48,4 +48,6 @@ unix {
 DESTDIR = $$PWD/LibOutput
 
 DISTFILES += \
-    ../src/OpenGL/wave-test.cs.glsl
+    ../src/OpenGL/wave-test.cs.glsl \
+    ../src/OpenGL/shaders/render-points.cs.glsl \
+    ../src/OpenGL/shaders/post-proc.cs.glsl
