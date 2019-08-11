@@ -19,6 +19,7 @@
     </ClCompile>
     <ClCompile Include="..\src\matrix-utils.cpp" />
     <ClCompile Include="..\src\storage.cpp" />
+    <ClCompile Include="..\src\font.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\partition.h" />
@@ -29,6 +30,7 @@
     </ClInclude>
     <ClInclude Include="..\src\matrix-utils.h" />
     <ClInclude Include="..\src\storage.h" />
+    <ClInclude Include="..\src\font.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="gl-config.props">
@@ -41,6 +43,9 @@
       <Filter>GLShaders</Filter>
     </None>
     <None Include="..\src\OpenGL\shaders\render-points.cs.glsl">
+      <Filter>GLShaders</Filter>
+    </None>
+    <None Include="..\src\OpenGL\shaders\render-font.cs.glsl">
       <Filter>GLShaders</Filter>
     </None>
   </ItemGroup>

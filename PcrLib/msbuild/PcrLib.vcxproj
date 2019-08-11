@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\font.cpp" />
     <ClCompile Include="..\src\matrix-utils.cpp" />
     <ClCompile Include="..\src\OpenGL\blit-gl.cpp" />
     <ClCompile Include="..\src\OpenGL\icompute-gl.cpp" />
@@ -28,6 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\pcrlib.h" />
+    <ClInclude Include="..\src\font.h" />
     <ClInclude Include="..\src\icompute.h" />
     <ClInclude Include="..\src\matrix-utils.h" />
     <ClInclude Include="..\src\OpenGL\wrapper-gl.h" />
@@ -36,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\OpenGL\shaders\post-proc.cs.glsl" />
+    <None Include="..\src\OpenGL\shaders\render-font.cs.glsl" />
     <None Include="..\src\OpenGL\shaders\render-points.cs.glsl" />
     <None Include="..\src\OpenGL\wave-test.cs.glsl" />
     <None Include="gl-config.props">

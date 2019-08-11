@@ -8,6 +8,7 @@
 #include "icompute.h"
 #include "storage.h"
 #include "matrix-utils.h"
+#include "font.h"
 
 #include "OpenGL/wave-test.cs.glsl"
 #include "OpenGL/shaders/render-points.cs.glsl"
@@ -29,6 +30,8 @@ extern int InitGLBlit();
 		bool isInit = false;
 		PointStorage  * m_pst = NULL;
 		GlobalParams m_Glob;
+		//font
+		IFontRenderer *m_font;
 		// buffres
 		std::vector<ICBuffer*> m_bufferList;
 		ICBuffer  *m_bufferZMap = NULL;
@@ -77,6 +80,9 @@ extern int InitGLBlit();
 				return;
 			}
 			ICShader::m_err = this;
+			
+			// init font
+			m_font = IFontRenderer::getInstance();
 
 			// init storage
             m_pst = PointStorage::GetInstatnce(m_pcallback);
@@ -202,6 +208,8 @@ extern int InitGLBlit();
 				ICShader *pPostProc = getPostProcShaderInternal(rp);
 				pPostProc->execute(sMaxW / 32, sMaxH / 32, 1, { m_bufferParams ,m_bufferZMap,m_bufferZMapPost,m_bufferView2World,m_bufferDebug });
 			}
+			// font
+			if(m_font) m_font->renderFont(m_bufferZMapPost, m_bufferParams);
 
 			m_bufferZMapPost->blit(destWidth, destHeight);
 			return 0;

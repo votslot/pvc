@@ -1,7 +1,7 @@
 
 #include "ginclude.glsl"
 
-
+/*
 const std::string cs_colorize = cs_glversion + cs_struct_colorize +
 R""(
  layout(local_size_x = 32,local_size_y =32) in; 
@@ -20,6 +20,7 @@ R""(
  }
 
 )"";
+*/
 
 
 //const std::string cs_postproc_w = cs_glversion + cs_const_val + cs_structs +

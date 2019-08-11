@@ -66,16 +66,13 @@ DECLARE_STRUCT_AS_STRING(cs_const_val,
 		 float pad1;
 	 };);
 
- DECLARE_STRUCT_AS_STRING(cs_struct_colorize, 
-	struct ColorizeData 
+ DECLARE_STRUCT_AS_STRING(cs_struct_font_chars, 
+	struct FontChars 
 	{
-		float blah;
-		float xMin;
-		float xMax;
-		float yMin;
-		float yMax;
-		float zMin;
-		float zMaz;
+		uint x;
+		uint y;
+		uint letter;
+		uint pad;
 	};);
 
 #ifdef  DECLARE_STRUCT_AS_STRING
