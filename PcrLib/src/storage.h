@@ -52,6 +52,7 @@ namespace pcrlib
 		virtual float GetYMax() = 0;
 		virtual float GetZMax() = 0;
 		static PointStorage  * GetInstatnce(LibCallback *pCB = NULL);
+		static void onGLTick();
 	};
 }
 

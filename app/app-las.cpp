@@ -116,11 +116,11 @@ namespace pcrapp
 
 		if (pCb) 
 		{
-			pCb->message(std::string("Las version:" + std::to_string(lasH.verMajor) + std::to_string(lasH.verMinor)+ "\n").c_str());
-			pCb->message(std::string("Las point format:" + std::to_string(lasH.pointDataFormatId) + "\n").c_str());
+			pCb->message(std::string(" Version:" + std::to_string(lasH.verMajor) + std::to_string(lasH.verMinor)+ " ").c_str());
+			pCb->message(std::string(" Format:" + std::to_string(lasH.pointDataFormatId) ).c_str());
+			pCb->message(std::string(" Points:" + std::to_string(lasH.numOfPointRecords) + "\n" ).c_str());
 		}
-        //std::cout << "yofst=" << lasH.yOffset << std::endl;
-
+ 
 		fs.seekg(0, fs.beg);
 		fs.seekp(lasH.pointOfst);
 		char *pPoinRecord = new char[lasH.poitDataRecordLength];
@@ -141,7 +141,7 @@ namespace pcrapp
 				bb = pXYZ3->blue >> 11;
                 cc = rr | (gg << 5) | (bb << 10);
             } else if( lasH.pointDataFormatId ==2){
-                 PointFromat2 *pXYZ2 = (PointFromat2 *)pPoinRecord;
+                PointFromat2 *pXYZ2 = (PointFromat2 *)pPoinRecord;
                 rr = pXYZ2->red >> 11;
                 gg = pXYZ2->green >> 11;
                 bb = pXYZ2->blue >> 11;
@@ -158,11 +158,12 @@ namespace pcrapp
 			float yf = (float)(pXYZ1->y )*float(lasH.yScale) + lasH.yOffset;
 			float zf = (float)(pXYZ1->z )*float(lasH.zScale) + lasH.zOffset;
 			pLib->addPoint(xf, yf, zf, cc);
+			//if (((k & 1023) == 0) ||( k== lasH.numOfPointRecords-1) ){
+			//	pCb->message(std::string("\r" + std::to_string(k+1)).c_str());
+			//}
 		}
 		fs.close();
 		delete[]pPoinRecord;
-
-        pCb->message(std::string("value range" + std::to_string(minV ) + ":" +  std::to_string(maxV)+ "\n").c_str());
 
 		return lasH.pointDataFormatId;
 	}
@@ -172,7 +173,7 @@ namespace pcrapp
 	int readLasFile(const char *pPath, pcrlib::IPcrLib *pLib, pcrlib::LibCallback *pCb)
 	{
 		std::string str(pPath);
-		if (pCb) pCb->message((std::string("Opening las file  ") + str +"\n").c_str() );
+		pCb->message("Openinglas file... ");
 		return ReadLas(str,pLib, pCb);
 	}
 }//namespace pcrapp

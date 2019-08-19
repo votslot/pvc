@@ -18,11 +18,11 @@ namespace pcrapp
                 float v = step_v * (float)vv;
                 float up = 2.0f * 3.1415f* u;
                 float vp = 2.0f * 3.1415f* v;
-                float r = 0.2f + cos(up*nf)*cos(up*nf) *sin(vp*1.1f) * sin(vp*1.1f);
- 				r = fabs(r);
+                float r = (float)( 0.2f + cos(up*nf)*cos(up*nf) *sin(vp*1.1f) * sin(vp*1.1f));
+ 				r = (float)fabs(r);
                 float xx  =  r* (float) ( sin(vp) * cos(up));
                 float yy  =  r* (float) ( sin(vp) * sin(up));
-                float zz  =  r *cos(vp);
+                float zz  =  r * (float)cos(vp);
 				unsigned char c = (unsigned char)(255.0f * cos(vp*nf)*cos(vp*nf));
 				unsigned short c555 =  (31 << 5) ;
                 pLib->addPoint(xx, yy, zz*0.5f, c555);

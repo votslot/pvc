@@ -23,6 +23,7 @@ namespace pcrapp
 		virtual void exitEvent() = 0;
 		virtual void openLasFile(const char *filePath) = 0;
 		virtual void testCloud() = 0;
+		virtual void displayString(const char *pStr) = 0;
 
 		static IAppEvents * getAppEvents();
 	};

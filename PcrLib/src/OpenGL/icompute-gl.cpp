@@ -20,11 +20,11 @@ namespace pcrlib
 	}
 
     // CSBuffer declaration
+	ICErrorCallBack*  ICBuffer::m_err = NULL;
 	class CSBuffer :public ICBuffer, ICErrorCallBack
 	{
 		GLuint m_buffer;
 		unsigned int m_size;
-		ICErrorCallBack *m_err;
 
 		friend class CShader;
 	public:
@@ -34,7 +34,9 @@ namespace pcrlib
 		}
 
 		~CSBuffer() {}
-		void error(const char *pMsg) { if (m_err) m_err->error(pMsg); }
+		void error(const char *pMsg) {
+			if (m_err) m_err->error(pMsg);
+		}
 		void bind(int n);
 		void init();
 		unsigned int getMaxSizeInBytes();
@@ -203,7 +205,7 @@ namespace pcrlib
 		glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &maxtb);
 		if (sizeInBytes > maxtb)
 		{
-			if (m_err) m_err->error(std::string("Requested size is bigger than allocated.  Alloc size=" + std::to_string(m_size)).c_str());
+			if (m_err) m_err->error(std::string("Requested size is bigger than max possible.  Alloc size=" + std::to_string(m_size)).c_str());
 		}
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_buffer);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeInBytes, NULL, GL_DYNAMIC_COPY);

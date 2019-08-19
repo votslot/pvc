@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
+#include <thread>
 #include <assert.h>
 #include "../pcrlib.h"
 #include "icompute.h"
@@ -26,6 +27,7 @@ extern int InitGLBlit();
 
 		static const int sMaxW = 2048;
 		static const int sMaxH = 2048;
+		std::thread::id m_thisThreadId;
 		LibCallback *m_pcallback;
 		bool isInit = false;
 		PointStorage  * m_pst = NULL;
@@ -50,6 +52,7 @@ extern int InitGLBlit();
 
 		ThePcrLib() 
 		{
+			m_thisThreadId = std::this_thread::get_id();
 			m_pcallback = new LibCallback();
 		}
 
@@ -80,6 +83,7 @@ extern int InitGLBlit();
 				return;
 			}
 			ICShader::m_err = this;
+			ICBuffer::m_err = this;
 			
 			// init font
 			m_font = IFontRenderer::getInstance();
@@ -150,6 +154,7 @@ extern int InitGLBlit();
 
 		int render(const Camera &cam, int destWidth, int destHeight, const RenderParams &rp)
 		{
+			PointStorage::onGLTick();
 			if (!isInit)
 			{
 				return 0;
@@ -215,6 +220,11 @@ extern int InitGLBlit();
 			return 0;
 		}
 
+		void renderText(const char *pTxt, unsigned int x, unsigned int y, unsigned int color) 
+		{
+			if (m_font) m_font->setString(pTxt, x, y);
+		}
+
 		void releaseInternal()
 		{
 			if (m_bufferZMap)			releaseICBuffer(&m_bufferZMap);
@@ -262,7 +272,7 @@ extern int InitGLBlit();
 	// Test
 	int ThePcrLib::verify()
 	{
-		m_pcallback->message("Run verification test...\n");
+		//m_pcallback->message("Run verification test...\n");
         int ret = 0;
 		const unsigned int bfz = 1024;
 		int *pDA = new int[bfz];
@@ -308,10 +318,12 @@ extern int InitGLBlit();
 		delete[] pDA;
 		delete[] pDB;
 		delete[] pDC;
-		m_pcallback->message("Verification test success\n");
+		//m_pcallback->message("Verification test success\n");
         return ret;
 	}
 	
+
+	// default LibCallback implementation
 	void  LibCallback::error(const char *pMsg) 
 	{
 		std::cout <<"Error: "<< pMsg;

@@ -1,6 +1,9 @@
 
 #include <assert.h>
 #include <iostream>
+#include <atomic>
+#include <thread>
+#include <string>
 #include "float.h"
 #include "storage.h"
 #include "icompute.h"
@@ -11,14 +14,13 @@
 
 namespace pcrlib
 {
-	//extern void BuildNormals(RenderPoint *pPt, int num, const BdBox<float>& Bd);
-	void BuildValues(float *pF, int num);
-
 	namespace pvc {
 
 		class PointStorageImpl : public PointStorage
 		{
 		public:
+			std::atomic_bool m_wrkStart = false;
+			std::atomic_bool m_wrkDone = true;
 			static const int sMaxBuffs = 32;
 			static const int sMaxAllocSize = 1024 * 1024 * 128;
 			LibCallback *m_cb = new LibCallback();
@@ -32,9 +34,10 @@ namespace pcrlib
 			float bbXMin = FLT_MAX;
 			float bbXMax = FLT_MIN;
 			float bbYMin = FLT_MAX;
-            float bbYMax = FLT_MIN;
+			float bbYMax = FLT_MIN;
 			float bbZMin = FLT_MAX;
 			float bbZMax = FLT_MIN;
+			int totalProgress = 0;
 
 			int numInUse;
 			bool hasPoints;
@@ -79,8 +82,8 @@ namespace pcrlib
 				{
 					numPointsInBuff[i] = NULL;
 					numPartitionsInBuff[i] = NULL;
-					bufferPoints[i]    = createICBuffer();
-					bufferPartition[i] = createICBuffer();
+					bufferPoints[i] = NULL;// createICBuffer();
+					bufferPartition[i] = NULL;// createICBuffer();
 				}
 				bdBuff.Reset();
 				bbZMin = FLT_MAX;
@@ -95,7 +98,7 @@ namespace pcrlib
 				{
 					AddNewBuffer();
 				}
-	
+
 				pTemp[numPointsInTemp].x = x;
 				pTemp[numPointsInTemp].y = y;
 				pTemp[numPointsInTemp].z = z;
@@ -123,7 +126,6 @@ namespace pcrlib
 
 			void AddNewBuffer()
 			{
-				//assert(numInUse < sMaxBuffs);
 				std::function<void(partitionData<float> *pD)> OnDonePartition = [=](partitionData<float> *pDt)
 				{
 					float dx = pDt->maxX - pDt->minX;
@@ -137,7 +139,12 @@ namespace pcrlib
 					pPartitions[numPartitions].cz = (pDt->maxZ + pDt->minZ) *0.5f;
 					pPartitions[numPartitions].sz = dMax;
 					pPartitions[numPartitions].ndx = numPartitions;
-					if ((numPartitions & 31) == 0) m_cb->message(".");
+					//report progress
+					//if ((numPartitions & 31) == 0) 
+					{
+						m_cb->message(("\rProcessing:" + std::to_string(totalProgress)).c_str());
+						totalProgress += 4096;
+					}
 					numPartitions++;
 
 					// shuffle points
@@ -156,17 +163,16 @@ namespace pcrlib
 
 				};
 
-				// BuildNormals((RenderPoint *)pTemp, numPointsInTemp, bdBuff);
-				// BuildValues((float*)pTemp, numPointsInTemp);
 				DoPartitionXYZW_Float(pTemp, numPointsInTemp, OnDonePartition);
-				m_cb->message("done\n");
-
-				bufferPoints[numInUse]->allocate(sizeInTemp);
-				bufferPoints[numInUse]->setData(pTemp, sizeInTemp);
-
-				bufferPartition[numInUse]->allocate(numPartitions * sizeof(Partition));
-				bufferPartition[numInUse]->setData(pPartitions, numPartitions * sizeof(Partition));
-
+				// Wait for GL thread to call initGlBuffers() 
+				m_wrkDone = false;
+				m_wrkStart = true;
+				for (;;) {
+					std::this_thread::sleep_for(std::chrono::milliseconds(10));
+					if (m_wrkDone) break;
+				}
+				//initGlBuffers();
+	
 				numPointsInBuff[numInUse] = numPointsInTemp;
 				numPartitionsInBuff[numInUse] = numPartitions;
 				numInUse++;
@@ -177,6 +183,24 @@ namespace pcrlib
 				bdBuff.Reset();
 			}
 
+			void initGlBuffers() 
+			{
+				if (!m_wrkStart) 
+				{
+					return;
+				}
+				//std::cout << "initGlBuffers()" << std::endl;
+				bufferPoints[numInUse] = createICBuffer();
+				bufferPoints[numInUse]->allocate(sizeInTemp);
+				bufferPoints[numInUse]->setData(pTemp, sizeInTemp);
+
+				bufferPartition[numInUse] = createICBuffer();;
+				bufferPartition[numInUse]->allocate(numPartitions * sizeof(Partition));
+				bufferPartition[numInUse]->setData(pPartitions, numPartitions * sizeof(Partition));
+				m_wrkStart = false;
+				m_wrkDone = true;
+			}
+		
 
 			void Release()
 			{
@@ -224,6 +248,24 @@ namespace pcrlib
 		};
 	}
 
+
+
+	static  pvc::PointStorageImpl theStorage;
+	PointStorage  * PointStorage::GetInstatnce(LibCallback *pCB)
+	{
+		theStorage.m_cb = pCB;
+		return  &theStorage;
+	}
+
+	void PointStorage::onGLTick()
+	{
+		theStorage.initGlBuffers();
+	}
+
+
+
+
+#if 0
 	void BuildValues(float *pF, int num)
 	{
 		RenderPoint *pPoint = (RenderPoint*)pF;
@@ -277,14 +319,8 @@ namespace pcrlib
 		}
 
 	}
+#endif
 
-
-	static  pvc::PointStorageImpl theStorage;
-	PointStorage  * PointStorage::GetInstatnce(LibCallback *pCB)
-	{
-		theStorage.m_cb = pCB;
-		return  &theStorage;
-	}
 }//namespace pcrlib
 
 

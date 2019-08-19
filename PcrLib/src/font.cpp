@@ -159,8 +159,8 @@ namespace pcrlib
 					int bt = (vl == 0) ? 0 : 1;
 					int xx = m_fontW - x -1;
 					int yy = m_fontH - y -1;
-					pSym[yy + xx * m_fontW] = (bt ==1) ? 0xFFFFFFFF : 0x800000;
-					}
+					pSym[yy + xx * m_fontW] = (bt ==1) ? 1 : 0;
+				}
 			}
 		}
 
@@ -174,11 +174,13 @@ namespace pcrlib
 		m_bufferChars = createICBuffer();
 		m_bufferChars->allocate(m_maxChars * sizeof(FontChars));
 
+		/*
 		setString("                              ", 20, 12);
 		setString("   PRESS SPACE TO SHOW HELP   ", 20, 20);
 		setString("                              ", 20, 28);
 		setString("   Point Size=1 PgUp/PgDn     ", 20, 36);
-	
+	    */
+
 		m_fontShader = createICShader();
 		m_fontShader->initFromSource(cs_render_font8x8.c_str());
 	}
@@ -213,6 +215,7 @@ namespace pcrlib
 		}
 		m_bufferChars->setData(m_pCharsXY, m_numCharsToRender * sizeof(FontChars));
 		m_fontShader->execute(1, m_numCharsToRender, 1, { pGlob ,m_fontImg,m_bufferChars,pDst });
+		m_numCharsToRender = 0;
 	}
 
 	void FontRender::releaseFont()

@@ -1,5 +1,8 @@
 
 #include <iostream>
+#include <thread>
+#include <atomic>
+#include <mutex>
 #include "GL\\glew.h"
 #define GL_GLEXT_PROTOTYPES
 #include <SDL.h>
@@ -19,7 +22,9 @@ SDL_GLContext gGlContext;
 static pcrapp::IAppEvents *sApp = NULL;
 extern void AddUI(HWND hwnd, pcrapp::IAppEvents *pApp);
 
-
+static std::atomic_bool sHasEvent = true;
+static std::atomic_bool sStopTicker = false;
+std::recursive_mutex paintMutex;
 struct LibCallbackUsr : public  pcrlib::LibCallback
 {
 	void error(const char *pMsg)
@@ -30,8 +35,10 @@ struct LibCallbackUsr : public  pcrlib::LibCallback
 	
 	 void message(const char *pMsg)
 	{
-		std::cout << pMsg ;
+		if(sApp) sApp->displayString(pMsg);
+		//std::cout << pMsg ;
 	}
+	 
 };
 
 void SetOpenGLVersion()
@@ -57,14 +64,14 @@ void OnEndLoop()
 	sDiff += df;
 	sNtimes--;
 	if (sNtimes <= 0) {
-		std::cout << ((float)sDiff/256000.0f) << "ms\n";
+		//std::cout << ((float)sDiff/256000.0f) << "ms\n";
 		sNtimes = 256;
 		sDiff = 0;
 	}
 	
 }
 
-static bool sHasEvent = true;
+
 
 static void OnMouseDownEvent(SDL_MouseButtonEvent *pMouseDown)
 {
@@ -95,6 +102,17 @@ static void close(SDL_Window *gWindow, pcrapp::IAppEvents *pApp)
 	pApp->exitEvent();
 	SDL_DestroyWindow(gWindow);
 	SDL_Quit();
+}
+
+
+static void tickerFunc()
+{
+	for (;;) 
+	{
+		if (sStopTicker) break;
+		sHasEvent = true;
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+	}
 }
 
 int SdlEntryPoint()
@@ -155,6 +173,7 @@ int SdlEntryPoint()
 	int sh = SCREEN_HEIGHT;
 	bool quit = false; 
 	SDL_Event sdlEvent;
+	std::thread ticker(tickerFunc);
 	while (!quit)
 	{
 		while (SDL_PollEvent(&sdlEvent) != 0)
@@ -184,11 +203,13 @@ int SdlEntryPoint()
 					}
 				break;
 				case SDL_QUIT:
+					sStopTicker = true;
 					quit = true;
 				break;
 			}
 		}
-		//if (sHasEvent)
+
+		if (sHasEvent)
 		{
 			OnStartLoop();
 			sApp->paintEvent(sw, sh);
@@ -197,6 +218,7 @@ int SdlEntryPoint()
 			sHasEvent = false;
 		}
 	}
+	ticker.join();
 	// clear resource
 	close(gWindow,sApp);
 	return 0;

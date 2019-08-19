@@ -14,6 +14,7 @@ namespace pcrlib
 	class ICBuffer 
 	{
 	public:
+		static  ICErrorCallBack *m_err;
 		virtual void allocate(unsigned int sizeInBytes) = 0;
 		virtual void setData(void *pD, unsigned int sizeInBytes) = 0;
 		virtual void getData(unsigned int sizeInBytes, void *pOut) = 0;
@@ -28,7 +29,6 @@ namespace pcrlib
 	{
 	public:
 		static  ICErrorCallBack *m_err;
-
 		virtual void initFromSource(const char *pSrc) = 0;
 		virtual int getSX() = 0;
 		virtual int getSY() = 0;

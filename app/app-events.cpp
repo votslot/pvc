@@ -1,5 +1,8 @@
 #include "stdio.h"
 #include <iostream>
+#include <thread>
+#include <mutex>
+#include <string>
 #include "app-events.h"
 #include "app-camera.h"
 #include "app-testcloud.h"
@@ -9,6 +12,7 @@ using namespace pcrlib;
 
 namespace pcrapp
 {
+	
 	class AppEventsImpl :public IAppEvents
 	{
 	public:
@@ -16,6 +20,11 @@ namespace pcrapp
 		pcrlib::LibCallback *m_cb;
 		AppCamera m_camera;
 		RenderParams m_renderParam;
+
+		static const int  m_maxStrings = 32;
+	    std::string m_displayStrings[m_maxStrings];
+		int m_numDispStrings = 0;
+
 		float m_maxSize;
 		int m_mouseXDown = 0;
 		int m_mouseYDown = 0;
@@ -33,10 +42,14 @@ namespace pcrapp
 		void exitEvent();
 		void openLasFile(const char *filePath);
 		void testCloud();
-		//
 		void setDefCamera();
+		void displayString(const char *pStr);
+		//
+		std::string m_filePath;
+		std::recursive_mutex m_mainMutex;
+		std::thread *m_threadObj;
+		static void loadLasAsync(AppEventsImpl *pEnvClass);
 	};
-	
 
 	AppEventsImpl::AppEventsImpl()
 	{
@@ -56,7 +69,10 @@ namespace pcrapp
 		m_cb = pCb;
 		m_pRLib = pcrlib::IPcrLib::init(pCb);
 		m_pRLib->verify();
+		m_filePath.clear();
 	}
+
+	
 
 	void AppEventsImpl::mouseDownEvent(int x, int y, bool isLeft, bool isRight)
 	{
@@ -118,12 +134,22 @@ namespace pcrapp
 
 	void AppEventsImpl::paintEvent(int sw, int sh)
 	{
+		static int nn = 0;
 		if (m_pRLib)
 		{
+			m_mainMutex.lock();
+			for( int i = 0,py = 20; i<m_maxStrings; i++,py+=10){
+				if ( !m_displayStrings[i].empty()) {
+					m_pRLib->renderText(m_displayStrings[i].c_str(), 20, py, 0xFFFFFFFF);
+				}
+			}
+			m_mainMutex.unlock();
+
  			pcrlib::Camera pcrCam;
 			m_camera.BuildPcrCamera(pcrCam);
 			m_pRLib->render(pcrCam, sw, sh, m_renderParam);
 		}
+		nn++;
 	}
 
 	void  AppEventsImpl::viewModeEvent(int val) 
@@ -138,23 +164,14 @@ namespace pcrapp
 
 	void AppEventsImpl::exitEvent()
 	{
+		if (m_threadObj) 
+		{
+			m_threadObj->join();
+			delete m_threadObj;
+		}
 		if (m_pRLib)
 		{
 			pcrlib::IPcrLib::release(&m_pRLib);
-		}
-	}
-
-
-	void AppEventsImpl::openLasFile(const char *filePath) 
-	{
-		if (m_pRLib)
-		{
-			int ret;
-			m_pRLib->startAddPoints();
-			ret = readLasFile(filePath, m_pRLib, m_cb);
-			m_pRLib->doneAddPoints();
-			setDefCamera(); 
-			m_renderParam.cm = (ret==1)?pcrlib::Color_model_intencity : pcrlib::Colos_model_rgb;
 		}
 	}
 
@@ -168,6 +185,51 @@ namespace pcrapp
 			setDefCamera();
 			m_renderParam.cm = pcrlib::Color_model_intencity;
 		}
+	}
+
+	void AppEventsImpl::openLasFile(const char *filePath)
+	{
+		if (m_pRLib)
+		{
+			m_filePath = std::string(filePath);
+			m_threadObj = new std::thread(loadLasAsync, this);
+		}
+	}
+
+	void AppEventsImpl::loadLasAsync(AppEventsImpl *pEnvClass)
+	{
+		pEnvClass->m_pRLib->startAddPoints();
+		int ret = readLasFile(pEnvClass->m_filePath.c_str(), pEnvClass->m_pRLib, pEnvClass->m_cb);
+		pEnvClass->m_pRLib->doneAddPoints();
+		pEnvClass->setDefCamera();
+		pEnvClass->m_renderParam.cm = (ret == 1) ? pcrlib::Color_model_intencity : pcrlib::Colos_model_rgb;
+	}
+
+	void AppEventsImpl::displayString(const char *pStr) 
+	{
+		m_mainMutex.lock();
+
+		if (pStr == NULL) {
+			m_mainMutex.unlock();
+			return;
+		}
+
+		if (pStr[0] == '\r') m_displayStrings[m_numDispStrings].clear();
+
+		for (const char *p = pStr; *p; p++) 
+		{
+			if (*p != '\n') {
+				if(*p != '\r')  m_displayStrings[m_numDispStrings] += *p;
+			}
+			else {
+				m_numDispStrings++;
+			}
+			if (m_numDispStrings >= m_maxStrings) {
+				m_displayStrings[0].clear();
+				m_numDispStrings = 0;
+			}
+		}
+		m_mainMutex.unlock();
 	}
 
 	void AppEventsImpl::setDefCamera()
