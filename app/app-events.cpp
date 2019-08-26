@@ -105,7 +105,7 @@ namespace pcrapp
 
 	void AppEventsImpl::mouseMoveEvent(int x, int y)
 	{
-		float *pivot = m_camera.GetPivot();
+        //float *pivot = m_camera.GetPivot();
 		int dx = x - m_mouseXDown;
 		int dy = y - m_mouseYDown;
 		if (m_leftMouseDown)
@@ -137,6 +137,7 @@ namespace pcrapp
 		static int nn = 0;
 		if (m_pRLib)
 		{
+            m_pRLib->renderText((nn&1)? "|":"-",10,sh-10, 0);
 			m_mainMutex.lock();
 			for( int i = 0,py = 20; i<m_maxStrings; i++,py+=10){
 				if ( !m_displayStrings[i].empty()) {

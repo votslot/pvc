@@ -23,7 +23,7 @@ namespace pcrapp
                 float xx  =  r* (float) ( sin(vp) * cos(up));
                 float yy  =  r* (float) ( sin(vp) * sin(up));
                 float zz  =  r * (float)cos(vp);
-				unsigned char c = (unsigned char)(255.0f * cos(vp*nf)*cos(vp*nf));
+                //unsigned char c = (unsigned char)(255.0f * cos(vp*nf)*cos(vp*nf));
 				unsigned short c555 =  (31 << 5) ;
                 pLib->addPoint(xx, yy, zz*0.5f, c555);
 			}

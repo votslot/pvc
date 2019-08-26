@@ -19,8 +19,8 @@ namespace pcrlib
 		class PointStorageImpl : public PointStorage
 		{
 		public:
-			std::atomic_bool m_wrkStart = false;
-			std::atomic_bool m_wrkDone = true;
+            std::atomic_bool m_wrkStart;// = false;
+            std::atomic_bool m_wrkDone;// = true;
 			static const int sMaxBuffs = 32;
 			static const int sMaxAllocSize = 1024 * 1024 * 128;
 			LibCallback *m_cb = new LibCallback();
@@ -88,6 +88,8 @@ namespace pcrlib
 				bdBuff.Reset();
 				bbZMin = FLT_MAX;
 				bbZMax = FLT_MIN;
+                m_wrkStart = false;
+                m_wrkDone = true;
 			}
 
 			void SetPoint(float x, float y, float z, unsigned int w)

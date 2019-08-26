@@ -79,7 +79,7 @@ R""(
 
 		}else
 		{
-			zMapOut[shift] = 0x800000;
+                        zMapOut[shift] = 0x000000;
 		}
 	}
  }  

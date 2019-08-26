@@ -1,6 +1,7 @@
 
 #include <string>
 #include <iostream>
+#include "memory.h"
 #include "icompute.h"
 #include "font.h"
 #include "OpenGL/shaders/ginclude.h"
@@ -126,7 +127,7 @@ namespace pcrlib
 
 	IFontRenderer * IFontRenderer::getInstance()
 	{
-		FontRender *pRet =  new  FontRender();
+        FontRender *pRet =  new  FontRender();
 		pRet->initFont();
 		return pRet;
 	}

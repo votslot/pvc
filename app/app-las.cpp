@@ -103,7 +103,7 @@ namespace pcrapp
 		fs.seekg(0, fs.beg);
 
 		LasHeader lasH;
-		int hdSise = sizeof(lasH);
+        //int hdSise = sizeof(lasH);
 		fs.read((char*)&lasH, sizeof(LasHeader));
 
 		int pointArea = fileLength - lasH.pointOfst;

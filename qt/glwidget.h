@@ -62,7 +62,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
 
-class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions
+class GLWidget : public QOpenGLWidget, pcrlib::LibCallback,protected QOpenGLFunctions
 {
     Q_OBJECT
 
@@ -91,6 +91,10 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
+
+    // from LibCallback
+    void error(const char *pMsg) override;
+    void message(const char *pMsg) override;
 
 private:
     void setupVertexAttribs();

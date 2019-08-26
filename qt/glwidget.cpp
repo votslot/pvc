@@ -65,26 +65,14 @@ bool GLWidget::m_transparent = false;
 QOpenGLExtraFunctions *pGlExtra = NULL;
 QOpenGLFunctions_4_1_Core *pGl4 = NULL;
 
-static void ErrMessageBox(const char *pMsg)
+#if 0
+static void ErrMessageBox(const char /* *pMsg */)
 {
     QInputDialog::getText(nullptr,"Title","text");
 }
+#endif
 
-struct LibCallbackQt :public pcrlib::LibCallback
-{
-    void error(const char *pMsg)
-    {
-        static QTextStream ts( stdout );
-        ts<<pMsg;
-        ts.flush();
-    }
-    void message(const char *pMsg)
-    {
-        static QTextStream ts( stdout );
-        ts<<pMsg;
-        ts.flush();
-    }
-};
+
 
 GLWidget::GLWidget(QWidget *parent)
     : QOpenGLWidget(parent),
@@ -98,9 +86,9 @@ GLWidget::GLWidget(QWidget *parent)
         fmt.setAlphaBufferSize(8);
         setFormat(fmt);
     }
-    //QTimer *timer = new QTimer(this);
-    //connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-    //timer->start(10);
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+    timer->start(200);
 
 }
 
@@ -142,11 +130,9 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
      update();
 }
 
-void GLWidget::mouseReleaseEvent(QMouseEvent *event)
+void GLWidget::mouseReleaseEvent(QMouseEvent *)
 {
     if(!m_pApp)  return;
-    bool isLeft  = event->buttons() & Qt::LeftButton;
-    bool isRight = event->buttons() & Qt::RightButton;
     m_pApp->mouseUpEvent(true, true);
     update();
 }
@@ -183,7 +169,8 @@ void GLWidget::initializeGL()
     pGlExtra->initializeOpenGLFunctions();
 
     m_pApp = pcrapp::IAppEvents::getAppEvents();
-    m_pApp->init(new LibCallbackQt());
+    //m_pApp->init(new LibCallbackQt());
+    m_pApp->init(this);
 }
 
 
@@ -197,4 +184,18 @@ void GLWidget::paintGL()
   int h = height();
   int w = width();
   if(m_pApp) m_pApp->paintEvent(w, h);
+}
+
+void GLWidget::error(const char *pMsg)
+{
+    static QTextStream ts( stdout );
+    ts<<pMsg;
+    ts.flush();
+}
+void GLWidget::message(const char *pMsg)
+{
+    static QTextStream ts( stdout );
+    ts<<pMsg;
+    ts.flush();
+    if(m_pApp)  m_pApp->displayString(pMsg);
 }

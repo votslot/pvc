@@ -30,7 +30,8 @@ SOURCES += \
     ../src/OpenGL/blit-gl.cpp \
     ../src/OpenGL/icompute-gl.cpp \
     ../src/storage.cpp \
-    ../src/matrix-utils.cpp
+    ../src/matrix-utils.cpp \
+    ../src/font.cpp
 
 HEADERS += \
     ../src/compute.h \
@@ -50,4 +51,5 @@ DESTDIR = $$PWD/LibOutput
 DISTFILES += \
     ../src/OpenGL/wave-test.cs.glsl \
     ../src/OpenGL/shaders/render-points.cs.glsl \
-    ../src/OpenGL/shaders/post-proc.cs.glsl
+    ../src/OpenGL/shaders/post-proc.cs.glsl \
+    ../src/OpenGL/shaders/render-font.cs.glsl
