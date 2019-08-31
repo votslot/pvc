@@ -52,6 +52,7 @@ namespace pcrlib
 			int sizeInTemp;
 			unsigned int maxBuffSz;
 
+			/*
 			void* getMem(size_t sz)
 			{
 				void * ptr = malloc(sz);
@@ -62,6 +63,7 @@ namespace pcrlib
 			{
 				free(ptr);
 			}
+			*/
 
 			void Init()
 			{
@@ -82,8 +84,8 @@ namespace pcrlib
 				{
 					numPointsInBuff[i] = NULL;
 					numPartitionsInBuff[i] = NULL;
-					bufferPoints[i] = NULL;// createICBuffer();
-					bufferPartition[i] = NULL;// createICBuffer();
+					bufferPoints[i] = NULL;
+					bufferPartition[i] = NULL;
 				}
 				bdBuff.Reset();
 				bbZMin = FLT_MAX;
@@ -142,7 +144,6 @@ namespace pcrlib
 					pPartitions[numPartitions].sz = dMax;
 					pPartitions[numPartitions].ndx = numPartitions;
 					//report progress
-					//if ((numPartitions & 31) == 0) 
 					{
 						m_cb->message(("\rProcessing:" + std::to_string(totalProgress)).c_str());
 						totalProgress += 4096;
@@ -174,10 +175,6 @@ namespace pcrlib
 					if (m_wrkDone) break;
 				}
 				//initGlBuffers();
-	
-				numPointsInBuff[numInUse] = numPointsInTemp;
-				numPartitionsInBuff[numInUse] = numPartitions;
-				numInUse++;
 
 				sizeInTemp = 0;
 				numPointsInTemp = 0;
@@ -191,7 +188,6 @@ namespace pcrlib
 				{
 					return;
 				}
-				//std::cout << "initGlBuffers()" << std::endl;
 				bufferPoints[numInUse] = createICBuffer();
 				bufferPoints[numInUse]->allocate(sizeInTemp);
 				bufferPoints[numInUse]->setData(pTemp, sizeInTemp);
@@ -199,6 +195,11 @@ namespace pcrlib
 				bufferPartition[numInUse] = createICBuffer();;
 				bufferPartition[numInUse]->allocate(numPartitions * sizeof(Partition));
 				bufferPartition[numInUse]->setData(pPartitions, numPartitions * sizeof(Partition));
+
+				numPointsInBuff[numInUse] = numPointsInTemp;
+				numPartitionsInBuff[numInUse] = numPartitions;
+				numInUse++;
+
 				m_wrkStart = false;
 				m_wrkDone = true;
 			}

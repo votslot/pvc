@@ -49,6 +49,7 @@ namespace pcrapp
 		std::recursive_mutex m_mainMutex;
 		std::thread *m_threadObj;
 		static void loadLasAsync(AppEventsImpl *pEnvClass);
+		static void testCloudAsync(AppEventsImpl *pEnvClass);
 	};
 
 	AppEventsImpl::AppEventsImpl()
@@ -180,12 +181,17 @@ namespace pcrapp
 	{
 		if (m_pRLib)
 		{
-			m_pRLib->startAddPoints();
-            generateWave(1024, 1024, m_pRLib);
-			m_pRLib->doneAddPoints();
-			setDefCamera();
-			m_renderParam.cm = pcrlib::Color_model_intencity;
+			m_threadObj = new std::thread(testCloudAsync, this);
 		}
+	}
+
+	void AppEventsImpl::testCloudAsync(AppEventsImpl *pEnvClass)
+	{
+		    pEnvClass->m_pRLib->startAddPoints();
+			generateWave(1024*4, 1024*4, pEnvClass->m_pRLib);
+			pEnvClass->m_pRLib->doneAddPoints();
+			pEnvClass->setDefCamera();
+			pEnvClass->m_renderParam.cm = pcrlib::Color_model_intencity;
 	}
 
 	void AppEventsImpl::openLasFile(const char *filePath)

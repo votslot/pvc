@@ -38,19 +38,35 @@ R""(
 	const uint msk_v = (1 << (32 - cZbuffBits)) -1 ;
 	Partition part = partitions[gl_GlobalInvocationID.y];
 
-	/*
-	float dx = globs.px -  part.cx;
-	float dy = globs.py -  part.cy;
-	float dz = globs.pz -  part.cz;
-	float dd = sqrt( dx*dx + dy*dy +dz*dz);
-		float szs = ( 4.0* float(globs.wrkLoad) * part.sz)  /( dd + 0.000001) ;
-		int steps  = clamp( int(szs), 16, int(globs.wrkLoad));
-		*/
+	uint lodLevel = globs.wrkLoad;
+	vec4 vc = World2View  * vec4(part.cx, part.cy, part.cz, 1.0) ;
+	if( (vc.z > 0.0) && (vc.z < 1.0) ){
+		vec4 tt = vec4(part.cx + globs.camUpx * part.sz , part.cy + globs.camUpy * part.sz, part.cz + globs.camUpz * part.sz, 1.0);
+		float xa = vc.x/vc.w;
+		float ya = vc.y/vc.w;
+		vec4 vb  =  World2View  * tt ;
+		float xb = vb.x/vb.w;
+		float yb = vb.y/vb.w;
+		float ddx =xa- xb;
+		float ddy =ya-yb;
+		uint dd = uint( sqrt(ddx*ddx + ddy*ddy));
+		lodLevel = clamp( dd, 8, uint(globs.wrkLoad));
+	}
 
+    
+	RenderPoint  pt_old,pt;
 	uint offset = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * gl_WorkGroupSize.x * globs.wrkLoad;
-	for( int loc = 0; loc < globs.wrkLoad; loc++, offset += gl_WorkGroupSize.x)
+ 	for( int loc = 0; loc < lodLevel; loc++, offset += gl_WorkGroupSize.x)
 	{
-		RenderPoint pt = inputPoints[offset] ;
+	  /*
+	   if ( ( loc & 7 ) == 0){
+	    pt = inputPoints[offset] ;
+	   }else{
+	   pt  = pt_old ;
+	   pt.x  = pt_old.x + 0.01;
+	   }
+	   */
+	    pt = inputPoints[offset] ;
 		uint color = pt.w;
 		vec4 vf =    World2View  * vec4(pt.x, pt.y, pt.z, 1.0) ;
 
@@ -63,6 +79,7 @@ R""(
 			zAsInt =  (zAsInt & (~ msk_v ) ) | ( color &  msk_v); // add color
 			atomicMin(zMap[shift],zAsInt);
 		}
+		 pt_old = pt;
 		// debug
 		/*
 		if(color==63)

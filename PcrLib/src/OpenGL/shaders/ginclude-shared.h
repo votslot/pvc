@@ -39,9 +39,9 @@ DECLARE_STRUCT_AS_STRING(cs_const_val,
 		float bbMinZ;
 		float bbMaxZ;
 		float scrMin;
-		float pad0;
-		float pad1;
-		float pad2;
+		float camUpx;
+		float camUpy;
+		float camUpz;
 	};);
 
  DECLARE_STRUCT_AS_STRING(cs_struct_point,

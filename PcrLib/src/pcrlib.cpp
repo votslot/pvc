@@ -176,6 +176,9 @@ extern int InitGLBlit();
 			m_Glob.bbMinZ = m_pst->GetZMin();
 			m_Glob.bbMaxZ = m_pst->GetZMax();
 			m_Glob.scrMin = (m_Glob.screenX < m_Glob.screenY) ? m_Glob.screenX : m_Glob.screenY;
+			m_Glob.camUpx = cam.up[0];
+			m_Glob.camUpy = cam.up[1];
+			m_Glob.camUpz = cam.up[2];
 			m_bufferParams->setData((unsigned char*)(&m_Glob), sizeof(GlobalParams));
 
 			// camera
