@@ -203,7 +203,7 @@ namespace pcrlib
 	{
 		GLint maxtb = 0;
 		glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &maxtb);
-		if (sizeInBytes > maxtb)
+        if (sizeInBytes > (unsigned int)maxtb)
 		{
 			if (m_err) m_err->error(std::string("Requested size is bigger than max possible.  Alloc size=" + std::to_string(m_size)).c_str());
 		}

@@ -9,15 +9,16 @@
 
 namespace pcrlib 
 {
-	static const uint8_t fontSrc[95][7] = {
-		0,    0,   0,   0,   0,   0,   0, // ' '  32
-		0,    6,  95,  95,   6,   0,   0, // '!'  33
-		0,    7,   7,   0,   7,   7,   0, // '"'  34
-		20, 127, 127,  20, 127, 127,  20, // '#'  35
-		36,  46, 107, 107,  58,  18,   0, // '$'  36
-		70, 102,  48,  24,  12, 102,  98, // '%'  37
-		48, 122,  79,  93,  55, 122,  72, // '&'  38
-		4,    7,   3,   0,   0,   0,   0, // '''  39
+
+    static const uint8_t fontSrc[95*7] = {
+        0,    0,   0,   0,   0,   0,   0, // ' '  32
+        0,    6,  95,  95,   6,   0,   0, // '!'  33
+        0,    7,   7,   0,   7,   7,   0, // '"'  34
+        20, 127, 127,  20, 127, 127,  20, // '#'  35
+        36,  46, 107, 107,  58,  18,   0, // '$'  36
+        70, 102,  48,  24,  12, 102,  98, // '%'  37
+        48, 122,  79,  93,  55, 122,  72, // '&'  38
+        4,    7,   3,   0,   0,   0,   0, // '''  39
 		0,   28,  62,  99,  65,   0,   0, // '('  40
 		0,   65,  99,  62,  28,   0,   0, // ')'  41
 		8,   42,  62,  28,  28,  62,  42, // '*'  42
@@ -110,9 +111,10 @@ namespace pcrlib
 	class FontRender : public IFontRenderer
 	{
 	public:
+        static const int m_numSym = 95;
+        static const int m_charsInSym = 7;
 		static const int m_fontW = 8;
 		static const int m_fontH = 8;
-		static const int m_numSym = 95;
 		static const int m_maxChars = 65000;
 		FontChars *m_pCharsXY;
 		int m_numCharsToRender;
@@ -155,7 +157,7 @@ namespace pcrlib
 			{
 				for (int x = 0; x < m_fontW-1; x++)
 				{
-					uint8_t dc = fontSrc[i][x];
+                    uint8_t dc = fontSrc[i* m_charsInSym + x];
 					int vl = dc & (1 << y);
 					int bt = (vl == 0) ? 0 : 1;
 					int xx = m_fontW - x -1;
@@ -168,7 +170,7 @@ namespace pcrlib
 		m_fontImg = createICBuffer();
 		m_fontImg->allocate(imgSize);
 		m_fontImg->setData(pPix, imgSize);
-		delete pPix;
+        delete[] pPix;
 
 		m_pCharsXY = new FontChars[m_maxChars];
 		m_numCharsToRender = 0;

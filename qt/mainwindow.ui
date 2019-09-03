@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>666</width>
-    <height>391</height>
+    <width>707</width>
+    <height>440</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,6 +18,18 @@
     <enum>Qt::LeftToRight</enum>
    </property>
    <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>1</number>
+    </property>
+    <property name="topMargin">
+     <number>1</number>
+    </property>
+    <property name="rightMargin">
+     <number>1</number>
+    </property>
+    <property name="bottomMargin">
+     <number>1</number>
+    </property>
     <item row="0" column="0">
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="sizeConstraint">
@@ -35,7 +47,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>666</width>
+     <width>707</width>
      <height>20</height>
     </rect>
    </property>
@@ -48,15 +60,25 @@
    </widget>
    <widget class="QMenu" name="menuTest">
     <property name="title">
-     <string>Test</string>
+     <string>&amp;View</string>
     </property>
+    <addaction name="actionXYZ_as_Colors"/>
+    <addaction name="actionSource_Colors"/>
+    <addaction name="actionSource_Intencity"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionShow_Help"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTest"/>
+   <addaction name="menuHelp"/>
   </widget>
   <action name="load_las_obj">
    <property name="text">
-    <string>LoadLas</string>
+    <string>&amp;LoadLas</string>
    </property>
    <property name="iconText">
     <string>las</string>
@@ -64,7 +86,27 @@
   </action>
   <action name="actiontest567">
    <property name="text">
-    <string>t&amp;est567</string>
+    <string>&amp;Run Test</string>
+   </property>
+  </action>
+  <action name="actionXYZ_as_Colors">
+   <property name="text">
+    <string>&amp;XYZ as Colors</string>
+   </property>
+  </action>
+  <action name="actionSource_Colors">
+   <property name="text">
+    <string>&amp;Source Colors</string>
+   </property>
+  </action>
+  <action name="actionSource_Intencity">
+   <property name="text">
+    <string>Source &amp;Intencity</string>
+   </property>
+  </action>
+  <action name="actionShow_Help">
+   <property name="text">
+    <string>&amp;Show Help</string>
    </property>
   </action>
  </widget>
@@ -78,6 +120,10 @@
     <slot>runtest()</slot>
     <slot>slot2()</slot>
     <slot>las_open()</slot>
+    <slot>show_help()</slot>
+    <slot>color_xyz()</slot>
+    <slot>color_model_rgb()</slot>
+    <slot>color_model_int()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -112,6 +158,70 @@
     <hint type="destinationlabel">
      <x>332</x>
      <y>205</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShow_Help</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>show_help()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>353</x>
+     <y>229</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionXYZ_as_Colors</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>color_xyz()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>353</x>
+     <y>229</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSource_Colors</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>color_model_rgb()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>353</x>
+     <y>229</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSource_Intencity</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>color_model_int()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>353</x>
+     <y>229</y>
     </hint>
    </hints>
   </connection>

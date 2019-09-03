@@ -151,6 +151,15 @@ void GLWidget::runtest() //slot
     update();
 }
 
+void GLWidget::show_help() //slot
+{
+   message("\nHelp!");
+   update();
+}
+void GLWidget::color_xyz()       {if(m_pApp) m_pApp->viewModeEvent(0); }  //slot
+void GLWidget::color_model_rgb() {if(m_pApp) m_pApp->viewModeEvent(1); }  //slot
+void GLWidget::color_model_int() {if(m_pApp) m_pApp->viewModeEvent(2); }  //slot
+
  void  GLWidget::las_open() // slot
  {
      QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "/home",tr("Files (*.las *.xyz)"));

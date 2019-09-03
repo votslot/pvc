@@ -52,7 +52,7 @@ namespace pcrlib
 	}
 
 	template<typename T>
-	void Separate(T *pData, unsigned int firstIn, unsigned int lastIn, unsigned int nval, unsigned int pivotIndexIn, compFuncType comp, int nn)
+    void Separate(T *pData, unsigned int firstIn, unsigned int lastIn, unsigned int nval, unsigned int pivotIndexIn, compFuncType comp, int /*nn*/)
 	{
 		// test
 		//printf("Input: fist=%d lastIn=%d nval=%d hint = %d nn = %d\n ",firstIn,lastIn, nval, pivotIndexIn,nn);

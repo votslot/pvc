@@ -8,13 +8,14 @@ namespace pcrlib
 {
 	struct ICErrorCallBack
 	{
-		virtual void error(const char *pMsg) {}
+        virtual void error(const char * /*pMsg*/ ) {}
 	};
 
 	class ICBuffer 
 	{
 	public:
 		static  ICErrorCallBack *m_err;
+        virtual ~ICBuffer(){}
 		virtual void allocate(unsigned int sizeInBytes) = 0;
 		virtual void setData(void *pD, unsigned int sizeInBytes) = 0;
 		virtual void getData(unsigned int sizeInBytes, void *pOut) = 0;
@@ -29,6 +30,7 @@ namespace pcrlib
 	{
 	public:
 		static  ICErrorCallBack *m_err;
+        virtual ~ICShader(){}
 		virtual void initFromSource(const char *pSrc) = 0;
 		virtual int getSX() = 0;
 		virtual int getSY() = 0;

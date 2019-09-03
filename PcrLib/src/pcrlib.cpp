@@ -223,7 +223,7 @@ extern int InitGLBlit();
 			return 0;
 		}
 
-		void renderText(const char *pTxt, unsigned int x, unsigned int y, unsigned int color) 
+        void renderText(const char *pTxt, unsigned int x, unsigned int y, unsigned int /*color*/)
 		{
 			if (m_font) m_font->setString(pTxt, x, y);
 		}
@@ -292,7 +292,7 @@ extern int InitGLBlit();
 		pBuffB->allocate(dtsize);
 		pBuffC->allocate(dtsize);
 
-		for (int i = 0; i < bfz; i++)
+        for (unsigned int i = 0; i < bfz; i++)
 		{
 			pDA[i] = i; pDB[i] = i; pDC[i] = 0;
 		}
@@ -304,7 +304,7 @@ extern int InitGLBlit();
 		pCsh->execute(32, 1, 1, { pBuffA,pBuffB,pBuffC });
 
 		pBuffC->getData(dtsize, pDC);
-		for (int i = 0; i < bfz; i++)
+        for (unsigned int i = 0; i < bfz; i++)
 		{
 			if (pDC[i] != pDA[i] + pDB[i])
 			{

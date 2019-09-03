@@ -40,37 +40,28 @@ R""(
 
 	uint lodLevel = globs.wrkLoad;
 	vec4 vc = World2View  * vec4(part.cx, part.cy, part.cz, 1.0) ;
-	if( (vc.z > 0.0) && (vc.z < 1.0) ){
+        if( (vc.z > 0.0) && (vc.z < 1.0) )
+        {
 		vec4 tt = vec4(part.cx + globs.camUpx * part.sz , part.cy + globs.camUpy * part.sz, part.cz + globs.camUpz * part.sz, 1.0);
-		float xa = vc.x/vc.w;
+                vec4 vb  =  World2View  * tt ;
+                float xa = vc.x/vc.w;
 		float ya = vc.y/vc.w;
-		vec4 vb  =  World2View  * tt ;
 		float xb = vb.x/vb.w;
 		float yb = vb.y/vb.w;
 		float ddx =xa- xb;
 		float ddy =ya-yb;
-		uint dd = uint( sqrt(ddx*ddx + ddy*ddy));
-		lodLevel = clamp( dd, 8, uint(globs.wrkLoad));
+                uint dd = uint( sqrt(ddx*ddx + ddy*ddy));
+                lodLevel = clamp( dd, 1, uint(globs.wrkLoad));
 	}
 
-    
-	RenderPoint  pt_old,pt;
 	uint offset = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * gl_WorkGroupSize.x * globs.wrkLoad;
  	for( int loc = 0; loc < lodLevel; loc++, offset += gl_WorkGroupSize.x)
-	{
-	  /*
-	   if ( ( loc & 7 ) == 0){
-	    pt = inputPoints[offset] ;
-	   }else{
-	   pt  = pt_old ;
-	   pt.x  = pt_old.x + 0.01;
-	   }
-	   */
-	    pt = inputPoints[offset] ;
-		uint color = pt.w;
+        {
+                RenderPoint pt = inputPoints[offset] ;
+                uint color = pt.w;
 		vec4 vf =    World2View  * vec4(pt.x, pt.y, pt.z, 1.0) ;
 
-		if( (vf.z > 0.0) && (vf.z < 1.0) && ( vf.x < globs.screenX *vf.w ) && ( vf.y < globs.screenY * vf.w) &&(vf.x>0.0) &&(vf.y>0.0)  )
+                if( (vf.z > 0.0) && (vf.z < 1.0) && ( vf.x < globs.screenX *vf.w ) && ( vf.y < globs.screenY * vf.w) &&(vf.x>0.0) &&(vf.y>0.0)  )
 		{
 			uint xx = uint(vf.x/vf.w);
 			uint yy = uint(vf.y/vf.w);
@@ -79,17 +70,11 @@ R""(
 			zAsInt =  (zAsInt & (~ msk_v ) ) | ( color &  msk_v); // add color
 			atomicMin(zMap[shift],zAsInt);
 		}
-		 pt_old = pt;
 		// debug
 		/*
 		if(color==63)
 		{
 			debugOut[0] =  pt.z;
-			debugOut[1] =  vf.z;
-			debugOut[2] =  222.0;
-			debugOut[3] =  333.0;
-			debugOut[4] =  444.0;
-			debugOut[5] =  555.0;
 		}
 		*/
 		

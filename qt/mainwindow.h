@@ -24,6 +24,8 @@ private slots:
 
     void on_actiontest123_triggered();
 
+    void on_openGLWidget_destroyed(QObject *arg1);
+
 signals:
     void test_run_signal();
 

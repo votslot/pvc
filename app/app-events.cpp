@@ -139,6 +139,7 @@ namespace pcrapp
 		if (m_pRLib)
 		{
             m_pRLib->renderText((nn&1)? "|":"-",10,sh-10, 0);
+            m_pRLib->renderText("PointSize PgUp/PgDn ",25,sh-10, 0);
 			m_mainMutex.lock();
 			for( int i = 0,py = 20; i<m_maxStrings; i++,py+=10){
 				if ( !m_displayStrings[i].empty()) {
@@ -191,7 +192,7 @@ namespace pcrapp
 			generateWave(1024*4, 1024*4, pEnvClass->m_pRLib);
 			pEnvClass->m_pRLib->doneAddPoints();
 			pEnvClass->setDefCamera();
-			pEnvClass->m_renderParam.cm = pcrlib::Color_model_intencity;
+            pEnvClass->m_renderParam.cm = pcrlib::Color_model_xyz;
 	}
 
 	void AppEventsImpl::openLasFile(const char *filePath)

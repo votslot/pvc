@@ -82,8 +82,8 @@ namespace pcrlib
 
 				for (int i = 0; i < sMaxBuffs; i++)
 				{
-					numPointsInBuff[i] = NULL;
-					numPartitionsInBuff[i] = NULL;
+                    numPointsInBuff[i] = 0;
+                    numPartitionsInBuff[i] = 0;
 					bufferPoints[i] = NULL;
 					bufferPartition[i] = NULL;
 				}
@@ -98,7 +98,7 @@ namespace pcrlib
 			{
 				bdBuff.Add(x, y, z);
 				int ptSize = sizeof(float) * 4;
-				if ((sizeInTemp) >= maxBuffSz)
+                if ((sizeInTemp) >= (int)maxBuffSz)
 				{
 					AddNewBuffer();
 				}
@@ -134,7 +134,7 @@ namespace pcrlib
 				{
 					float dx = pDt->maxX - pDt->minX;
 					float dy = pDt->maxY - pDt->minY;
-					float dz = pDt->maxZ - pDt->minX;
+                    float dz = pDt->maxZ - pDt->minZ;
 					float dMax = (dx > dy) ? dx : dy;
 					dMax = (dMax > dz) ? dMax : dz;
 

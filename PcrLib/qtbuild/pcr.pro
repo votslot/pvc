@@ -47,6 +47,8 @@ unix {
 }
 
 DESTDIR = $$PWD/LibOutput
+QMAKE_CXXFLAGS += -Wno-missing-braces
+
 
 DISTFILES += \
     ../src/OpenGL/wave-test.cs.glsl \

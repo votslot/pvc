@@ -80,6 +80,10 @@ public slots:
     void cleanup();
     void runtest();
     void las_open();
+    void show_help();
+    void color_xyz();
+    void color_model_rgb();
+    void color_model_int();
 
 signals:
 

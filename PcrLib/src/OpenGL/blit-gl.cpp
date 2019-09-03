@@ -57,11 +57,14 @@ namespace pcrlib
 	}   
 	)"";
 
+    /*
 	static GLuint  GetSrcBuff() 
 	{
 		return 0;
 	}
+    */
 
+    /*
     static int err_check()
     {
             GLenum err;
@@ -71,6 +74,7 @@ namespace pcrlib
             }
             return 0;
     }
+    */
 
     static void initQuadVerts()
 	{

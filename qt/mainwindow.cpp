@@ -33,3 +33,8 @@ void MainWindow::on_actiontest123_triggered()
 {
 
 }
+
+void MainWindow::on_openGLWidget_destroyed(QObject *arg1)
+{
+
+}
