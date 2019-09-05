@@ -14,6 +14,7 @@
 #include "OpenGL/wave-test.cs.glsl"
 #include "OpenGL/shaders/render-points.cs.glsl"
 #include "OpenGL/shaders/post-proc.cs.glsl"
+#include "OpenGL/shaders/post-proc-ptsize.cs.glsl"
 #include "OpenGL/shaders/ginclude.h"
 
 namespace pcrlib 
@@ -39,6 +40,7 @@ extern int InitGLBlit();
 		ICBuffer  *m_bufferZMap = NULL;
 		ICBuffer  *m_bufferParams = NULL;
 		ICBuffer  *m_bufferZMapPost = NULL;
+		ICBuffer  *m_bufferFinal = NULL;
 		ICBuffer  *m_bufferMatrView4x4  = NULL;
 		ICBuffer  *m_bufferView2World = NULL;
 		ICBuffer  *m_bufferDebug = NULL;
@@ -49,6 +51,7 @@ extern int InitGLBlit();
 		ICShader *m_csPostProcRgb = NULL;
 		ICShader *m_csPostProcXyz = NULL;
 		ICShader *m_csPostProcInt = NULL;
+		ICShader *m_csPostProcPtSize = NULL;
 
 		ThePcrLib() 
 		{
@@ -97,6 +100,7 @@ extern int InitGLBlit();
 			m_csPostProcXyz = initShaderInternal(cs_postproc_xyz.c_str());
 			m_csPostProcInt = initShaderInternal(cs_postproc_int.c_str());
 			m_csPostProcRgb = initShaderInternal(cs_postproc_rgb.c_str());
+			m_csPostProcPtSize = initShaderInternal(cs_postproc_ptsize.c_str());
 
 			// buffers
 			m_bufferParams = createICBuffer();
@@ -107,6 +111,9 @@ extern int InitGLBlit();
 
 			m_bufferZMapPost = createICBuffer();
 			m_bufferZMapPost->allocate(sMaxW*sMaxH * sizeof(int));
+
+			m_bufferFinal = createICBuffer();
+			m_bufferFinal->allocate(sMaxW*sMaxH * sizeof(int));
 
 			m_bufferMatrView4x4 = createICBuffer();
 			m_bufferMatrView4x4->allocate(16 * sizeof(float));
@@ -154,7 +161,7 @@ extern int InitGLBlit();
 
 		int render(const Camera &cam, int destWidth, int destHeight, const RenderParams &rp)
 		{
-			PointStorage::onGLTick();
+			PointStorage::onGLTick(); // for async. loading
 			if (!isInit)
 			{
 				return 0;
@@ -163,8 +170,8 @@ extern int InitGLBlit();
 			m_Glob.screenY = (float)destHeight;
 			m_Glob.zNear = (float)cam.zNear;
 			m_Glob.zFar = (float)cam.zFar;
-			m_Glob.zRange = (float)(1 << 24); 
-			m_Glob.maxDimension = 0.0f;
+			m_Glob.zRange = (float)(1 << 24);
+			m_Glob.pointSize = rp.pointSize;
 			m_Glob.wrkLoad = 64;
 			m_Glob.px = cam.pos[0];
 			m_Glob.py = cam.pos[1];
@@ -199,7 +206,7 @@ extern int InitGLBlit();
 				{
 					ICBuffer *pPoints = m_pst->GetPointBuffer(m);
 					ICBuffer *pPartitions = m_pst->GetPartitionBuffer(m);
-				    uint num_groups_x = 1;
+					uint num_groups_x = 1;
 					uint num_groups_y = (m_pst->GetNumPointsInBuffer(m) / m_csPointRender->getSX() / m_Glob.wrkLoad);
 					m_csPointRender->execute(
 						num_groups_x, num_groups_y, 1,
@@ -207,7 +214,7 @@ extern int InitGLBlit();
 				}
 			}
 
-			// post proc
+			// color map
 			{
 				float Vew2World4x4[16];
 				GetVew2World4x4(cam.up, cam.lookAt, cam.pos, Vew2World4x4);
@@ -216,10 +223,23 @@ extern int InitGLBlit();
 				ICShader *pPostProc = getPostProcShaderInternal(rp);
 				pPostProc->execute(sMaxW / 32, sMaxH / 32, 1, { m_bufferParams ,m_bufferZMap,m_bufferZMapPost,m_bufferView2World,m_bufferDebug });
 			}
-			// font
-			if(m_font) m_font->renderFont(m_bufferZMapPost, m_bufferParams);
 
-			m_bufferZMapPost->blit(destWidth, destHeight);
+			// point size
+			ICBuffer *pBuffToBlit;
+			if (rp.pointSize > 0) 
+			{
+				m_csPostProcPtSize->execute((destWidth +31) / 32, (destHeight+31) / 32, 1, { m_bufferParams ,m_bufferZMap,m_bufferZMapPost,m_bufferFinal });
+				pBuffToBlit = m_bufferFinal;
+			}
+			else {
+				pBuffToBlit = m_bufferZMapPost;
+			}
+
+			// font
+			if(m_font) m_font->renderFont(pBuffToBlit, m_bufferParams);
+
+			// blit to screen
+			pBuffToBlit->blit(destWidth, destHeight);
 			return 0;
 		}
 
@@ -236,6 +256,7 @@ extern int InitGLBlit();
 			if (m_bufferMatrView4x4)	releaseICBuffer(&m_bufferMatrView4x4);
 			if (m_bufferView2World)		releaseICBuffer(&m_bufferView2World);
 			if (m_bufferDebug)          releaseICBuffer(&m_bufferDebug);
+			if (m_bufferFinal)          releaseICBuffer(&m_bufferFinal);
 
 			for (std::vector<ICShader*>::iterator it = m_shaderList.begin(); it != m_shaderList.end(); ++it)
 			{

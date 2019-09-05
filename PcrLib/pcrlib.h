@@ -43,6 +43,7 @@ namespace pcrlib
 	struct RenderParams 
 	{
 		ColorModel cm;
+		unsigned int pointSize;
 	};
 
 

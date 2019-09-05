@@ -71,7 +71,15 @@ void OnEndLoop()
 	
 }
 
+static void OnKeyDownEvent(SDL_KeyboardEvent *pKetEvent)
+{
+	sApp->keyEvent(pKetEvent->keysym.scancode, true);
+}
 
+static void OnKeyReleaseEvent(SDL_KeyboardEvent *pKetEvent)
+{
+	sApp->keyEvent(pKetEvent->keysym.scancode, false);
+}
 
 static void OnMouseDownEvent(SDL_MouseButtonEvent *pMouseDown)
 {
@@ -181,8 +189,10 @@ int SdlEntryPoint()
 			switch (sdlEvent.type) 
 			{
 				case SDL_KEYDOWN:
-					//OnKeyEvent(sdlEvent.key.keysym.sym);
-					sHasEvent = true;
+					OnKeyDownEvent(&sdlEvent.key);
+				break;
+				case SDL_KEYUP:
+					OnKeyReleaseEvent(&sdlEvent.key);
 				break;
 				case SDL_MOUSEBUTTONDOWN:
 					OnMouseDownEvent(&sdlEvent.button);

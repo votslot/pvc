@@ -37,6 +37,7 @@
     <ClInclude Include="..\src\storage.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\src\OpenGL\shaders\post-proc-ptsize.cs.glsl" />
     <None Include="..\src\OpenGL\shaders\post-proc.cs.glsl" />
     <None Include="..\src\OpenGL\shaders\render-font.cs.glsl" />
     <None Include="..\src\OpenGL\shaders\render-points.cs.glsl" />

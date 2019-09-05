@@ -30,6 +30,7 @@ namespace pcrapp
 		int m_mouseYDown = 0;
 		bool m_leftMouseDown = false;
 		bool m_rightMouseDown = false;
+		bool m_keyPressed = false;
 
 		AppEventsImpl();
 		void init(pcrlib::LibCallback *pCb );
@@ -37,6 +38,7 @@ namespace pcrapp
 		void mouseUpEvent(bool isLeft, bool isRight);
 		void mouseMoveEvent(int x, int y);
 		void mouseWhellEvent(int val);
+		void keyEvent(int val, bool isPress);
 		void paintEvent(int sw, int sh);
 		void viewModeEvent(int val);
 		void exitEvent();
@@ -58,6 +60,7 @@ namespace pcrapp
 		m_cb = NULL;
 		m_maxSize = 1.0f;
 		m_renderParam.cm = pcrlib::Color_model_xyz;
+		m_renderParam.pointSize = 0;
 	}
 
 	IAppEvents * IAppEvents::getAppEvents()
@@ -131,6 +134,21 @@ namespace pcrapp
 		float prd = 0.02f;
 		float shift = (val > 0) ? prd : -prd;
 		m_camera.MoveInPivotDir(shift*m_maxSize);
+	}
+
+	void AppEventsImpl::keyEvent(int val,bool isPress)
+	{  
+		if (m_keyPressed != isPress)
+		{
+
+			if (isPress) {
+				if ((val == 75) && (m_renderParam.pointSize<5)) m_renderParam.pointSize++;
+				if ((val == 78) && (m_renderParam.pointSize>0)) m_renderParam.pointSize--;
+			}
+			
+		   // std::cout << "scan=" << val << " press=" << isPress << std::endl;
+		}
+		m_keyPressed = isPress;
 	}
 
 	void AppEventsImpl::paintEvent(int sw, int sh)

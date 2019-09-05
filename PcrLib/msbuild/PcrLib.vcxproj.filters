@@ -48,5 +48,8 @@
     <None Include="..\src\OpenGL\shaders\render-font.cs.glsl">
       <Filter>GLShaders</Filter>
     </None>
+    <None Include="..\src\OpenGL\shaders\post-proc-ptsize.cs.glsl">
+      <Filter>GLShaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

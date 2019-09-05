@@ -18,6 +18,7 @@ namespace pcrapp
 		virtual void mouseUpEvent(bool isLeft, bool isRight) = 0;
 		virtual void mouseMoveEvent(int x, int y) = 0;
 		virtual void mouseWhellEvent(int val) = 0;
+		virtual void keyEvent(int val, bool isPress) = 0;
 		virtual void paintEvent(int sw, int sh) = 0;
 		virtual void viewModeEvent(int val ) = 0;
 		virtual void exitEvent() = 0;
