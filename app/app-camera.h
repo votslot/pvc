@@ -14,6 +14,7 @@ namespace pcrapp
 			float& operator[] (int i) { return v[i]; }
 		};
 		vector3 m_P, m_D, m_U, m_R, m_L;
+		vector3 m_worldUp;
 		float m_zNear, m_zFar, m_Fov;
 		AppCamera();
 		static AppCamera *GetCamera();
@@ -22,6 +23,7 @@ namespace pcrapp
 		void MoveInPivotDir(float dd);
 		void ShiftPivot(float dx, float dy);
 		void BuildPcrCamera(pcrlib::Camera &res);
+		void SetWorldUpAxis(float x, float y, float  z);
 		float *GetPivot();
 	};
 }

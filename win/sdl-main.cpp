@@ -64,7 +64,7 @@ void OnEndLoop()
 	sDiff += df;
 	sNtimes--;
 	if (sNtimes <= 0) {
-		std::cout << ((float)sDiff/32000.0f) << "ms\n";
+		//std::cout << ((float)sDiff/32000.0f) << "ms\n";
 		sNtimes = 32;
 		sDiff = 0;
 	}
@@ -219,7 +219,7 @@ int SdlEntryPoint()
 			}
 		}
 
-		//if (sHasEvent)
+		if (sHasEvent)
 		{
 			OnStartLoop();
 			sApp->paintEvent(sw, sh);

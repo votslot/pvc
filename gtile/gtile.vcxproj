@@ -190,6 +190,7 @@
     <ClInclude Include="..\app\app-camera.h" />
     <ClInclude Include="..\app\app-events.h" />
     <ClInclude Include="..\app\app-las.h" />
+    <ClInclude Include="..\app\app-ply.h" />
     <ClInclude Include="..\app\app-testcloud.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -198,6 +199,7 @@
     <ClCompile Include="..\app\app-camera.cpp" />
     <ClCompile Include="..\app\app-events.cpp" />
     <ClCompile Include="..\app\app-las.cpp" />
+    <ClCompile Include="..\app\app-ply.cpp" />
     <ClCompile Include="..\app\app-testcloud.cpp" />
     <ClCompile Include="..\win\sdl-main.cpp" />
     <ClCompile Include="..\win\winui\winui.cpp" />

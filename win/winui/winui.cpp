@@ -29,7 +29,7 @@ static void OpenFileDialog()
 	ZeroMemory(&ofn, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn); 
 	ofn.hwndOwner = NULL;
-	ofn.lpstrFilter = L"las Files (*.las)\0*.las\0All Files (*.*)\0*.*\0";
+ 	ofn.lpstrFilter = L" Files (*.ply;*.las)\0*.ply;*.las\0";
 	ofn.lpstrFile = szFileName;
 	ofn.nMaxFile = MAX_PATH;
 	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;

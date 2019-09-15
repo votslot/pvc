@@ -158,9 +158,6 @@ namespace pcrapp
 			float yf = (float)(pXYZ1->y )*float(lasH.yScale) + lasH.yOffset;
 			float zf = (float)(pXYZ1->z )*float(lasH.zScale) + lasH.zOffset;
 			pLib->addPoint(xf, yf, zf, cc);
-			//if (((k & 1023) == 0) ||( k== lasH.numOfPointRecords-1) ){
-			//	pCb->message(std::string("\r" + std::to_string(k+1)).c_str());
-			//}
 		}
 		fs.close();
 		delete[]pPoinRecord;

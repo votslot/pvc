@@ -7,6 +7,7 @@
 #include "app-camera.h"
 #include "app-testcloud.h"
 #include "app-las.h"
+#include "app-ply.h"
 
 using namespace pcrlib;
 
@@ -224,11 +225,23 @@ namespace pcrapp
 
 	void AppEventsImpl::loadLasAsync(AppEventsImpl *pEnvClass)
 	{
+		std::string fp = pEnvClass->m_filePath;
+		std::string ext = fp.substr(fp.find_last_of(".") + 1);
+
 		pEnvClass->m_pRLib->startAddPoints();
-		int ret = readLasFile(pEnvClass->m_filePath.c_str(), pEnvClass->m_pRLib, pEnvClass->m_cb);
+		int ret;
+		if (ext == "las") {
+			ret = readLasFile(pEnvClass->m_filePath.c_str(), pEnvClass->m_pRLib, pEnvClass->m_cb);
+			pEnvClass->m_renderParam.cm = (ret == 1) ? pcrlib::Color_model_intencity : pcrlib::Colos_model_rgb;
+			pEnvClass->m_camera.SetWorldUpAxis(0.0f, 0.0f, 1.0f);
+		}
+		if (ext == "ply") {
+			ret = readPlyFile(pEnvClass->m_filePath.c_str(), pEnvClass->m_pRLib, pEnvClass->m_cb);
+			pEnvClass->m_renderParam.cm = pcrlib::Color_model_xyz;
+			pEnvClass->m_camera.SetWorldUpAxis(0.0f, 1.0f, 0.0f);
+		}
 		pEnvClass->m_pRLib->doneAddPoints();
 		pEnvClass->setDefCamera();
-		pEnvClass->m_renderParam.cm = (ret == 1) ? pcrlib::Color_model_intencity : pcrlib::Colos_model_rgb;
 	}
 
 	void AppEventsImpl::displayString(const char *pStr) 
@@ -271,7 +284,7 @@ namespace pcrapp
 			float cx = (bd.xMax + bd.xMin) *0.5f;
 			float cy = (bd.yMax + bd.yMin) *0.5f;
 			float cz = (bd.zMax + bd.zMin) *0.5f;
-			m_camera.SetPivotCamera(0.0f, 0.0f, maxD*2.0f, cx, cy, cz);
+			m_camera.SetPivotCamera(0.0f, 0.0f, maxD*4.0f, cx, cy, cz);
             m_camera.m_zFar = maxD * 10.0f;
 			m_maxSize = maxD;
 		}

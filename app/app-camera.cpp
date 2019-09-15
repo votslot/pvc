@@ -70,6 +70,16 @@ namespace pcrapp
 		m_zNear = 2.0f;
 		m_zFar = 10000.0f;
 		SetPivotCamera(0.0f, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f);
+		m_worldUp[0] = 0.0f;
+		m_worldUp[1] = 0.0f;
+		m_worldUp[2] = 1.0f;
+	}
+
+	void AppCamera::SetWorldUpAxis(float x, float y, float  z) 
+	{
+		m_worldUp[0] = x;
+		m_worldUp[1] = y;
+		m_worldUp[2] = z;
 	}
 
 	float *AppCamera::GetPivot() { return  m_L.v; }
@@ -77,13 +87,13 @@ namespace pcrapp
 	void AppCamera::RotateAroundPivot(float dx, float dy)
 	{
 		AppCamera::vector3 ZZ(0.0f, 0.0f, 0.0f);
-		AppCamera::vector3 A0 = m_R;
+		AppCamera::vector3 A0 = m_R;  // rotate arounf camera right 
 		m_P = rotate(m_P, m_L, A0, dy);
 		m_D = rotate(m_D, ZZ, A0, dy);
 		m_U = rotate(m_U, ZZ, A0, dy);
-        //m_R = rotate(m_R, ZZ, A0, dy);
+        //m_R = rotate(m_R, ZZ, A0, dy); // 
 
-		AppCamera::vector3 A1(0.0f, 0.0f, 1.0f);
+		AppCamera::vector3 A1 = m_worldUp;
 		m_P = rotate(m_P, m_L, A1, dx);
 		m_D = rotate(m_D, ZZ, A1, dx);
 		m_U = rotate(m_U, ZZ, A1, dx);

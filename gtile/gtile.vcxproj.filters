@@ -35,6 +35,9 @@
     <ClInclude Include="..\app\app-las.h">
       <Filter>app</Filter>
     </ClInclude>
+    <ClInclude Include="..\app\app-ply.h">
+      <Filter>app</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gtile.cpp">
@@ -57,6 +60,9 @@
     </ClCompile>
     <ClCompile Include="..\win\winui\winui.cpp">
       <Filter>win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\app\app-ply.cpp">
+      <Filter>app</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

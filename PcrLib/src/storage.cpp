@@ -52,19 +52,6 @@ namespace pcrlib
 			int sizeInTemp;
 			unsigned int maxBuffSz;
 
-			/*
-			void* getMem(size_t sz)
-			{
-				void * ptr = malloc(sz);
-				return ptr;
-			}
-
-			void releaseMem(void *ptr)
-			{
-				free(ptr);
-			}
-			*/
-
 			void Init()
 			{
 				numInUse = 0;
