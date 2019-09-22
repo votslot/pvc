@@ -26,7 +26,7 @@ DECLARE_STRUCT_AS_STRING(cs_const_val,
 		float screenY;
 		float zNear;
 		float zFar;
-		float zRange;
+		float fovTan;
 		uint pointSize;
 		uint wrkLoad;
 		float px;

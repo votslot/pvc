@@ -144,8 +144,6 @@ namespace pcrapp
 			return -1;
 		}
 
-		//fs.close();
-
 		//Parse header
 		int num_verts = -1;
 		std::vector<PlyRecordI*> propV;
@@ -199,6 +197,7 @@ namespace pcrapp
 			return -1;
 		}
 
+		// read data
 		float res[4];
 		size_t ss = 0;
 		for (std::vector<PlyRecordI*>::iterator it = propV.begin(); it != propV.end(); ++it) ss += ((PlyRecordI*)(*it))->get_size();
@@ -211,7 +210,7 @@ namespace pcrapp
 				pr->read_line(res,isAscii, isBigEndian);
 			}
 			if((n % 1023)==0) pCb->message(("\rProcessing:" + std::to_string(n) ).c_str());
-			pLib->addPoint(10.0f*res[0], 10.0f*res[1], 10.0f*res[2], (unsigned int)(512.0f* res[3]));
+			pLib->addPoint(res[0], -res[1], res[2], 65535);
 		}
 
 		fs.close();

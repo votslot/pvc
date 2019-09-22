@@ -170,7 +170,7 @@ extern int InitGLBlit();
 			m_Glob.screenY = (float)destHeight;
 			m_Glob.zNear = (float)cam.zNear;
 			m_Glob.zFar = (float)cam.zFar;
-			m_Glob.zRange = (float)(1 << 24);
+			m_Glob.fovTan = tan(cam.fovInGrads * 3.1415f / 360.0f); 
 			m_Glob.pointSize = rp.pointSize;
 			m_Glob.wrkLoad = 64;
 			m_Glob.px = cam.pos[0];
@@ -191,8 +191,8 @@ extern int InitGLBlit();
 			// camera
 			float matrView4x4[16];
 			GetProjectionMat4x4(
-				m_Glob.screenX, m_Glob.screenY, m_Glob.zNear, m_Glob.zFar,
-				cam.up, cam.lookAt, cam.pos,
+				m_Glob.screenX, m_Glob.screenY, m_Glob.zNear, m_Glob.zFar, cam.fovInGrads,
+				cam.up, cam.lookAt, cam.pos, 
 				matrView4x4);
 			m_bufferMatrView4x4->setData(matrView4x4, 16 * sizeof(float));
 

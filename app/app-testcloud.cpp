@@ -4,6 +4,7 @@
 
 namespace pcrapp
 {
+#if 0
 	void generateWave(int w, int h, pcrlib::IPcrLib* pLib)
 	{
 	//	float sz = 10.0f;
@@ -18,7 +19,7 @@ namespace pcrapp
                 float v = step_v * (float)vv;
                 float up = 2.0f * 3.1415f* u;
                 float vp = 2.0f * 3.1415f* v;
-                float r = (float)( 0.2f + cos(up*nf)*cos(up*nf) *sin(vp*1.1f) * sin(vp*1.1f));
+                float r = 100.0f*(float)( 0.2f + cos(up*nf)*cos(up*nf) *sin(vp*1.1f) * sin(vp*1.1f));
  				r = (float)fabs(r);
                 float xx  =  r* (float) ( sin(vp) * cos(up));
                 float yy  =  r* (float) ( sin(vp) * sin(up));
@@ -29,4 +30,24 @@ namespace pcrapp
 			}
 		}
 	}
+#endif
+	void generateWave(int w, int h, pcrlib::IPcrLib* pLib)
+	{
+		float xc = 0.5f*(float)(w - 1);
+		float yc = 0.5f*(float)(h - 1);
+	
+		for (int y = 0; y < h; y++)
+		{
+			for (int x = 0; x < w; x++)
+			{
+				unsigned int c =(x>w/2) ? 255 :65535;
+				float zf = (y == 0) ? 0.1f : 0.0f;
+				pLib->addPoint((float)x - xc, (float)y- yc, zf, c);
+			}
+		}
+	
+	
+	}
+
+
 }//namespace pcrapp

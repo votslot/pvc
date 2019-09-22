@@ -21,7 +21,7 @@ namespace pcrlib
 		float up[3];
 		float zNear;
 		float zFar;
-		float fovInRadians;
+		float fovInGrads;
 		bool isPerspective;
 	};
 

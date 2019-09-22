@@ -208,10 +208,10 @@ namespace pcrapp
 	void AppEventsImpl::testCloudAsync(AppEventsImpl *pEnvClass)
 	{
 		    pEnvClass->m_pRLib->startAddPoints();
-			generateWave(1024*4, 1024*4, pEnvClass->m_pRLib);
+			generateWave(256, 256, pEnvClass->m_pRLib);
 			pEnvClass->m_pRLib->doneAddPoints();
 			pEnvClass->setDefCamera();
-            pEnvClass->m_renderParam.cm = pcrlib::Color_model_xyz;
+            pEnvClass->m_renderParam.cm = pcrlib::Colos_model_rgb;
 	}
 
 	void AppEventsImpl::openLasFile(const char *filePath)
@@ -284,8 +284,10 @@ namespace pcrapp
 			float cx = (bd.xMax + bd.xMin) *0.5f;
 			float cy = (bd.yMax + bd.yMin) *0.5f;
 			float cz = (bd.zMax + bd.zMin) *0.5f;
-			m_camera.SetPivotCamera(0.0f, 0.0f, maxD*4.0f, cx, cy, cz);
+			float dst = 1.1f*maxD / tan(m_camera.m_Fov * 3.1415f / 360.0f);;
+			m_camera.SetPivotCamera(0.0f, 0.0f, dst, cx, cy, cz);
             m_camera.m_zFar = maxD * 10.0f;
+			m_camera.m_zNear = maxD * 0.01f;
 			m_maxSize = maxD;
 		}
 	}

@@ -47,16 +47,21 @@ R""(
 	    uint shift = xx +  ww* yy;
 		if(zMapIn[shift] !=  0xFFFFFF00)
 		{
+		    //Xs = x*scm  + ( z * tana * screenPixX) /2
+			// Zs = (z-zNear)/(zFar-zNear)
+			//W = z*tana
 		    uint color = zMapIn[shift] & msk_v;
 			uint zi  = (zMapIn[shift]>>(32 - cZbuffBits)) & msk_z;
-			float zf  =  (globs.zFar - globs.zNear )*float(zi)/float(msk_z);
-			float xf = (float(xx) - globs.screenX * 0.5) /globs.scrMin;
-			float yf = (float(yy) - globs.screenY * 0.5) /globs.scrMin;
+			float zf  = globs.zNear + (globs.zFar - globs.zNear )*(float(zi)/float(msk_z));
+			float wf  = zf *globs.fovTan;
+			float xf =  (float(xx) * wf - zf *globs.fovTan*globs.screenX *0.5) /globs.scrMin;
+			float yf =  (float(yy) * wf - zf *globs.fovTan*globs.screenY *0.5) /globs.scrMin;
+
 			vec4 rt =  vec4( View2World[0][0],View2World[0][1],View2World[0][2],1);
 			vec4 up =  vec4( View2World[1][0],View2World[1][1],View2World[1][2],1);
 			vec4 dr =  vec4( View2World[2][0],View2World[2][1],View2World[2][2],1);
 			vec4 pos = vec4( View2World[3][0],View2World[3][1],View2World[3][2],1);
-			vec4 res = pos + ( rt * xf + up * yf + globs.zNear * dr) * (zf/ globs.zNear);
+			vec4 res = pos + ( rt * xf + up * yf + dr*zf);
 			
 			#ifdef  XYZ_AS_COLOR
 			uint colorX = uint(  255.0 * (res.x - globs.bbMinX)/(globs.bbMaxX - globs.bbMinX));
@@ -79,7 +84,7 @@ R""(
 
 		}else
 		{
-            zMapOut[shift] = 0x000000;
+            zMapOut[shift] = 0x00202020; // bkg color
 		}
 	}
  }  

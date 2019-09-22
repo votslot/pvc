@@ -67,8 +67,9 @@ namespace pcrapp
 	AppCamera::AppCamera()
 	{
 		m_L.v[0] = m_L.v[1] = m_L.v[2] = 0.0f;
-		m_zNear = 2.0f;
+		m_zNear = 0.9f;
 		m_zFar = 10000.0f;
+		m_Fov = 60.0f;
 		SetPivotCamera(0.0f, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f);
 		m_worldUp[0] = 0.0f;
 		m_worldUp[1] = 0.0f;
@@ -150,6 +151,7 @@ namespace pcrapp
 		res.lookAt[2] = m_D[2];
 		res.zNear = m_zNear;
 		res.zFar = m_zFar;
+		res.fovInGrads = m_Fov;
 	}
 }// namespace pcrapp
 

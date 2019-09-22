@@ -40,6 +40,7 @@ R""(
 
     uint lodLevel = globs.wrkLoad;
     vec4 vc = World2View  * vec4(part.cx, part.cy, part.cz, 1.0) ;
+	
     if( (vc.z > 0.0) && (vc.z < 1.0) )
     {
         vec4 tt = vec4(part.cx + globs.camUpx * part.sz , part.cy + globs.camUpy * part.sz, part.cz + globs.camUpz * part.sz, 1.0);
@@ -64,6 +65,7 @@ R""(
         {
             uint xx = uint(vf.x/vf.w);
             uint yy = uint(vf.y/vf.w);
+			//vf.z = vf.z/vf.w;
             uint shift = xx + yy * ( uint(globs.screenX));
             uint zAsInt = uint(vf.z* float(msk_z)) <<(32-cZbuffBits);
             zAsInt =  (zAsInt & (~ msk_v ) ) | ( color &  msk_v); // add color
