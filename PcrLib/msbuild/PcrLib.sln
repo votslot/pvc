@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gtile", "gtile.vcxproj", "{2E8977C4-493F-4AC2-B54D-7A76B419D7E1}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PcrLib", "..\PcrLib\msbuild\PcrLib.vcxproj", "{D716781D-3932-4311-BAD1-4F6A0AC5CF3F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PcrLib", "PcrLib.vcxproj", "{D716781D-3932-4311-BAD1-4F6A0AC5CF3F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,14 +13,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2E8977C4-493F-4AC2-B54D-7A76B419D7E1}.Debug|x64.ActiveCfg = Debug|x64
-		{2E8977C4-493F-4AC2-B54D-7A76B419D7E1}.Debug|x64.Build.0 = Debug|x64
-		{2E8977C4-493F-4AC2-B54D-7A76B419D7E1}.Debug|x86.ActiveCfg = Debug|Win32
-		{2E8977C4-493F-4AC2-B54D-7A76B419D7E1}.Debug|x86.Build.0 = Debug|Win32
-		{2E8977C4-493F-4AC2-B54D-7A76B419D7E1}.Release|x64.ActiveCfg = Release|x64
-		{2E8977C4-493F-4AC2-B54D-7A76B419D7E1}.Release|x64.Build.0 = Release|x64
-		{2E8977C4-493F-4AC2-B54D-7A76B419D7E1}.Release|x86.ActiveCfg = Release|Win32
-		{2E8977C4-493F-4AC2-B54D-7A76B419D7E1}.Release|x86.Build.0 = Release|Win32
 		{D716781D-3932-4311-BAD1-4F6A0AC5CF3F}.Debug|x64.ActiveCfg = Debug|x64
 		{D716781D-3932-4311-BAD1-4F6A0AC5CF3F}.Debug|x64.Build.0 = Debug|x64
 		{D716781D-3932-4311-BAD1-4F6A0AC5CF3F}.Debug|x86.ActiveCfg = Debug|Win32
@@ -36,6 +26,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {16614FB7-CEF6-42E4-8997-7925ADDA3C64}
+		SolutionGuid = {D9AF784C-AE19-408A-A10C-55C02462397F}
 	EndGlobalSection
 EndGlobal

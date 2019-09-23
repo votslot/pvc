@@ -3,6 +3,7 @@
 *.slo
 *.lo
 *.o
+*.pro.user
 
 # Compiled Dynamic libraries
 *.so
@@ -23,6 +24,8 @@ Release
 ipch
 *sdf
 *.db
+*.db-shm
+*db-wal
 
 # Project
 *.opendb
